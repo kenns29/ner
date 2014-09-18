@@ -24,20 +24,14 @@ public class Main {
 		Database outputData = new Database("vaderserver0.dhcp.asu.edu", 27017);
 		outputData.getDatabase("scotlandstream48hour");
 		outputData.getCollection("hour");
-		TimeZone timeZone = TimeZone.getTimeZone("UTC");
-		Calendar calendar = new GregorianCalendar();
-		Date startTime = null;
-		Date endTime = null;
-		try {
-			startTime = new SimpleDateFormat("MM/dd/yy HH:mm:ss", Locale.ENGLISH).parse("09/16/2014 12:00:00");
-			endTime = new SimpleDateFormat("MM/dd/yy HH:mm:ss", Locale.ENGLISH).parse("09/16/2014 13:00:00");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
+		Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
+		Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
+		startTime.set(2014, 8, 16, 0, 6, 59);
+		endTime.set(2014, 8, 16, 1, 0, 0);
 		BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject(
-					"$gte", startTime.getTime()
-				).append("$lt", endTime.getTime()));
+					"$gte", startTime.getTimeInMillis()
+				).append("$lt", endTime.getTimeInMillis()));
 		
 		DBCursor cursor = database.coll.find(query);
 		try{
