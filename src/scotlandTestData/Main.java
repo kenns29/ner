@@ -18,7 +18,7 @@ public class Main {
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		Database database = new Database("vaderserver0.dhcp.asu.edu", 27017);
-		database.getDatabase("scotlandstream48hour");
+		database.getDatabase("ebola");
 		database.getCollection("tweets");
 		
 		Database outputData = new Database("vaderserver0.dhcp.asu.edu", 27017);
