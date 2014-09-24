@@ -98,7 +98,7 @@ public class NLP {
 				}
 				//System.out.println("word = " + word + "\tpos = " + pos + "\tne = " + ne + "\tnne = " + nne);
 			}
-			if(!previousNe.equals("")){
+			if(!previousNe.equals("") && !finalWord.equals("")){
 				mongoObj = new BasicDBObject("mentionSpan", finalWord)
 					.append("namedEntity", previousNe);
 				mongoList.add(mongoObj);
