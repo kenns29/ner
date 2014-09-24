@@ -19,16 +19,16 @@ public class Main {
 		// TODO Auto-generated method stub
 		Database database = new Database("vaderserver0.dhcp.asu.edu", 27017);
 		database.getDatabase("scotlandstream48hour");
-		database.getCollection("tweet");
+		database.getCollection("tweets");
 		
 		Database outputData = new Database("vaderserver0.dhcp.asu.edu", 27017);
-		outputData.getDatabase("scotlandstream48hour");
-		outputData.getCollection("hour");
+		outputData.getDatabase("ebola");
+		outputData.getCollection("tweetsWithNerJoined");
 
 		Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
 		Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
-		startTime.set(2014, 8, 16, 0, 6, 59);
-		endTime.set(2014, 8, 16, 1, 0, 0);
+		startTime.set(2014, 8, 1, 0, 0, 0);
+		endTime.set(2014, 8, 2, 0, 0, 0);
 		BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject(
 					"$gte", startTime.getTimeInMillis()
 				).append("$lt", endTime.getTimeInMillis()));
