@@ -94,7 +94,7 @@ public class NLP {
 							finalWord = word;
 						else{
 							String finalCandidate = finalWord + " " + word;
-							if(text.contains(finalCandidate)){
+							if(!text.contains(finalCandidate)){
 								mongoObj = new BasicDBObject("mentionSpan", finalWord)
 									.append("namedEntity", previousNe);
 								mongoList.add(mongoObj);
