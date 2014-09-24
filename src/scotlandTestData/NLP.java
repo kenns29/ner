@@ -92,8 +92,17 @@ public class NLP {
 					else{
 						if(finalWord.equals(""))
 							finalWord = word;
-						else
-							finalWord = finalWord + " " + word;	
+						else{
+							String finalCandidate = finalWord + " " + word;
+							if(text.contains(finalCandidate)){
+								mongoObj = new BasicDBObject("mentionSpan", finalWord)
+									.append("namedEntity", previousNe);
+								mongoList.add(mongoObj);
+								finalWord = word;
+							} else {
+								finalWord = finalCandidate;
+							}
+						}
 						previousNe = ne;
 					}
 					
