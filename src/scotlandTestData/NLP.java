@@ -81,9 +81,11 @@ public class NLP {
 				if(!ne.equals("O")){
 					if(!ne.equals(previousNe)){
 						
-						mongoObj = new BasicDBObject("mentionSpan", finalWord)
-							.append("namedEntity", previousNe);
-						mongoList.add(mongoObj);
+						if(!finalWord.equals("") && !previousNe.equals("")){
+							mongoObj = new BasicDBObject("mentionSpan", finalWord)
+								.append("namedEntity", previousNe);
+							mongoList.add(mongoObj);
+						}
 						previousNe = ne;
 						finalWord = word;
 					}
