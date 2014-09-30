@@ -59,7 +59,7 @@ public class NLP {
 	}
 	
 	public static BasicDBList annotateDBObject(String text){
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+		//StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 		
 		
 		Annotation document = new Annotation(text);

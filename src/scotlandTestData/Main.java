@@ -23,7 +23,7 @@ public class Main {
 		
 		Database outputData = new Database("vaderserver0.dhcp.asu.edu", 27017);
 		outputData.getDatabase("ebola");
-		outputData.getCollection("tweetsWithNerCheckedJoined");
+		outputData.getCollection("newTweetsWithNerCheckedJoined");
 
 		Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
 		Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
