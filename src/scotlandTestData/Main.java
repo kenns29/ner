@@ -11,36 +11,28 @@ import java.util.TimeZone;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Main {
 	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
-		Database database = new Database("vaderserver0.dhcp.asu.edu", 27017);
-		database.getDatabase("ebola");
-		database.getCollection("tweets");
+		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
+		database.getDatabase("foresight");
+		DBCollection sentenceColl = database.getCollection("sentence");
 		
-		Database outputData = new Database("vaderserver0.dhcp.asu.edu", 27017);
-		outputData.getDatabase("ebola");
-		outputData.getCollection("newTweetsWithNerCheckedJoined");
-
-		Calendar startTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
-		Calendar endTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
-		startTime.set(2014, 8, 1, 0, 0, 0);
-		endTime.set(2014, 8, 2, 0, 0, 0);
-		BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject(
-					"$gte", startTime.getTimeInMillis()
-				).append("$lt", endTime.getTimeInMillis()));
+		BasicDBObject query = new BasicDBObject("ner", null);
+		DBCursor cursor = sentenceColl.find(query);
 		
-		DBCursor cursor = database.coll.find(query);
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString("text");
+				String text = mongoObj.getString("sentence");
 				BasicDBList entities = NLP.annotateDBObject(text);
-				BasicDBObject outObj = mongoObj.append("ner", entities);
-				outputData.coll.insert(outObj);
+				
+				sentenceColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+									new BasicDBObject("$set", new BasicDBObject("ner", entities)));
 			}
 		}
 		finally{
