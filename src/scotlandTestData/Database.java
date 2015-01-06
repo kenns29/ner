@@ -9,7 +9,6 @@ import com.mongodb.MongoClient;
 
 public class Database{
 	public MongoClient mongoClient = null;
-	public DB db = null;
 	public Database() throws UnknownHostException{
 		mongoClient = new MongoClient();
 	}
@@ -19,11 +18,11 @@ public class Database{
 	public Database(String name, int port) throws UnknownHostException{
 		mongoClient = new MongoClient(name, port);
 	}
-	public void getDatabase(String name){
-		db = mongoClient.getDB(name);
+	public DB getDatabase(String name){
+		return mongoClient.getDB(name);
 	}
 	
-	public DBCollection getCollection(String name){
-		return db.getCollection(name);
+	public void close(){
+		mongoClient.close();
 	}
 }

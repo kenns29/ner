@@ -1,16 +1,9 @@
 package scotlandTestData;
 
 import java.net.UnknownHostException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
@@ -19,8 +12,8 @@ public class Main {
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
-		database.getDatabase("foresight");
-		DBCollection sentenceColl = database.getCollection("sentence");
+		DB db = database.getDatabase("foresight");
+		DBCollection sentenceColl = db.getCollection("sentence");
 		
 		BasicDBObject query = new BasicDBObject("ner", null);
 		DBCursor cursor = sentenceColl.find(query);
@@ -38,6 +31,8 @@ public class Main {
 		finally{
 			cursor.close();
 		}
+		
+		database.close();
 	}
 
 }
