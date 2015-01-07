@@ -1,6 +1,8 @@
 package scotlandTestData;
 
 import java.net.UnknownHostException;
+import java.util.LinkedHashMap;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -15,8 +17,14 @@ public class Main {
 		DB db = database.getDatabase("foresight");
 		DBCollection sentenceColl = db.getCollection("sentence");
 		
+		insertNer(sentenceColl);
+		insertLocation(sentenceColl);
+		database.close();
+	}
+	
+	public static void insertNer(DBCollection coll){
 		BasicDBObject query = new BasicDBObject("ner", null);
-		DBCursor cursor = sentenceColl.find(query);
+		DBCursor cursor = coll.find(query);
 		
 		try{
 			while(cursor.hasNext()){
@@ -24,15 +32,60 @@ public class Main {
 				String text = mongoObj.getString("sentence");
 				BasicDBList entities = NLP.annotateDBObject(text);
 				
-				sentenceColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 									new BasicDBObject("$set", new BasicDBObject("ner", entities)));
 			}
 		}
 		finally{
 			cursor.close();
 		}
-		
-		database.close();
 	}
-
+	
+	public static void insertLocation(DBCollection coll){
+		BasicDBObject query = new BasicDBObject("location", null)
+		.append("ner", new BasicDBObject("$ne", null));
+		
+		DBCursor cursor = coll.find(query);
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
+				BasicDBList locArray = new BasicDBList();
+				BasicDBList outList = new BasicDBList();
+				for(Object e: ner){
+					BasicDBObject entity = (BasicDBObject)e;
+					if(entity.getString("namedEntity").equals("LOCATION")){
+						String inputLoc = entity.getString("mentionSpan");
+						System.out.println("inputLoc" + inputLoc);
+							if(!(	inputLoc.equals("Africa")
+									|| 	inputLoc.equals("Europe")
+									|| 	inputLoc.equals("Asia")
+									||	inputLoc.equals("North America")
+									|| 	inputLoc.equals("South America")
+									|| 	inputLoc.equals("Antarctica")	)){
+							LinkedHashMap coord = GeoCoding.getCoord(inputLoc);
+							String loc = GeoCoding.getCountry(coord);
+							
+							if(!locArray.contains(loc) && loc != null){
+								outList.add(new BasicDBObject("name", loc)
+								.append("coord", new BasicDBObject("lat", (double)coord.get("lat"))
+													.append("lng", (double)coord.get("lng")))
+								.append("type", "country"));
+								locArray.add(loc);
+							}
+						}
+					}
+				}
+				
+				System.out.println(outList.toString());
+				
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
+						new BasicDBObject("$set", new BasicDBObject("location", outList)));
+				
+			}
+		}
+		finally{
+			cursor.close();
+		}
+	}
 }
