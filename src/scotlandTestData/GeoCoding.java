@@ -36,8 +36,8 @@ public class GeoCoding {
 		try{
 			
 			urlParameter = "sensor=false&address="+location.replaceAll(" ","+");
-			url = new URL("http://vaderserver0.dhcp.asu.edu:8080/maps/api/geocode/json?" + urlParameter);
-			
+			//url = new URL("http://vaderserver0.dhcp.asu.edu:8080/maps/api/geocode/json?" + urlParameter);
+			url = new URL("http://www.datasciencetoolkit.org/maps/api/geocode/json?" + urlParameter);
 			//System.out.println(urlParameter);
 			connection = (HttpURLConnection)url.openConnection();
 			connection.setRequestMethod("GET");
@@ -114,7 +114,7 @@ public class GeoCoding {
 				double lat = (double)coord.get("lat");
 				double lng = (double)coord.get("lng");
 				urlParameter = lat + "%2c" + lng;
-				url = new URL("http://vaderserver0.dhcp.asu.edu:8080/coordinates2politics/" + urlParameter);
+				url = new URL("http://www.datasciencetoolkit.org/coordinates2politics/" + urlParameter);
 				connection = (HttpURLConnection)url.openConnection();
 				connection.setRequestMethod("GET");
 				connection.setRequestProperty("Content-Type", "application/json");

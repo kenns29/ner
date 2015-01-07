@@ -14,6 +14,7 @@ public class Main {
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
+		//Database database = new Database("localhost", 27017);
 		DB db = database.getDatabase("foresight");
 		DBCollection sentenceColl = db.getCollection("sentence");
 		
@@ -56,13 +57,12 @@ public class Main {
 					BasicDBObject entity = (BasicDBObject)e;
 					if(entity.getString("namedEntity").equals("LOCATION")){
 						String inputLoc = entity.getString("mentionSpan");
-						System.out.println("inputLoc" + inputLoc);
-							if(!(	inputLoc.equals("Africa")
-									|| 	inputLoc.equals("Europe")
-									|| 	inputLoc.equals("Asia")
-									||	inputLoc.equals("North America")
-									|| 	inputLoc.equals("South America")
-									|| 	inputLoc.equals("Antarctica")	)){
+						if(!(	inputLoc.equals("Africa")
+								|| 	inputLoc.equals("Europe")
+								|| 	inputLoc.equals("Asia")
+								||	inputLoc.equals("North America")
+								|| 	inputLoc.equals("South America")
+								|| 	inputLoc.equals("Antarctica")	)){
 							LinkedHashMap coord = GeoCoding.getCoord(inputLoc);
 							String loc = GeoCoding.getCountry(coord);
 							
@@ -76,8 +76,6 @@ public class Main {
 						}
 					}
 				}
-				
-				System.out.println(outList.toString());
 				
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
 						new BasicDBObject("$set", new BasicDBObject("location", outList)));
