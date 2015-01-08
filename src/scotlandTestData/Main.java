@@ -15,10 +15,12 @@ public class Main {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
 		//Database database = new Database("localhost", 27017);
-		DB db = database.getDatabase("foresight");
-		DBCollection sentenceColl = db.getCollection("sentence");
+		DB db = database.getDatabase("tweettracker");
+		DBCollection sentenceColl = db.getCollection("tweets");
 		
+		System.out.println("Inserting Ner");
 		insertNer(sentenceColl);
+		System.out.println("Inserting Geocoding");
 		insertLocation(sentenceColl);
 		database.close();
 	}
@@ -30,10 +32,9 @@ public class Main {
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString("sentence");
+				String text = mongoObj.getString("text");
 				if(text != null && text.length() < 400){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					
 					BasicDBList entities = NLP.annotateDBObject(text);
 					
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
@@ -47,7 +48,7 @@ public class Main {
 	}
 	
 	public static void insertLocation(DBCollection coll){
-		BasicDBObject query = new BasicDBObject("location", null)
+		BasicDBObject query = new BasicDBObject("geocoding", null)
 		.append("ner", new BasicDBObject("$ne", null));
 		
 		DBCursor cursor = coll.find(query);
@@ -82,7 +83,7 @@ public class Main {
 				}
 				
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
-						new BasicDBObject("$set", new BasicDBObject("location", outList)));
+						new BasicDBObject("$set", new BasicDBObject("geocoding", outList)));
 				
 			}
 		}
