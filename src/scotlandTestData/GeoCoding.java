@@ -114,6 +114,7 @@ public class GeoCoding {
 				double lat = (double)coord.get("lat");
 				double lng = (double)coord.get("lng");
 				urlParameter = lat + "%2c" + lng;
+				//url = new URL("http://vaderserver0.dhcp.asu.edu:8080/coordinates2politics/" + urlParameter);
 				url = new URL("http://www.datasciencetoolkit.org/coordinates2politics/" + urlParameter);
 				connection = (HttpURLConnection)url.openConnection();
 				connection.setRequestMethod("GET");

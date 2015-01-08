@@ -31,10 +31,13 @@ public class Main {
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString("sentence");
-				BasicDBList entities = NLP.annotateDBObject(text);
-				
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-									new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+				if(text != null){
+					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					BasicDBList entities = NLP.annotateDBObject(text);
+					
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+				}
 			}
 		}
 		finally{
