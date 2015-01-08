@@ -15,24 +15,38 @@ public class Main {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
 		//Database database = new Database("localhost", 27017);
-		DB db = database.getDatabase("tweettracker");
-		DBCollection sentenceColl = db.getCollection("tweets");
+		DB dbTweettracker = database.getDatabase("tweettracker");
+		DB dbRSS = database.getDatabase("foresight");
+		DBCollection sentenceColl = dbRSS.getCollection("sentence");
+		DBCollection tweetsColl = dbTweettracker.getCollection("tweets");
 		
-		System.out.println("Inserting Ner");
-		insertNer(sentenceColl);
-		System.out.println("Inserting Geocoding");
-		insertLocation(sentenceColl);
+		if(args[0].equals("-tweets")){
+			if(args[1].equals("-ner")){
+				insertNer(tweetsColl, "text");
+			}
+			else{
+				insertLocation(tweetsColl);
+			}
+		}
+		else{
+			if(args[1].equals("-ner")){
+				insertNer(sentenceColl, "sentence");
+			}
+			else{
+				insertLocation(sentenceColl);
+			}
+		}
 		database.close();
 	}
 	
-	public static void insertNer(DBCollection coll){
+	public static void insertNer(DBCollection coll, String inputField){
 		BasicDBObject query = new BasicDBObject("ner", null);
 		DBCursor cursor = coll.find(query);
 		
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString("text");
+				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 400){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NLP.annotateDBObject(text);
