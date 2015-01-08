@@ -118,4 +118,9 @@ public class NLP {
 		
 		return mongoList;
 	}
+	
+	public static BasicDBList annotateDBObject(String text, int length){
+		BasicDBList result = null;
+		return result;
+	}
 }
