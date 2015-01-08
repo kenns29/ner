@@ -31,8 +31,9 @@ public class Main {
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString("sentence");
-				if(text != null){
+				if(text != null && text.length() < 400){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					
 					BasicDBList entities = NLP.annotateDBObject(text);
 					
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
