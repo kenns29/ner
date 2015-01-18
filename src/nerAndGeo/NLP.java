@@ -1,4 +1,4 @@
-package scotlandTestData;
+package nerAndGeo;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;

@@ -1,4 +1,4 @@
-package scotlandTestData;
+package nerAndGeo;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

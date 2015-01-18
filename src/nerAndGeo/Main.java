@@ -1,4 +1,4 @@
-package scotlandTestData;
+package nerAndGeo;
 
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
