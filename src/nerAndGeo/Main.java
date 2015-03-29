@@ -13,27 +13,41 @@ public class Main {
 	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
-		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
+		Database database = new Database("fsdb2.dtn.asu.edu", 27017);
 		//Database database = new Database("localhost", 27017);
 		DB dbTweettracker = database.getDatabase("tweettracker");
 		DB dbRSS = database.getDatabase("foresight");
+		DB dbACLED = database.getDatabase("conflicts");
+
 		DBCollection sentenceColl = dbRSS.getCollection("sentence");
 		DBCollection tweetsColl = dbTweettracker.getCollection("tweets");
+		DBCollection ACLEDColl = dbACLED.getCollection("ACLEDfull");
 		
 		if(args[0].equals("-tweets")){
 			if(args[1].equals("-ner")){
 				insertNer(tweetsColl, "text");
 			}
-			else{
+			else if(args[1].equals("-location")){
 				insertLocation(tweetsColl);
+			}
+			else{
+				insertCoord(tweetsColl);
+			}
+		}
+		else if(args[0].equals("-rss")){
+			if(args[1].equals("-ner")){
+				insertNer(sentenceColl, "sentence");
+			}
+			else if(args[1].equals("-location")){
+				insertLocation(sentenceColl);
+			}
+			else{
+				insertCoord(sentenceColl);
 			}
 		}
 		else{
 			if(args[1].equals("-ner")){
-				insertNer(sentenceColl, "sentence");
-			}
-			else{
-				insertLocation(sentenceColl);
+				insertNer(ACLEDColl, "NOTES");
 			}
 		}
 		database.close();
@@ -99,6 +113,47 @@ public class Main {
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
 						new BasicDBObject("$set", new BasicDBObject("geocoding", outList)));
 				
+			}
+		}
+		finally{
+			cursor.close();
+		}
+	}
+	
+	public static void insertCoord(DBCollection coll){
+		BasicDBObject query = new BasicDBObject("geoCoord", null)
+		.append("ner", new BasicDBObject("$ne", null));
+		
+		DBCursor cursor = coll.find(query);
+		
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
+				BasicDBList outList = new BasicDBList();
+				for(Object e : ner){
+					BasicDBObject entity = (BasicDBObject) e;
+					if(entity.getString("namedEntity").equals("LOCATION")){
+						String inputLoc = entity.getString("mentionSpan");
+						if(!(	inputLoc.equals("Africa")
+								|| 	inputLoc.equals("Europe")
+								|| 	inputLoc.equals("Asia")
+								||	inputLoc.equals("North America")
+								|| 	inputLoc.equals("South America")
+								|| 	inputLoc.equals("Antarctica")	)){
+							LinkedHashMap coord = GeoCoding.getCoord(inputLoc);
+							String loc = GeoCoding.getCountry(coord);
+							if(coord != null && loc != null){
+								outList.add(new BasicDBObject("name", inputLoc)
+									.append("country", loc)
+									.append("coord", new BasicDBObject("lat", (double)coord.get("lat"))
+													.append("lng", (double)coord.get("lng"))));
+							}
+						}
+					}
+				}
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+						new BasicDBObject("$set", new BasicDBObject("geoCoord", outList)));
 			}
 		}
 		finally{
