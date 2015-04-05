@@ -14,21 +14,44 @@ public class Main {
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb2.dtn.asu.edu", 27017);
+		Database database1 = new Database("vaderserver0.cidse.dhcp.asu.edu", 27017);
 		//Database database = new Database("localhost", 27017);
 		DB dbTweettracker = database.getDatabase("tweettracker");
 		DB dbRSS = database.getDatabase("foresight");
 		DB dbACLED = database.getDatabase("conflicts");
-
+		
+		DB dbNigeriaTweets = database1.getDatabase("NigeriaTweets");
+		
 		DBCollection sentenceColl = dbRSS.getCollection("sentence");
 		DBCollection tweetsColl = dbTweettracker.getCollection("tweets");
 		DBCollection ACLEDColl = dbACLED.getCollection("ACLEDfull");
 		
+		DBCollection NigeriaColl = dbNigeriaTweets.getCollection("tweets");
+		
 		if(args[0].equals("-tweets")){
 			if(args[1].equals("-ner")){
-				insertNer(tweetsColl, "text");
+				if(args.length >= 3){
+					Integer catID = Integer.parseInt(args[2]);
+					BasicDBObject query = new BasicDBObject("cat", catID)
+					.append("ner", null);
+					
+					insertNer(tweetsColl, "text", query);
+				}
+				else{
+					insertNer(tweetsColl, "text");
+				}
 			}
 			else if(args[1].equals("-location")){
-				insertLocation(tweetsColl);
+				if(args.length >= 3){
+					Integer catID = Integer.parseInt(args[2]);
+					BasicDBObject query = new BasicDBObject("cat", catID)
+					.append("ner", new BasicDBObject("$ne", null));
+					
+					insertLocation(tweetsColl, query);
+				}
+				else{
+					insertLocation(tweetsColl);
+				}
 			}
 			else{
 				insertCoord(tweetsColl);
@@ -45,6 +68,17 @@ public class Main {
 				insertCoord(sentenceColl);
 			}
 		}
+		else if(args[0].equals("-NigeriaTweets")){
+			if(args[1].equals("-ner")){
+				insertNer(NigeriaColl, "text");
+			}
+			else if(args[1].equals("-location")){
+				insertLocation(NigeriaColl);
+			}
+			else{
+				
+			}
+		}
 		else{
 			if(args[1].equals("-ner")){
 				insertNer(ACLEDColl, "NOTES");
@@ -56,7 +90,7 @@ public class Main {
 	public static void insertNer(DBCollection coll, String inputField){
 		BasicDBObject query = new BasicDBObject("ner", null);
 		DBCursor cursor = coll.find(query);
-		
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
@@ -75,11 +109,39 @@ public class Main {
 		}
 	}
 	
+	public static void insertNer(DBCollection coll, String inputField, BasicDBObject query){
+		DBCursor cursor = coll.find(query);
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		System.out.println("Finished Querying, there are total of " + cursor.count() + "items");
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				String text = mongoObj.getString(inputField);
+				if(text != null && text.length() < 1000){
+					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					BasicDBList entities = NLP.annotateDBObject(text);
+					
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+				}
+			}
+		}
+		finally{
+			cursor.close();
+		}
+	}
+		
 	public static void insertLocation(DBCollection coll){
 		BasicDBObject query = new BasicDBObject("geocoding", null)
 		.append("ner", new BasicDBObject("$ne", null));
 		
+		insertLocation(coll, query);
+	}
+	
+	public static void insertLocation(DBCollection coll, BasicDBObject query){
 		DBCursor cursor = coll.find(query);
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		System.out.println("Finished query, there are total of " + cursor.count() + " items.");
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
@@ -119,13 +181,12 @@ public class Main {
 			cursor.close();
 		}
 	}
-	
 	public static void insertCoord(DBCollection coll){
 		BasicDBObject query = new BasicDBObject("geoCoord", null)
 		.append("ner", new BasicDBObject("$ne", null));
 		
 		DBCursor cursor = coll.find(query);
-		
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
