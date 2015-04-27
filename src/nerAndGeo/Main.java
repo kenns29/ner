@@ -13,7 +13,7 @@ public class Main {
 	
 	public static void main(String[] args) throws UnknownHostException {
 		// TODO Auto-generated method stub
-		Database database = new Database("fsdb2.dtn.asu.edu", 27017);
+		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
 		Database database1 = new Database("vaderserver0.cidse.dhcp.asu.edu", 27017);
 		//Database database = new Database("localhost", 27017);
 		DB dbTweettracker = database.getDatabase("tweettracker");
@@ -91,8 +91,10 @@ public class Main {
 		BasicDBObject query = new BasicDBObject("ner", null);
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		int count = 0;
 		try{
 			while(cursor.hasNext()){
+				System.out.println("one");
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
@@ -101,7 +103,14 @@ public class Main {
 					
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+					
+					++count;
 				}
+			}
+			
+			if(count >= 100){
+				System.out.println("100");
+				count = 0;
 			}
 		}
 		finally{
