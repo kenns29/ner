@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="Jar/stanford-corenlp-3.4-sources.jar"/>
 	<classpathentry kind="lib" path="Jar/stanford-corenlp-3.4.jar"/>
 	<classpathentry kind="lib" path="Jar/xom.jar"/>
+	<classpathentry kind="lib" path="Jar/geonames-source-1.1.12.jar"/>
+	<classpathentry kind="lib" path="Jar/jdom-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

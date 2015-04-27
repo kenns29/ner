@@ -2,6 +2,7 @@ package nerAndGeo;
 
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
+import java.util.regex.Pattern;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -11,7 +12,7 @@ import com.mongodb.DBCursor;
 
 public class Main {
 	
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
 		Database database1 = new Database("vaderserver0.cidse.dhcp.asu.edu", 27017);
@@ -63,6 +64,9 @@ public class Main {
 			}
 			else if(args[1].equals("-location")){
 				insertLocation(sentenceColl);
+			}
+			else if(args[1].equals("-geoname")){
+				insertGeoNames(sentenceColl);
 			}
 			else{
 				insertCoord(sentenceColl);
@@ -229,5 +233,62 @@ public class Main {
 		finally{
 			cursor.close();
 		}
+	}
+	
+	public static void insertGeoNames(DBCollection coll, BasicDBObject query) throws Exception{
+		DBCursor cursor = coll.find(query);
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
+				BasicDBList outList = new BasicDBList();
+				for(Object e : ner){
+					BasicDBObject entity = (BasicDBObject) e;
+					String entType = entity.getString("namedEntity");
+					String ent = entity.getString("mentionSpan");
+					if(entType.equals("LOCATION")){
+						
+						BasicDBObject rObj = null;
+						try{
+							rObj = Geoname.geocode(ent);
+						}
+						catch(Exception excpetion){
+							excpetion.printStackTrace();
+						}
+					    if(rObj != null){
+							outList.add(rObj);
+						}
+					}
+					else if(Pattern.matches("Burkina Faso", ent)){
+						BasicDBObject rObj = null;
+						try{
+							rObj = Geoname.geocode("Burkina Faso");
+						}
+						catch(Exception excpetion){
+							excpetion.printStackTrace();
+						}
+						if(rObj != null){
+							outList.add(rObj);
+						}
+					}
+					
+				}
+				
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
+						new BasicDBObject("$set", new BasicDBObject("geoname", outList)));
+			}
+		}
+		finally{
+			System.out.println("Finished Inserting Geonames");
+			cursor.close();
+		}
+	}
+	
+	public static void insertGeoNames(DBCollection coll) throws Exception{
+		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null));
+		//.append("geoname", null);
+		insertGeoNames(coll, query);
 	}
 }
