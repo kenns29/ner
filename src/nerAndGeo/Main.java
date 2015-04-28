@@ -4,6 +4,8 @@ import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
+import org.geonames.GeoNamesException;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -254,7 +256,7 @@ public class Main {
 						try{
 							rObj = Geoname.geocode(ent);
 						}
-						catch(Exception excpetion){
+						catch(GeoNamesException excpetion){
 							excpetion.printStackTrace();
 						}
 					    if(rObj != null){
@@ -266,7 +268,7 @@ public class Main {
 						try{
 							rObj = Geoname.geocode("Burkina Faso");
 						}
-						catch(Exception excpetion){
+						catch(GeoNamesException excpetion){
 							excpetion.printStackTrace();
 						}
 						if(rObj != null){
@@ -291,4 +293,6 @@ public class Main {
 		//.append("geoname", null);
 		insertGeoNames(coll, query);
 	}
+	//http://www.geonames.org/export/webservice-exception.html
+	
 }
