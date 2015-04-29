@@ -262,6 +262,12 @@ public class Main {
 							outList.add(rObj);
 						}
 					}
+					else if(ent.toLowerCase().equals("niger delta")){
+						BasicDBObject rObj = getGeonameMongoObj("Niger Delta");
+					    if(rObj != null){
+							outList.add(rObj);
+						}
+					}
 					
 				}
 				
