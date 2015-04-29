@@ -14,8 +14,28 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class Geoname {
-	public static final String accountName = "labuse";
-	 
+	private static int accountNumber = 0;
+	public static String accountName = getAccountName();
+	public static String getAccountName(){
+		if(accountNumber == 0){
+			return "labuse";
+		}
+		else{
+			return "labuse" + accountNumber;
+		}
+	}
+	
+	private static void cycleAccountNumber(){
+		++accountNumber;
+		if(accountNumber > 10){
+			accountNumber = 0;
+		}
+	}
+	
+	public static void cycleAccountName(){
+		cycleAccountNumber();
+		accountName = getAccountName();
+	}
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
 	 	 WebService.setUserName(accountName); // add your username here

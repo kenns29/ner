@@ -251,27 +251,14 @@ public class Main {
 					String entType = entity.getString("namedEntity");
 					String ent = entity.getString("mentionSpan");
 					if(entType.equals("LOCATION")){
-						
-						BasicDBObject rObj = null;
-						try{
-							rObj = Geoname.geocode(ent);
-						}
-						catch(GeoNamesException excpetion){
-							excpetion.printStackTrace();
-						}
+						BasicDBObject rObj = getGeonameMongoObj(ent);
 					    if(rObj != null){
 							outList.add(rObj);
 						}
 					}
 					else if(Pattern.matches("Burkina Faso", ent)){
-						BasicDBObject rObj = null;
-						try{
-							rObj = Geoname.geocode("Burkina Faso");
-						}
-						catch(GeoNamesException excpetion){
-							excpetion.printStackTrace();
-						}
-						if(rObj != null){
+						BasicDBObject rObj = getGeonameMongoObj("Burkina Faso");
+					    if(rObj != null){
 							outList.add(rObj);
 						}
 					}
@@ -288,9 +275,29 @@ public class Main {
 		}
 	}
 	
+	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+		BasicDBObject rObj = null;
+		boolean reachLimit = false;
+		do{
+			try{
+				System.out.println("Current Username = " + Geoname.accountName);
+				rObj = Geoname.geocode(name);
+				reachLimit = false;
+			}
+			catch(GeoNamesException exception){
+				exception.printStackTrace();
+				int code = exception.getExceptionCode();
+				if(code == 19 || code == 10){
+					Geoname.cycleAccountName();
+					reachLimit = true;
+				}
+			}
+		} while(reachLimit);
+		return rObj;
+	}
 	public static void insertGeoNames(DBCollection coll) throws Exception{
-		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null));
-		//.append("geoname", null);
+		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
+		.append("geoname", null);
 		insertGeoNames(coll, query);
 	}
 	//http://www.geonames.org/export/webservice-exception.html
