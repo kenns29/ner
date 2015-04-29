@@ -68,7 +68,7 @@ public class Main {
 				insertLocation(sentenceColl);
 			}
 			else if(args[1].equals("-geoname")){
-				insertGeoNames(sentenceColl);
+				insertGeonamesWithException(sentenceColl);
 			}
 			else{
 				insertCoord(sentenceColl);
@@ -304,6 +304,21 @@ public class Main {
 	public static void insertGeoNames(DBCollection coll) throws Exception{
 		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
 		.append("geoname", null);
+		insertGeoNames(coll, query);
+	}
+	
+	public static void insertGeonamesWithException(DBCollection coll) throws Exception{
+		BasicDBList orList = new BasicDBList();
+		orList.add(new BasicDBObject("geoname", null));
+		BasicDBList andList = new BasicDBList();
+		andList.add(new BasicDBObject("ner", new BasicDBObject("$ne", null)));
+		BasicDBList inList = new BasicDBList();
+		inList.add("Niger Delta");
+		andList.add(new BasicDBObject("ner.mentionSpan", new BasicDBObject("$in", inList)));
+		orList.add(new BasicDBObject("$and", andList));
+		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
+		.append("$or", orList);
+		
 		insertGeoNames(coll, query);
 	}
 	//http://www.geonames.org/export/webservice-exception.html
