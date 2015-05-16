@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 import org.geonames.GeoNamesException;
+import org.json.simple.JSONArray;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -68,7 +69,8 @@ public class Main {
 				insertLocation(sentenceColl);
 			}
 			else if(args[1].equals("-geoname")){
-				insertGeonamesWithException(sentenceColl);
+				//insertGeonamesWithException(sentenceColl);
+				insertGeoNames(sentenceColl);
 			}
 			else{
 				insertCoord(sentenceColl);
@@ -85,6 +87,11 @@ public class Main {
 				
 			}
 		}
+		else if(args[0].equals("-test")){
+			String text = "Yesterday 's meeting was presided over by Vice President Mohammed Namadi Sambo , in the absence of President Goodluck Jonathan , who left as part of ECOWAS leaders to troubled Burkina Faso .";
+			JSONArray entities = NLP.performAnnotation(text);
+			System.out.println(entities.toJSONString());
+		}
 		else{
 			if(args[1].equals("-ner")){
 				insertNer(ACLEDColl, "NOTES");
@@ -94,13 +101,13 @@ public class Main {
 	}
 	
 	public static void insertNer(DBCollection coll, String inputField){
-		BasicDBObject query = new BasicDBObject("ner", null);
+		BasicDBObject query = new BasicDBObject("ner1", null);
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		System.out.println("There are total of " + cursor.count() + "items in the query");
 		int count = 0;
 		try{
 			while(cursor.hasNext()){
-				System.out.println("one");
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
@@ -108,15 +115,14 @@ public class Main {
 					BasicDBList entities = NLP.annotateDBObject(text);
 					
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+										new BasicDBObject("$set", new BasicDBObject("ner1", entities)));
 					
 					++count;
 				}
-			}
-			
-			if(count >= 100){
-				System.out.println("100");
-				count = 0;
+				
+				if(count % 100 == 0){
+					System.out.println(count + " updated");
+				}
 			}
 		}
 		finally{
@@ -241,10 +247,12 @@ public class Main {
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		
+		int count = 0;
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
+				BasicDBList ner = (BasicDBList) mongoObj.get("ner1");
+				String text = mongoObj.getString("sentence");
 				BasicDBList outList = new BasicDBList();
 				for(Object e : ner){
 					BasicDBObject entity = (BasicDBObject) e;
@@ -256,23 +264,33 @@ public class Main {
 							outList.add(rObj);
 						}
 					}
-					else if(Pattern.matches("Burkina Faso", ent)){
-						BasicDBObject rObj = getGeonameMongoObj("Burkina Faso");
-					    if(rObj != null){
-							outList.add(rObj);
-						}
-					}
-					else if(ent.toLowerCase().equals("niger delta")){
-						BasicDBObject rObj = getGeonameMongoObj("Niger Delta");
-					    if(rObj != null){
-							outList.add(rObj);
-						}
-					}
-					
+//					else if(Pattern.matches("Burkina Faso", ent)){
+//						BasicDBObject rObj = getGeonameMongoObj("Burkina Faso");
+//					    if(rObj != null){
+//							outList.add(rObj);
+//						}
+//					}
+//					else if(ent.toLowerCase().equals("niger delta")){
+//						BasicDBObject rObj = getGeonameMongoObj("Niger Delta");
+//					    if(rObj != null){
+//							outList.add(rObj);
+//						}
+//					}
 				}
 				
+//				if(Pattern.matches(".*\\sCote d'Ivoire\\s.*", text)){
+//					BasicDBObject rObj = getGeonameMongoObj("Cote d'Ivoire");	
+//					if(rObj != null){
+//						outList.add(rObj);
+//					}
+//				}
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
-						new BasicDBObject("$set", new BasicDBObject("geoname", outList)));
+						new BasicDBObject("$set", new BasicDBObject("geoname1", outList)));
+				
+				++count;
+				if(count % 100 == 0){
+					System.out.println(count + " updated");
+				}
 			}
 		}
 		finally{
@@ -302,24 +320,29 @@ public class Main {
 		return rObj;
 	}
 	public static void insertGeoNames(DBCollection coll) throws Exception{
-		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
-		.append("geoname", null);
+		BasicDBObject query = new BasicDBObject("ner1", new BasicDBObject("$ne", null))
+		.append("geoname1", null);
 		insertGeoNames(coll, query);
 	}
 	
 	public static void insertGeonamesWithException(DBCollection coll) throws Exception{
-		BasicDBList orList = new BasicDBList();
-		orList.add(new BasicDBObject("geoname", null));
-		BasicDBList andList = new BasicDBList();
-		andList.add(new BasicDBObject("ner", new BasicDBObject("$ne", null)));
-		BasicDBList inList = new BasicDBList();
-		inList.add("Niger Delta");
-		andList.add(new BasicDBObject("ner.mentionSpan", new BasicDBObject("$in", inList)));
-		orList.add(new BasicDBObject("$and", andList));
-		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
-		.append("$or", orList);
 		
-		insertGeoNames(coll, query);
+		//just for Niger Delta
+//		BasicDBList orList = new BasicDBList();
+//		orList.add(new BasicDBObject("geoname", null));
+//		BasicDBList andList = new BasicDBList();
+//		andList.add(new BasicDBObject("ner", new BasicDBObject("$ne", null)));
+//		BasicDBList inList = new BasicDBList();
+//		inList.add("Niger Delta");
+//		andList.add(new BasicDBObject("ner.mentionSpan", new BasicDBObject("$in", inList)));
+//		orList.add(new BasicDBObject("$and", andList));
+//		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
+//		.append("$or", orList);
+		
+		BasicDBList andList = new BasicDBList();
+		andList.add(new BasicDBObject("sentence", new BasicDBObject("$ne", null)));
+		andList.add(new BasicDBObject("sentence", new BasicDBObject("$regex", "\\sCote d'Ivoire\\s")));
+		insertGeoNames(coll, new BasicDBObject("$and", andList));
 	}
 	//http://www.geonames.org/export/webservice-exception.html
 	
