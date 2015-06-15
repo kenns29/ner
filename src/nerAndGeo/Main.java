@@ -100,6 +100,9 @@ public class Main {
 		database.close();
 	}
 	
+	public static void parallelNer(DBCollection coll, String inputField, BasicDBObject query){
+		
+	}
 	public static void insertNer(DBCollection coll, String inputField){
 		BasicDBObject query = new BasicDBObject("ner1", null);
 		DBCursor cursor = coll.find(query);
