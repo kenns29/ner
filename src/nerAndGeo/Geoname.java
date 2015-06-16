@@ -3,6 +3,7 @@ package nerAndGeo;
 import java.util.List;
 
 import org.geonames.BoundingBox;
+import org.geonames.GeoNamesException;
 import org.geonames.InsufficientStyleException;
 import org.geonames.Style;
 import org.geonames.Toponym;
@@ -39,7 +40,8 @@ public class Geoname {
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
 	 	 WebService.setUserName(accountName); // add your username here
-		 //System.out.println(name);
+	 	 //System.out.println("accountName = " + accountName);
+		 //System.out.println("location = " + name);
 		 ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 		 searchCriteria.setStyle(Style.valueOf("FULL"));
 		 ToponymSearchResult searchResult = null;
@@ -138,4 +140,43 @@ public class Geoname {
 		 return rObj;
 	 }
 	 
+	 public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+		BasicDBObject rObj = null;
+		boolean reachLimit = false;
+		do{
+			try{
+				rObj = Geoname.geocode(name);
+				reachLimit = false;
+			}
+			catch(GeoNamesException exception){
+				exception.printStackTrace();
+				String preAccountName = Geoname.accountName;
+				int code = exception.getExceptionCode();
+				if(code == 19 || code == 10){
+					synchronized(Geoname.class){
+						if(preAccountName.equals(Geoname.accountName))
+							Geoname.cycleAccountName();
+					}
+					reachLimit = true;
+				}
+			}
+		} while(reachLimit);
+		return rObj;
+	}
+	 
+	public static BasicDBList getGeonameList(BasicDBList ner) throws Exception{
+		BasicDBList outList = new BasicDBList();
+		for(Object e : ner){
+			BasicDBObject entity = (BasicDBObject) e;
+			String entType = entity.getString("namedEntity");
+			String ent = entity.getString("mentionSpan");
+			if(entType.equals("LOCATION")){
+				BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
+			    if(rObj != null){
+					outList.add(rObj);
+				}
+			}
+		}
+		return outList;
+	}
 }

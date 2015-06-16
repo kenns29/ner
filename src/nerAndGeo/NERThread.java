@@ -41,6 +41,12 @@ public class NERThread implements Runnable{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		System.out.println("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
+		if(useGeoname){
+			System.out.println("inserting entities along with geonames");
+		}
+		else{
+			System.out.println("inserting entities");
+		}
 		try{
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
@@ -54,7 +60,7 @@ public class NERThread implements Runnable{
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
 					}
 					else{
-						BasicDBList geonameList = getGeonameList(entities);
+						BasicDBList geonameList = Geoname.getGeonameList(entities);
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)
 																		.append("geoname", geonameList)));
@@ -76,19 +82,5 @@ public class NERThread implements Runnable{
 		}
 	}
 	
-	public BasicDBList getGeonameList(BasicDBList ner) throws Exception{
-		BasicDBList outList = new BasicDBList();
-		for(Object e : ner){
-			BasicDBObject entity = (BasicDBObject) e;
-			String entType = entity.getString("namedEntity");
-			String ent = entity.getString("mentionSpan");
-			if(entType.equals("LOCATION")){
-				BasicDBObject rObj = Main.getGeonameMongoObj(ent);
-			    if(rObj != null){
-					outList.add(rObj);
-				}
-			}
-		}
-		return outList;
-	}
+	
 }

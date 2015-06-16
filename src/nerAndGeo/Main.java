@@ -153,7 +153,7 @@ public class Main {
 	}
 	
 	public static void parallelNer(DBCollection coll, String inputField, long minTime, long maxTime){
-		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, 4, minTime, maxTime);
+		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, configPropertyValues.core, minTime, maxTime);
 		nerThreadPool.run();
 	}
 	
@@ -317,7 +317,7 @@ public class Main {
 					String entType = entity.getString("namedEntity");
 					String ent = entity.getString("mentionSpan");
 					if(entType.equals("LOCATION")){
-						BasicDBObject rObj = getGeonameMongoObj(ent);
+						BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
 					    if(rObj != null){
 							outList.add(rObj);
 						}
@@ -357,26 +357,7 @@ public class Main {
 		}
 	}
 	
-	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
-		BasicDBObject rObj = null;
-		boolean reachLimit = false;
-		do{
-			try{
-				System.out.println("Current Username = " + Geoname.accountName);
-				rObj = Geoname.geocode(name);
-				reachLimit = false;
-			}
-			catch(GeoNamesException exception){
-				exception.printStackTrace();
-				int code = exception.getExceptionCode();
-				if(code == 19 || code == 10){
-					Geoname.cycleAccountName();
-					reachLimit = true;
-				}
-			}
-		} while(reachLimit);
-		return rObj;
-	}
+	
 	public static void insertGeoNames(DBCollection coll) throws Exception{
 		BasicDBObject query = new BasicDBObject("ner1", new BasicDBObject("$ne", null))
 		.append("geoname1", null);
