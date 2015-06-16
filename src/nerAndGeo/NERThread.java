@@ -19,20 +19,25 @@ public class NERThread implements Runnable{
 		this.inputField = inputField;
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.query = new BasicDBObject("timestamp", 
-				new BasicDBObject("$gte", this.startTime)
-				.append("$lt", this.endTime));
+		this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
+						.append("timestamp", 
+								new BasicDBObject("$gte", this.startTime)
+								.append("$lt", this.endTime));
 	}
 	@Override
 	public void run() {
 		System.out.println("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
 		long start = System.currentTimeMillis();
-		insertNer();
+		try {
+			insertNer(Main.configPropertyValues.geoname);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		long time = System.currentTimeMillis() - start;
 		System.out.println("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
 	}
 	
-	public void insertNer(){
+	public void insertNer(boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		System.out.println("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
@@ -44,8 +49,17 @@ public class NERThread implements Runnable{
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NLP.annotateDBObject(text);
 					
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+					if(!useGeoname){
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+					}
+					else{
+						BasicDBList geonameList = getGeonameList(entities);
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+											new BasicDBObject("$set", new BasicDBObject("ner", entities)
+																		.append("geoname", geonameList)));
+					}
+					
 				}
 				
 				++NERThreadPool.count;
@@ -62,4 +76,19 @@ public class NERThread implements Runnable{
 		}
 	}
 	
+	public BasicDBList getGeonameList(BasicDBList ner) throws Exception{
+		BasicDBList outList = new BasicDBList();
+		for(Object e : ner){
+			BasicDBObject entity = (BasicDBObject) e;
+			String entType = entity.getString("namedEntity");
+			String ent = entity.getString("mentionSpan");
+			if(entType.equals("LOCATION")){
+				BasicDBObject rObj = Main.getGeonameMongoObj(ent);
+			    if(rObj != null){
+					outList.add(rObj);
+				}
+			}
+		}
+		return outList;
+	}
 }

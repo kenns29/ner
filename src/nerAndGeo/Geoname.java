@@ -39,7 +39,7 @@ public class Geoname {
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
 	 	 WebService.setUserName(accountName); // add your username here
-		 System.out.println(name);
+		 //System.out.println(name);
 		 ToponymSearchCriteria searchCriteria = new ToponymSearchCriteria();
 		 searchCriteria.setStyle(Style.valueOf("FULL"));
 		 ToponymSearchResult searchResult = null;

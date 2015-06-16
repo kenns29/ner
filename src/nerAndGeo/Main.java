@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -19,19 +20,25 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 public class Main {
 	public static Properties NLPprops = new Properties();
 	public static StanfordCoreNLP pipeline = null;
+	public static ConfigPropertyValues configPropertyValues = null;
 	static{
 		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		pipeline = new StanfordCoreNLP(NLPprops);
+		try {
+			configPropertyValues = new ConfigPropertyValues("config.properties");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
+		Database database0 = new Database("fsdb1.dtn.asu.edu", 27017);
 		Database database1 = new Database("vaderserver0.cidse.dhcp.asu.edu", 27017);
 		Database database2 = new Database("fssand1.dtn.asu.edu", 27888);
 		//Database database = new Database("localhost", 27017);
-		DB dbTweettracker = database.getDatabase("tweettracker");
-		DB dbRSS = database.getDatabase("foresight");
-		DB dbACLED = database.getDatabase("conflicts");
+		DB dbTweettracker = database0.getDatabase("tweettracker");
+		DB dbRSS = database0.getDatabase("foresight");
+		DB dbACLED = database0.getDatabase("conflicts");
 		
 		DB dbNigeriaTweets = database1.getDatabase("NigeriaTweets");
 		DB dbTest = database2.getDatabase("NigeriaTweets");
@@ -43,8 +50,28 @@ public class Main {
 		DBCollection NigeriaColl = dbNigeriaTweets.getCollection("tweets");
 		
 		DBCollection testColl = dbTest.getCollection("tweets");
+		
 		if(args.length == 0){
+			Database database = new Database(configPropertyValues.host, configPropertyValues.port);
+			DB db = database.getDatabase(configPropertyValues.db);
+			DBCollection coll = db.getCollection(configPropertyValues.coll);
 			
+			if(configPropertyValues.parallel){
+				if(configPropertyValues.ner){
+					if(configPropertyValues.useTimeLimit){
+						parallelNer(coll, configPropertyValues.nerInputField, configPropertyValues.startTime, configPropertyValues.endTime);
+					}
+					else{
+						
+						parallelNer(coll, configPropertyValues.nerInputField);
+					}
+				}
+			}
+			else{
+				if(configPropertyValues.ner){
+					insertNer(coll, configPropertyValues.nerInputField);
+				}
+			}
 		}
 		else if(args[0].equals("-tweets")){
 			if(args[1].equals("-ner")){
@@ -116,12 +143,16 @@ public class Main {
 				insertNer(ACLEDColl, "NOTES");
 			}
 		}
-		database.close();
+		database0.close();
 	}
 	
 	public static void parallelNer(DBCollection coll, String inputField){
 		long minTime = CollUtilities.minTime(coll);
 		long maxTime = CollUtilities.maxTime(coll);
+		parallelNer(coll, inputField, minTime, maxTime);
+	}
+	
+	public static void parallelNer(DBCollection coll, String inputField, long minTime, long maxTime){
 		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, 4, minTime, maxTime);
 		nerThreadPool.run();
 	}
