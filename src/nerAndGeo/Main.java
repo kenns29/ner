@@ -2,6 +2,7 @@ package nerAndGeo;
 
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.geonames.GeoNamesException;
@@ -13,18 +14,27 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+
 public class Main {
+	public static Properties NLPprops = new Properties();
+	public static StanfordCoreNLP pipeline = null;
+	static{
+		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		pipeline = new StanfordCoreNLP(NLPprops);
+	}
 	
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
 		Database database = new Database("fsdb1.dtn.asu.edu", 27017);
 		Database database1 = new Database("vaderserver0.cidse.dhcp.asu.edu", 27017);
+		Database database2 = new Database("fssand1.dtn.asu.edu", 27888);
 		//Database database = new Database("localhost", 27017);
 		DB dbTweettracker = database.getDatabase("tweettracker");
 		DB dbRSS = database.getDatabase("foresight");
 		DB dbACLED = database.getDatabase("conflicts");
 		
 		DB dbNigeriaTweets = database1.getDatabase("NigeriaTweets");
+		DB dbTest = database2.getDatabase("NigeriaTweets");
 		
 		DBCollection sentenceColl = dbRSS.getCollection("sentence");
 		DBCollection tweetsColl = dbTweettracker.getCollection("tweets");
@@ -32,7 +42,11 @@ public class Main {
 		
 		DBCollection NigeriaColl = dbNigeriaTweets.getCollection("tweets");
 		
-		if(args[0].equals("-tweets")){
+		DBCollection testColl = dbTest.getCollection("tweets");
+		if(args.length == 0){
+			
+		}
+		else if(args[0].equals("-tweets")){
 			if(args[1].equals("-ner")){
 				if(args.length >= 3){
 					Integer catID = Integer.parseInt(args[2]);
@@ -87,6 +101,11 @@ public class Main {
 				
 			}
 		}
+		else if(args[0].equals("-testPar")){
+			if(args[1].equals("-ner")){
+				parallelNer(testColl, "text");
+			}
+		}
 		else if(args[0].equals("-test")){
 			String text = "Yesterday 's meeting was presided over by Vice President Mohammed Namadi Sambo , in the absence of President Goodluck Jonathan , who left as part of ECOWAS leaders to troubled Burkina Faso .";
 			JSONArray entities = NLP.performAnnotation(text);
@@ -100,12 +119,16 @@ public class Main {
 		database.close();
 	}
 	
-	public static void parallelNer(DBCollection coll, String inputField, BasicDBObject query){
-		
+	public static void parallelNer(DBCollection coll, String inputField){
+		long minTime = CollUtilities.minTime(coll);
+		long maxTime = CollUtilities.maxTime(coll);
+		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, 4, minTime, maxTime);
+		nerThreadPool.run();
 	}
+	
 	public static void insertNer(DBCollection coll, String inputField){
 		BasicDBObject query = new BasicDBObject("ner1", null);
-		DBCursor cursor = coll.find(query);
+		DBCursor cursor = coll.find();
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		System.out.println("There are total of " + cursor.count() + "items in the query");
 		int count = 0;
@@ -117,6 +140,7 @@ public class Main {
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NLP.annotateDBObject(text);
 					
+					System.out.println(entities.toString());
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 										new BasicDBObject("$set", new BasicDBObject("ner1", entities)));
 					

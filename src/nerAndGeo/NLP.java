@@ -24,16 +24,11 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 public class NLP {
-	public static Properties props = new Properties();
-	public static StanfordCoreNLP pipeline = null;
-	static{
-		props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-		pipeline = new StanfordCoreNLP(props);
-	}
+	
 	public static JSONArray performAnnotation(String text) throws IOException{
 			
 		Annotation document = new Annotation(text);
-		pipeline.annotate(document);
+		Main.pipeline.annotate(document);
 		
 	
 		JSONArray entities = new JSONArray();
@@ -65,8 +60,13 @@ public class NLP {
 		
 		
 		Annotation document = new Annotation(text);
-		pipeline.annotate(document);
-		
+		try{
+			Main.pipeline.annotate(document);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			System.out.println(text);
+		}
 		BasicDBList mongoList = new BasicDBList();
 		
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
@@ -76,9 +76,9 @@ public class NLP {
 			BasicDBObject mongoObj = null;
 			for (CoreLabel token: sentence.get(TokensAnnotation.class)){
 				String word = token.getString(TextAnnotation.class);
-				String pos = token.getString(PartOfSpeechAnnotation.class);
+				//String pos = token.getString(PartOfSpeechAnnotation.class);
 				String ne = token.getString(NamedEntityTagAnnotation.class);
-				String nne = token.getString(NormalizedNamedEntityTagAnnotation.class);
+				//String nne = token.getString(NormalizedNamedEntityTagAnnotation.class);
 				
 				if(!ne.equals("O")){
 					if(!ne.equals(previousNe)){
@@ -117,7 +117,6 @@ public class NLP {
 				mongoList.add(mongoObj);
 			}
 		}
-		
 		return mongoList;
 	}
 	
