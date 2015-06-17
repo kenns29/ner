@@ -14,6 +14,8 @@ import org.geonames.WebService;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
 public class Geoname {
 	private static Logger LOGGER = Logger.getLogger(Geoname.class.getName());
@@ -185,5 +187,88 @@ public class Geoname {
 			}
 		}
 		return outList;
+	}
+	
+	
+	public static void insertGeoNames(DBCollection coll, BasicDBObject query) throws Exception{
+		DBCursor cursor = coll.find(query);
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		
+		int count = 0;
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				BasicDBList ner = (BasicDBList) mongoObj.get("ner1");
+				String text = mongoObj.getString("sentence");
+				BasicDBList outList = new BasicDBList();
+				for(Object e : ner){
+					BasicDBObject entity = (BasicDBObject) e;
+					String entType = entity.getString("namedEntity");
+					String ent = entity.getString("mentionSpan");
+					if(entType.equals("LOCATION")){
+						BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
+					    if(rObj != null){
+							outList.add(rObj);
+						}
+					}
+//					else if(Pattern.matches("Burkina Faso", ent)){
+//						BasicDBObject rObj = getGeonameMongoObj("Burkina Faso");
+//					    if(rObj != null){
+//							outList.add(rObj);
+//						}
+//					}
+//					else if(ent.toLowerCase().equals("niger delta")){
+//						BasicDBObject rObj = getGeonameMongoObj("Niger Delta");
+//					    if(rObj != null){
+//							outList.add(rObj);
+//						}
+//					}
+				}
+				
+//				if(Pattern.matches(".*\\sCote d'Ivoire\\s.*", text)){
+//					BasicDBObject rObj = getGeonameMongoObj("Cote d'Ivoire");	
+//					if(rObj != null){
+//						outList.add(rObj);
+//					}
+//				}
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
+						new BasicDBObject("$set", new BasicDBObject("geoname1", outList)));
+				
+				++count;
+				if(count % 100 == 0){
+					System.out.println(count + " updated");
+				}
+			}
+		}
+		finally{
+			System.out.println("Finished Inserting Geonames");
+			cursor.close();
+		}
+	}
+	
+	public static void insertGeoNames(DBCollection coll) throws Exception{
+		BasicDBObject query = new BasicDBObject("ner1", new BasicDBObject("$ne", null))
+		.append("geoname1", null);
+		insertGeoNames(coll, query);
+	}
+	
+	public static void insertGeonamesWithException(DBCollection coll) throws Exception{
+		
+		//just for Niger Delta
+//		BasicDBList orList = new BasicDBList();
+//		orList.add(new BasicDBObject("geoname", null));
+//		BasicDBList andList = new BasicDBList();
+//		andList.add(new BasicDBObject("ner", new BasicDBObject("$ne", null)));
+//		BasicDBList inList = new BasicDBList();
+//		inList.add("Niger Delta");
+//		andList.add(new BasicDBObject("ner.mentionSpan", new BasicDBObject("$in", inList)));
+//		orList.add(new BasicDBObject("$and", andList));
+//		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
+//		.append("$or", orList);
+		
+		BasicDBList andList = new BasicDBList();
+		andList.add(new BasicDBObject("sentence", new BasicDBObject("$ne", null)));
+		andList.add(new BasicDBObject("sentence", new BasicDBObject("$regex", "\\sCote d'Ivoire\\s")));
+		insertGeoNames(coll, new BasicDBObject("$and", andList));
 	}
 }

@@ -10,6 +10,8 @@ import org.json.simple.JSONArray;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NormalizedNamedEntityTagAnnotation;
@@ -24,8 +26,8 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 
-public class NLP {
-	private static final Logger LOGGER = Logger.getLogger(NLP.class.getName());
+public class NER {
+	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);
 	}
@@ -128,5 +130,69 @@ public class NLP {
 	public static BasicDBList annotateDBObject(String text, int length){
 		BasicDBList result = null;
 		return result;
+	}
+	
+	public static void parallelNer(DBCollection coll, String inputField){
+		long minTime = CollUtilities.minTime(coll);
+		long maxTime = CollUtilities.maxTime(coll);
+		parallelNer(coll, inputField, minTime, maxTime);
+	}
+	
+	public static void parallelNer(DBCollection coll, String inputField, long minTime, long maxTime){
+		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, Main.configPropertyValues.core, minTime, maxTime);
+		nerThreadPool.run();
+	}
+	
+	public static void insertNer(DBCollection coll, String inputField){
+		BasicDBObject query = new BasicDBObject("ner1", null);
+		DBCursor cursor = coll.find();
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		System.out.println("There are total of " + cursor.count() + "items in the query");
+		int count = 0;
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				String text = mongoObj.getString(inputField);
+				if(text != null && text.length() < 1000){
+					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					BasicDBList entities = NER.annotateDBObject(text);
+					
+					System.out.println(entities.toString());
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+										new BasicDBObject("$set", new BasicDBObject("ner1", entities)));
+					
+					++count;
+				}
+				
+				if(count % 100 == 0){
+					System.out.println(count + " updated");
+				}
+			}
+		}
+		finally{
+			cursor.close();
+		}
+	}
+	
+	public static void insertNer(DBCollection coll, String inputField, BasicDBObject query){
+		DBCursor cursor = coll.find(query);
+		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		System.out.println("Finished Querying, there are total of " + cursor.count() + "items");
+		try{
+			while(cursor.hasNext()){
+				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
+				String text = mongoObj.getString(inputField);
+				if(text != null && text.length() < 1000){
+					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					BasicDBList entities = NER.annotateDBObject(text);
+					
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+				}
+			}
+		}
+		finally{
+			cursor.close();
+		}
 	}
 }

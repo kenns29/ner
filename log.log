@@ -2,8 +2,8 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994570</millis>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598531</millis>
   <sequence>0</sequence>
   <logger>nerAndGeo.NERThreadPool</logger>
   <level>INFO</level>
@@ -13,30 +13,8 @@
   <message>There are total of 4 threads.</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994577</millis>
-  <sequence>2</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>run</method>
-  <thread>20</thread>
-  <message>Starting new Thread for (StartTime 1426377600000, endTime 1426464000000)</message>
-</record>
-<record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994577</millis>
-  <sequence>4</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>run</method>
-  <thread>22</thread>
-  <message>Starting new Thread for (StartTime 1426550400000, endTime 1426636800000)</message>
-</record>
-<record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994577</millis>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598539</millis>
   <sequence>3</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
@@ -46,8 +24,30 @@
   <message>Starting new Thread for (StartTime 1426464000000, endTime 1426550400000)</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994577</millis>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598539</millis>
+  <sequence>4</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>22</thread>
+  <message>Starting new Thread for (StartTime 1426550400000, endTime 1426636800000)</message>
+</record>
+<record>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598539</millis>
+  <sequence>2</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>20</thread>
+  <message>Starting new Thread for (StartTime 1426377600000, endTime 1426464000000)</message>
+</record>
+<record>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598538</millis>
   <sequence>1</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
@@ -57,31 +57,9 @@
   <message>Starting new Thread for (StartTime 1426291200000, endTime 1426377600000)</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994611</millis>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598573</millis>
   <sequence>5</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>19</thread>
-  <message>Querying for (StartTime 1426291200000, endTime 1426377600000), there are total of 1107 items</message>
-</record>
-<record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994611</millis>
-  <sequence>6</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>19</thread>
-  <message>inserting entities along with geonames</message>
-</record>
-<record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994614</millis>
-  <sequence>7</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -90,9 +68,9 @@
   <message>Querying for (StartTime 1426550400000, endTime 1426636800000), there are total of 11703 items</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994614</millis>
-  <sequence>8</sequence>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598574</millis>
+  <sequence>6</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -101,20 +79,31 @@
   <message>inserting entities along with geonames</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994615</millis>
-  <sequence>9</sequence>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598574</millis>
+  <sequence>7</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>20</thread>
-  <message>Querying for (StartTime 1426377600000, endTime 1426464000000), there are total of 4127 items</message>
+  <thread>19</thread>
+  <message>Querying for (StartTime 1426291200000, endTime 1426377600000), there are total of 1107 items</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994616</millis>
-  <sequence>10</sequence>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598575</millis>
+  <sequence>8</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>19</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598575</millis>
+  <sequence>9</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -123,24 +112,35 @@
   <message>Querying for (StartTime 1426464000000, endTime 1426550400000), there are total of 6666 items</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994616</millis>
-  <sequence>11</sequence>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598577</millis>
+  <sequence>10</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
   <thread>20</thread>
-  <message>inserting entities along with geonames</message>
+  <message>Querying for (StartTime 1426377600000, endTime 1426464000000), there are total of 4127 items</message>
 </record>
 <record>
-  <date>2015-06-16T18:36:34</date>
-  <millis>1434504994617</millis>
-  <sequence>12</sequence>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598577</millis>
+  <sequence>11</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
   <thread>21</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-17T11:09:58</date>
+  <millis>1434564598578</millis>
+  <sequence>12</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>20</thread>
   <message>inserting entities along with geonames</message>
 </record>

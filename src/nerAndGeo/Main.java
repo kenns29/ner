@@ -59,17 +59,17 @@ public class Main {
 			if(configPropertyValues.parallel){
 				if(configPropertyValues.ner){
 					if(configPropertyValues.useTimeLimit){
-						parallelNer(coll, configPropertyValues.nerInputField, configPropertyValues.startTime, configPropertyValues.endTime);
+						NER.parallelNer(coll, configPropertyValues.nerInputField, configPropertyValues.startTime, configPropertyValues.endTime);
 					}
 					else{
 						
-						parallelNer(coll, configPropertyValues.nerInputField);
+						NER.parallelNer(coll, configPropertyValues.nerInputField);
 					}
 				}
 			}
 			else{
 				if(configPropertyValues.ner){
-					insertNer(coll, configPropertyValues.nerInputField);
+					NER.insertNer(coll, configPropertyValues.nerInputField);
 				}
 			}
 		}
@@ -80,10 +80,10 @@ public class Main {
 					BasicDBObject query = new BasicDBObject("cat", catID)
 					.append("ner", null);
 					
-					insertNer(tweetsColl, "text", query);
+					NER.insertNer(tweetsColl, "text", query);
 				}
 				else{
-					insertNer(tweetsColl, "text");
+					NER.insertNer(tweetsColl, "text");
 				}
 			}
 			else if(args[1].equals("-location")){
@@ -92,37 +92,38 @@ public class Main {
 					BasicDBObject query = new BasicDBObject("cat", catID)
 					.append("ner", new BasicDBObject("$ne", null));
 					
-					insertLocation(tweetsColl, query);
+					GeoCoding.insertLocation(tweetsColl, query);
 				}
 				else{
-					insertLocation(tweetsColl);
+					GeoCoding.insertLocation(tweetsColl);
 				}
 			}
 			else{
-				insertCoord(tweetsColl);
+				GeoCoding.insertCoord(tweetsColl);
 			}
 		}
 		else if(args[0].equals("-rss")){
 			if(args[1].equals("-ner")){
-				insertNer(sentenceColl, "sentence");
+				NER.insertNer(sentenceColl, "sentence");
 			}
 			else if(args[1].equals("-location")){
-				insertLocation(sentenceColl);
+				GeoCoding.insertLocation(sentenceColl);
 			}
 			else if(args[1].equals("-geoname")){
 				//insertGeonamesWithException(sentenceColl);
+				
 				insertGeoNames(sentenceColl);
 			}
 			else{
-				insertCoord(sentenceColl);
+				GeoCoding.insertCoord(sentenceColl);
 			}
 		}
 		else if(args[0].equals("-NigeriaTweets")){
 			if(args[1].equals("-ner")){
-				insertNer(NigeriaColl, "text");
+				NER.insertNer(NigeriaColl, "text");
 			}
 			else if(args[1].equals("-location")){
-				insertLocation(NigeriaColl);
+				GeoCoding.insertLocation(NigeriaColl);
 			}
 			else{
 				
@@ -130,175 +131,20 @@ public class Main {
 		}
 		else if(args[0].equals("-testPar")){
 			if(args[1].equals("-ner")){
-				parallelNer(testColl, "text");
+				NER.parallelNer(testColl, "text");
 			}
 		}
 		else if(args[0].equals("-test")){
 			String text = "Yesterday 's meeting was presided over by Vice President Mohammed Namadi Sambo , in the absence of President Goodluck Jonathan , who left as part of ECOWAS leaders to troubled Burkina Faso .";
-			JSONArray entities = NLP.performAnnotation(text);
+			JSONArray entities = NER.performAnnotation(text);
 			System.out.println(entities.toJSONString());
 		}
 		else{
 			if(args[1].equals("-ner")){
-				insertNer(ACLEDColl, "NOTES");
+				NER.insertNer(ACLEDColl, "NOTES");
 			}
 		}
 		database0.close();
-	}
-	
-	public static void parallelNer(DBCollection coll, String inputField){
-		long minTime = CollUtilities.minTime(coll);
-		long maxTime = CollUtilities.maxTime(coll);
-		parallelNer(coll, inputField, minTime, maxTime);
-	}
-	
-	public static void parallelNer(DBCollection coll, String inputField, long minTime, long maxTime){
-		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, configPropertyValues.core, minTime, maxTime);
-		nerThreadPool.run();
-	}
-	
-	public static void insertNer(DBCollection coll, String inputField){
-		BasicDBObject query = new BasicDBObject("ner1", null);
-		DBCursor cursor = coll.find();
-		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		System.out.println("There are total of " + cursor.count() + "items in the query");
-		int count = 0;
-		try{
-			while(cursor.hasNext()){
-				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString(inputField);
-				if(text != null && text.length() < 1000){
-					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NLP.annotateDBObject(text);
-					
-					System.out.println(entities.toString());
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner1", entities)));
-					
-					++count;
-				}
-				
-				if(count % 100 == 0){
-					System.out.println(count + " updated");
-				}
-			}
-		}
-		finally{
-			cursor.close();
-		}
-	}
-	
-	public static void insertNer(DBCollection coll, String inputField, BasicDBObject query){
-		DBCursor cursor = coll.find(query);
-		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		System.out.println("Finished Querying, there are total of " + cursor.count() + "items");
-		try{
-			while(cursor.hasNext()){
-				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString(inputField);
-				if(text != null && text.length() < 1000){
-					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NLP.annotateDBObject(text);
-					
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
-				}
-			}
-		}
-		finally{
-			cursor.close();
-		}
-	}
-		
-	public static void insertLocation(DBCollection coll){
-		BasicDBObject query = new BasicDBObject("geocoding", null)
-		.append("ner", new BasicDBObject("$ne", null));
-		
-		insertLocation(coll, query);
-	}
-	
-	public static void insertLocation(DBCollection coll, BasicDBObject query){
-		DBCursor cursor = coll.find(query);
-		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		System.out.println("Finished query, there are total of " + cursor.count() + " items.");
-		try{
-			while(cursor.hasNext()){
-				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
-				BasicDBList locArray = new BasicDBList();
-				BasicDBList outList = new BasicDBList();
-				for(Object e: ner){
-					BasicDBObject entity = (BasicDBObject)e;
-					if(entity.getString("namedEntity").equals("LOCATION")){
-						String inputLoc = entity.getString("mentionSpan");
-						if(!(	inputLoc.equals("Africa")
-								|| 	inputLoc.equals("Europe")
-								|| 	inputLoc.equals("Asia")
-								||	inputLoc.equals("North America")
-								|| 	inputLoc.equals("South America")
-								|| 	inputLoc.equals("Antarctica")	)){
-							LinkedHashMap coord = GeoCoding.getCoord(inputLoc);
-							String loc = GeoCoding.getCountry(coord);
-							
-							if(!locArray.contains(loc) && loc != null){
-								outList.add(new BasicDBObject("name", loc)
-								.append("coord", new BasicDBObject("lat", (double)coord.get("lat"))
-													.append("lng", (double)coord.get("lng")))
-								.append("type", "country"));
-								locArray.add(loc);
-							}
-						}
-					}
-				}
-				
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
-						new BasicDBObject("$set", new BasicDBObject("geocoding", outList)));
-				
-			}
-		}
-		finally{
-			cursor.close();
-		}
-	}
-	public static void insertCoord(DBCollection coll){
-		BasicDBObject query = new BasicDBObject("geoCoord", null)
-		.append("ner", new BasicDBObject("$ne", null));
-		
-		DBCursor cursor = coll.find(query);
-		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		try{
-			while(cursor.hasNext()){
-				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				BasicDBList ner = (BasicDBList) mongoObj.get("ner");
-				BasicDBList outList = new BasicDBList();
-				for(Object e : ner){
-					BasicDBObject entity = (BasicDBObject) e;
-					if(entity.getString("namedEntity").equals("LOCATION")){
-						String inputLoc = entity.getString("mentionSpan");
-						if(!(	inputLoc.equals("Africa")
-								|| 	inputLoc.equals("Europe")
-								|| 	inputLoc.equals("Asia")
-								||	inputLoc.equals("North America")
-								|| 	inputLoc.equals("South America")
-								|| 	inputLoc.equals("Antarctica")	)){
-							LinkedHashMap coord = GeoCoding.getCoord(inputLoc);
-							String loc = GeoCoding.getCountry(coord);
-							if(coord != null && loc != null){
-								outList.add(new BasicDBObject("name", inputLoc)
-									.append("country", loc)
-									.append("coord", new BasicDBObject("lat", (double)coord.get("lat"))
-													.append("lng", (double)coord.get("lng"))));
-							}
-						}
-					}
-				}
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-						new BasicDBObject("$set", new BasicDBObject("geoCoord", outList)));
-			}
-		}
-		finally{
-			cursor.close();
-		}
 	}
 	
 	public static void insertGeoNames(DBCollection coll, BasicDBObject query) throws Exception{
@@ -383,6 +229,8 @@ public class Main {
 		andList.add(new BasicDBObject("sentence", new BasicDBObject("$regex", "\\sCote d'Ivoire\\s")));
 		insertGeoNames(coll, new BasicDBObject("$and", andList));
 	}
+	//http://www.geonames.org/export/webservice-exception.html
+	
 	//http://www.geonames.org/export/webservice-exception.html
 	
 }
