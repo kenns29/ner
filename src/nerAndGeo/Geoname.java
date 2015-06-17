@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -14,13 +15,25 @@ import org.geonames.WebService;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Geoname {
 	private static Logger LOGGER = Logger.getLogger(Geoname.class.getName());
+	private static Database cacheHost = null;
+	private static DB cacheDB = null;
+	private static DBCollection cacheColl = null;
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);
+		try {
+			cacheHost = new Database(Main.configPropertyValues.cacheHost, Main.configPropertyValues.cachePort);
+			cacheDB = cacheHost.getDatabase(Main.configPropertyValues.cacheDatabase);
+			cacheColl = cacheDB.getCollection(Main.configPropertyValues.cacheCollection);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	private static int accountNumber = 0;
 	public static String accountName = getAccountName();
@@ -60,7 +73,7 @@ public class Geoname {
 			 if(searchResult.getTotalResultsCount() > 0){
 				 List<Toponym> toponym = searchResult.getToponyms();
 				 Toponym firstToponym = toponym.get(0);
-				 rObj = getMongoObj(firstToponym);
+				 rObj = getGeonameObj(firstToponym);
 			 }
 		 }
 		 else if(name.toLowerCase().equals("denmark")){
@@ -71,7 +84,7 @@ public class Geoname {
 			 if(searchResult.getTotalResultsCount() > 0){
 				 List<Toponym> toponym = searchResult.getToponyms();
 				 Toponym firstToponym = toponym.get(0);
-				 rObj = getMongoObj(firstToponym);
+				 rObj = getGeonameObj(firstToponym);
 			 }
 		 }
 		 else{
@@ -83,7 +96,7 @@ public class Geoname {
 			 if(searchResult.getTotalResultsCount() > 0){
 				 List<Toponym> toponyms = searchResult.getToponyms();
 				 Toponym firstToponym = toponyms.get(0);
-				 rObj = getMongoObj(firstToponym);
+				 rObj = getGeonameObj(firstToponym);
 				 
 			 }
 			 else{
@@ -93,15 +106,17 @@ public class Geoname {
 				 if(searchResult.getTotalResultsCount() > 0){
 					 List<Toponym> toponym = searchResult.getToponyms();
 					 Toponym firstToponym = toponym.get(0);
-					 rObj = getMongoObj(firstToponym);
+					 rObj = getGeonameObj(firstToponym);
 				 }
 				 
 			 }
 		 }
+		 
+		 
 		 return rObj;
 	 }
 	 
-	 public static BasicDBObject getMongoObj(Toponym toponym) throws InsufficientStyleException{
+	 public static BasicDBObject getGeonameObj(Toponym toponym) throws InsufficientStyleException{
 		 BasicDBObject rObj = new BasicDBObject();
 		 String locName = toponym.getName();
 		 String countryName = toponym.getCountryName();
@@ -114,7 +129,7 @@ public class Geoname {
 		 double lat = toponym.getLatitude();
 		 double lng = toponym.getLongitude();
 		 
-		 rObj.append("name", locName)
+		 rObj.append("location", locName)
 		 	.append("countryName", countryName);
 		 if(continentCode != null){
 			 rObj.append("continentCode", continentCode);
@@ -147,12 +162,14 @@ public class Geoname {
 		 return rObj;
 	 }
 	 
-	 public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+	 
+	 public static BasicDBObject getGeonameWithAccountRotate(String name) throws Exception{
 		BasicDBObject rObj = null;
 		boolean reachLimit = false;
 		do{
 			try{
 				rObj = Geoname.geocode(name);
+				cacheGeonameObj(name, rObj);
 				reachLimit = false;
 			}
 			catch(GeoNamesException exception){
@@ -172,7 +189,35 @@ public class Geoname {
 		} while(reachLimit);
 		return rObj;
 	}
-	 
+	public static BasicDBObject makeCacheObj(String name, BasicDBObject geonameObj){
+		BasicDBObject rObj = new BasicDBObject("name", name);
+		rObj.append("geoname", geonameObj);
+		return rObj;
+	}
+	public static void cacheGeonameObj(String name, BasicDBObject geonameObj){
+		BasicDBObject query = new BasicDBObject("name", name);
+		if(cacheColl.findOne(query) == null){
+			BasicDBObject cacheObj = makeCacheObj(name, geonameObj);
+			cacheColl.update(query, new BasicDBObject("$set", cacheObj), true, false);
+		}
+	}
+	public static BasicDBObject getGeonameObjFromCache(String name){
+		BasicDBObject geonameObj = null;
+		Object obj = cacheColl.findOne(new BasicDBObject("name", name));
+		if(obj != null){
+			geonameObj = (BasicDBObject) obj;
+			geonameObj.removeField("name");
+		}
+		return geonameObj;
+	}
+	
+	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+		BasicDBObject geonameObj = getGeonameObjFromCache(name);
+		if(geonameObj == null){
+			geonameObj = getGeonameWithAccountRotate(name);
+		}
+		return geonameObj;
+	}
 	public static BasicDBList getGeonameList(BasicDBList ner) throws Exception{
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
@@ -212,13 +257,13 @@ public class Geoname {
 						}
 					}
 //					else if(Pattern.matches("Burkina Faso", ent)){
-//						BasicDBObject rObj = getGeonameMongoObj("Burkina Faso");
+//						BasicDBObject rObj = getGeonameWithAccountRotate("Burkina Faso");
 //					    if(rObj != null){
 //							outList.add(rObj);
 //						}
 //					}
 //					else if(ent.toLowerCase().equals("niger delta")){
-//						BasicDBObject rObj = getGeonameMongoObj("Niger Delta");
+//						BasicDBObject rObj = getGeonameWithAccountRotate("Niger Delta");
 //					    if(rObj != null){
 //							outList.add(rObj);
 //						}
@@ -226,7 +271,7 @@ public class Geoname {
 				}
 				
 //				if(Pattern.matches(".*\\sCote d'Ivoire\\s.*", text)){
-//					BasicDBObject rObj = getGeonameMongoObj("Cote d'Ivoire");	
+//					BasicDBObject rObj = getGeonameWithAccountRotate("Cote d'Ivoire");	
 //					if(rObj != null){
 //						outList.add(rObj);
 //					}

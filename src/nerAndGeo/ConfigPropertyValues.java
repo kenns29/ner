@@ -29,6 +29,13 @@ public class ConfigPropertyValues {
 	public boolean useDocLimit = false;
 	public int docLimit = 0;
 	
+	public boolean useCache = true;
+	public String cacheHost = null;
+	public int cachePort = 0;
+	public String cacheDatabase = null;
+	public String cacheCollection = null;
+	public int cacheLimit = -1;
+	
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -77,5 +84,13 @@ public class ConfigPropertyValues {
 		
 		useDocLimit = Boolean.parseBoolean(prop.getProperty("useDocLimit"));
 		docLimit = Integer.valueOf(prop.getProperty("docLimit"));
+		
+		cacheHost = prop.getProperty("cacheHost");
+		cachePort = Integer.valueOf(prop.getProperty("cachePort"));
+		useCache = Boolean.parseBoolean(prop.getProperty("useCache"));
+		cacheDatabase = prop.getProperty("cacheDatabase");
+		cacheCollection = prop.getProperty("cacheCollection");
+		cacheLimit = Integer.valueOf(prop.getProperty("cacheLimit"));
+		
 	}
 }
