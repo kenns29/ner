@@ -235,6 +235,8 @@ public class Geoname {
 	}
 	
 	
+	
+	//Single Thread operations
 	public static void insertGeoNames(DBCollection coll, BasicDBObject query) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);

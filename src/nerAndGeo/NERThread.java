@@ -28,15 +28,40 @@ public class NERThread implements Runnable{
 		this.inputField = inputField;
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
-						.append("timestamp", 
-								new BasicDBObject("$gte", this.startTime)
-								.append("$lt", this.endTime));
+		if(Main.configPropertyValues.catID < 0){
+			switch(Main.configPropertyValues.parallelFlag){
+			case 1:
+				this.query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
+															.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				break;
+			case 0:
+			default:
+				this.query = new BasicDBObject("timestamp", 
+									new BasicDBObject("$gte", this.startTime)
+									.append("$lt", this.endTime));
+			}
+			
+		}
+		else{
+			switch(Main.configPropertyValues.parallelFlag){
+			case 1:
+				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
+							.append("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
+											.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				break;
+			case 0:
+			default:
+				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
+									.append("timestamp", 
+										new BasicDBObject("$gte", this.startTime)
+										.append("$lt", this.endTime));
+			}
+		}
 	}
 	@Override
 	public void run() {
 		LOGGER.info("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
-		
+		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(Main.NLPprops);
 		long start = System.currentTimeMillis();
 		try {
@@ -47,12 +72,14 @@ public class NERThread implements Runnable{
 		}
 		long time = System.currentTimeMillis() - start;
 		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
+		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
 	public void insertNer(StanfordCoreNLP pipeline, boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
+		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		if(useGeoname){
 			LOGGER.info("inserting entities along with geonames");
 		}

@@ -18,6 +18,11 @@ public class ConfigPropertyValues {
 	public int core = 0;
 	
 	public boolean parallel = false;
+	
+	//0: split task by insertion time
+	//1: split task by creation time
+	public int parallelFlag = 0;
+	
 	public boolean ner = false;
 	public boolean geoname = false;
 	public boolean geocoding = false;
@@ -67,6 +72,8 @@ public class ConfigPropertyValues {
 		core = Integer.valueOf(prop.getProperty("core"));
 		
 		parallel = Boolean.parseBoolean(prop.getProperty("parallel"));
+		parallelFlag = Integer.valueOf(prop.getProperty("parallelFlag"));
+		
 		ner = Boolean.parseBoolean(prop.getProperty("ner"));
 		geoname = Boolean.parseBoolean(prop.getProperty("geoname"));
 		geocoding = Boolean.parseBoolean(prop.getProperty("geocoding"));
