@@ -2,10 +2,16 @@ package nerAndGeo;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
 public class NERThreadPool {
+	private static final Logger LOGGER = Logger.getLogger(NERThreadPool.class.getName());
+	static{
+		LOGGER.addHandler(LoggerAttr.fileHandler);
+	}
 	private int numOfThreads = 1;
 	private DBCollection coll = null;
 	private String inputField = null;
@@ -31,7 +37,7 @@ public class NERThreadPool {
 	}
 	
 	public void run(){
-		System.out.println("There are total of " + numOfThreads + " threads.");
+		LOGGER.info("There are total of " + numOfThreads + " threads.");
 		ExecutorService executor = Executors.newFixedThreadPool(numOfThreads);
 		for(long t = TimeUtilities.dayFloor(startTime); t < TimeUtilities.dayCeiling(endTime); t+= TimeUtilities.dayMillis){
 			Runnable worker = new NERThread(coll, inputField, t, t+TimeUtilities.dayMillis);
@@ -39,7 +45,7 @@ public class NERThreadPool {
 		}
 		executor.shutdown();
 		while(!executor.isTerminated()){}
-		System.out.println("all threads finished.");
+		LOGGER.info("all threads finished.");
 	}
 	
 }

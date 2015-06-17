@@ -1,6 +1,7 @@
 package nerAndGeo;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.geonames.BoundingBox;
 import org.geonames.GeoNamesException;
@@ -15,6 +16,10 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class Geoname {
+	private static Logger LOGGER = Logger.getLogger(Geoname.class.getName());
+	static{
+		LOGGER.addHandler(LoggerAttr.fileHandler);
+	}
 	private static int accountNumber = 0;
 	public static String accountName = getAccountName();
 	public static String getAccountName(){
@@ -154,8 +159,10 @@ public class Geoname {
 				int code = exception.getExceptionCode();
 				if(code == 19 || code == 10){
 					synchronized(Geoname.class){
-						if(preAccountName.equals(Geoname.accountName))
+						if(preAccountName.equals(Geoname.accountName)){
 							Geoname.cycleAccountName();
+							LOGGER.config("Setting Current Geoname Account: " + Geoname.accountName);
+						}
 					}
 					reachLimit = true;
 				}

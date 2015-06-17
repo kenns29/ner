@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 
@@ -24,7 +25,10 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 public class NLP {
-	
+	private static final Logger LOGGER = Logger.getLogger(NLP.class.getName());
+	static{
+		LOGGER.addHandler(LoggerAttr.fileHandler);
+	}
 	public static JSONArray performAnnotation(String text) throws IOException{
 			
 		Annotation document = new Annotation(text);
@@ -57,15 +61,17 @@ public class NLP {
 	
 	public static BasicDBList annotateDBObject(String text){
 		//StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-		
-		
+		return annotateDBObject(text, Main.pipeline);
+	}
+	
+	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline){
 		Annotation document = new Annotation(text);
 		try{
-			Main.pipeline.annotate(document);
+			pipeline.annotate(document);
 		}
 		catch(Exception e){
+			LOGGER.severe("Pipline Annotation Error, text: " + text);
 			e.printStackTrace();
-			System.out.println(text);
 		}
 		BasicDBList mongoList = new BasicDBList();
 		
@@ -119,7 +125,6 @@ public class NLP {
 		}
 		return mongoList;
 	}
-	
 	public static BasicDBList annotateDBObject(String text, int length){
 		BasicDBList result = null;
 		return result;

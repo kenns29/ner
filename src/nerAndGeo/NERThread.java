@@ -7,6 +7,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger(NERThread.class.getName());
 	static{
@@ -34,17 +36,20 @@ public class NERThread implements Runnable{
 	@Override
 	public void run() {
 		LOGGER.info("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
+		
+		StanfordCoreNLP pipeline = new StanfordCoreNLP(Main.NLPprops);
 		long start = System.currentTimeMillis();
 		try {
-			insertNer(Main.configPropertyValues.geoname);
+			insertNer(pipeline, Main.configPropertyValues.geoname);
 		} catch (Exception e) {
+			LOGGER.warning("ner parsing error");
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
 		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
 	}
 	
-	public void insertNer(boolean useGeoname) throws Exception{
+	public void insertNer(StanfordCoreNLP pipeline, boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
@@ -60,7 +65,7 @@ public class NERThread implements Runnable{
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NLP.annotateDBObject(text);
+					BasicDBList entities = NLP.annotateDBObject(text, pipeline);
 					
 					if(!useGeoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
@@ -87,6 +92,9 @@ public class NERThread implements Runnable{
 		finally{
 			cursor.close();
 		}
+	}
+	public void insertNer(boolean useGeoname) throws Exception{
+		insertNer(Main.pipeline, useGeoname);
 	}
 	
 	
