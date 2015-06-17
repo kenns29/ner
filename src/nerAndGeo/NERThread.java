@@ -1,11 +1,18 @@
 package nerAndGeo;
 
+import java.util.logging.Logger;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class NERThread implements Runnable{
+	private static final Logger LOGGER = Logger.getLogger(NERThread.class.getName());
+	static{
+		//LOGGER.addHandler(LoggerAttr.consoleHandler);
+		LOGGER.addHandler(LoggerAttr.fileHandler);
+	}
 	private DBCollection coll = null;
 	private String inputField = null;
 	private BasicDBObject query = null;
@@ -26,7 +33,7 @@ public class NERThread implements Runnable{
 	}
 	@Override
 	public void run() {
-		System.out.println("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
+		LOGGER.info("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
 		long start = System.currentTimeMillis();
 		try {
 			insertNer(Main.configPropertyValues.geoname);
@@ -34,18 +41,18 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		System.out.println("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
+		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
 	}
 	
 	public void insertNer(boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		System.out.println("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
+		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
 		if(useGeoname){
-			System.out.println("inserting entities along with geonames");
+			LOGGER.info("inserting entities along with geonames");
 		}
 		else{
-			System.out.println("inserting entities");
+			LOGGER.info("inserting entities");
 		}
 		try{
 			while(cursor.hasNext()){
@@ -71,7 +78,7 @@ public class NERThread implements Runnable{
 				++NERThreadPool.count;
 				long time = System.currentTimeMillis();
 				if(time - NERThreadPool.preTime >= 60000){
-					System.out.println("From " + NERThreadPool.preTime + " to " + time + ", " + NERThreadPool.count + " are processed. The time range is " + (time - NERThreadPool.preTime));
+					LOGGER.info("From " + NERThreadPool.preTime + " to " + time + ", " + NERThreadPool.count + " are processed. The time range is " + (time - NERThreadPool.preTime));
 					NERThreadPool.preTime = time;
 					NERThreadPool.count = 0;
 				}
