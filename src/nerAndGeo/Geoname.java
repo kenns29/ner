@@ -176,6 +176,7 @@ public class Geoname {
 				exception.printStackTrace();
 				String preAccountName = Geoname.accountName;
 				int code = exception.getExceptionCode();
+				//http://www.geonames.org/export/webservice-exception.html
 				if(code == 19 || code == 10){
 					synchronized(Geoname.class){
 						if(preAccountName.equals(Geoname.accountName)){
@@ -235,8 +236,9 @@ public class Geoname {
 	}
 	
 	
-	
-	//Single Thread operations
+	///////////////////////////////
+	//Single Thread operations/////
+	///////////////////////////////
 	public static void insertGeoNames(DBCollection coll, BasicDBObject query) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);

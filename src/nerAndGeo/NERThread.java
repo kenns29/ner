@@ -28,6 +28,7 @@ public class NERThread implements Runnable{
 		this.inputField = inputField;
 		this.startTime = startTime;
 		this.endTime = endTime;
+		//use the catID
 		if(Main.configPropertyValues.catID < 0){
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
@@ -42,6 +43,7 @@ public class NERThread implements Runnable{
 			}
 			
 		}
+		//do not use the cat ID
 		else{
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
@@ -71,15 +73,15 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time);
-		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time
+		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
 	public void insertNer(StanfordCoreNLP pipeline, boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items");
-		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items"
+			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		if(useGeoname){
 			LOGGER.info("inserting entities along with geonames");
 		}
