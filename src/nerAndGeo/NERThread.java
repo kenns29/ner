@@ -59,6 +59,8 @@ public class NERThread implements Runnable{
 										.append("$lt", this.endTime));
 			}
 		}
+		
+		
 	}
 	@Override
 	public void run() {

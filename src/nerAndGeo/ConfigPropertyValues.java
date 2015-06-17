@@ -27,6 +27,7 @@ public class ConfigPropertyValues {
 	public boolean geoname = false;
 	public boolean geocoding = false;
 	
+	public boolean overwrite = true;
 	public boolean useTimeLimit = false;
 	public long startTime = 0;
 	public long endTime = 0;
@@ -77,6 +78,8 @@ public class ConfigPropertyValues {
 		ner = Boolean.parseBoolean(prop.getProperty("ner"));
 		geoname = Boolean.parseBoolean(prop.getProperty("geoname"));
 		geocoding = Boolean.parseBoolean(prop.getProperty("geocoding"));
+		
+		overwrite = Boolean.parseBoolean(prop.getProperty("overwrite"));
 		
 		useTimeLimit = Boolean.parseBoolean(prop.getProperty("useTimeLimit"));
 		String startTimeStr = prop.getProperty("startTime");
