@@ -35,7 +35,7 @@ public class ConfigPropertyValues {
 	public boolean useDocLimit = false;
 	public int docLimit = 0;
 	
-	public boolean useCache = true;
+	public boolean useGeonameCache = true;
 	public String cacheHost = null;
 	public int cachePort = 0;
 	public String cacheDatabase = null;
@@ -97,7 +97,7 @@ public class ConfigPropertyValues {
 		
 		cacheHost = prop.getProperty("cacheHost");
 		cachePort = Integer.valueOf(prop.getProperty("cachePort"));
-		useCache = Boolean.parseBoolean(prop.getProperty("useCache"));
+		useGeonameCache = Boolean.parseBoolean(prop.getProperty("useGeonameCache"));
 		cacheDatabase = prop.getProperty("cacheDatabase");
 		cacheCollection = prop.getProperty("cacheCollection");
 		cacheLimit = Integer.valueOf(prop.getProperty("cacheLimit"));

@@ -21,6 +21,8 @@ public class NERThread implements Runnable{
 	private BasicDBObject query = null;
 	private long startTime = 0;
 	private long endTime = 0;
+	private String startTimeStr = null;
+	private String endTimeStr = null;
 	public NERThread(){
 		super();
 	}
@@ -29,6 +31,8 @@ public class NERThread implements Runnable{
 		this.inputField = inputField;
 		this.startTime = startTime;
 		this.endTime = endTime;
+		this.startTimeStr = TimeUtilities.js_timestampToString(startTime);
+		this.endTimeStr = TimeUtilities.js_timestampToString(endTime);
 		//use the catID
 		if(Main.configPropertyValues.catID < 0){
 			switch(Main.configPropertyValues.parallelFlag){
@@ -65,8 +69,8 @@ public class NERThread implements Runnable{
 	}
 	@Override
 	public void run() {
-		LOGGER.info("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
-		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("Starting new Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + ")\n" 
+				+ "equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		Properties NLPprops = new Properties();
 		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
@@ -78,14 +82,14 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		LOGGER.info("FinishThread for (StartTime " + startTime + ", endTime " + endTime + "). Elapsed Time = " + time
+		LOGGER.info("FinishThread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time
 		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
 	public void insertNer(StanfordCoreNLP pipeline, boolean useGeoname) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for (StartTime " + startTime + ", endTime " + endTime + "), there are total of " + cursor.count() + " items"
+		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
 			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		if(useGeoname){
 			LOGGER.info("inserting entities along with geonames");
@@ -95,11 +99,12 @@ public class NERThread implements Runnable{
 		}
 		try{
 			while(cursor.hasNext()){
+				++Main.documentCount;
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTime, endTime);
+					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
 					if(!useGeoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
@@ -110,7 +115,6 @@ public class NERThread implements Runnable{
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)
 																		.append("geoname", geonameList)));
 					}
-					
 				}
 				
 				++NERThreadPool.count;
@@ -120,15 +124,14 @@ public class NERThread implements Runnable{
 					NERThreadPool.preTime = time;
 					NERThreadPool.count = 0;
 				}
+				
+				if(Main.documentCount % 1000 == 0){
+					LOGGER.info(Main.documentCount + "documents has been processed.");
+				}
 			}
 		}
 		finally{
 			cursor.close();
 		}
-	}
-//	public void insertNer(boolean useGeoname) throws Exception{
-//		insertNer(Main.pipeline, useGeoname);
-//	}
-	
-	
+	}	
 }

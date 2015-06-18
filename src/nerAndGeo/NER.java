@@ -27,6 +27,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 public class NER {
+	private static int pipelineErrCount = 0;
 	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);
@@ -65,28 +66,36 @@ public class NER {
 	}
 	
 	public static BasicDBList annotateDBObject(String text){
-		//StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 		Properties NLPprops = new Properties();
 		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
-		return annotateDBObject(text, pipeline, -1, -1);
+		return annotateDBObject(text, pipeline, "", "");
 	}
 	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline){
-		return annotateDBObject(text, pipeline, -1, -1);
+		return annotateDBObject(text, pipeline, "", "");
 	}
 	
-	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline, long startTime, long endTime){
+	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline, String startTimeStr, String endTimeStr){
 		Annotation document = new Annotation(text);
 		
 		boolean annotationSuccess = false;
+		boolean isSecondTry = false;
 		do{
 			try{
 				pipeline.annotate(document);
 				annotationSuccess = true;
+				if(isSecondTry){
+					LOGGER.info("Succeed the annotation after the first attempt. for Thread from (startTime " + startTimeStr + " to endTime " + endTimeStr + ")");
+				}
 			}
 			catch(Exception e){
 				annotationSuccess = false;
-				LOGGER.severe("Pipline Annotation Error, text: " + text + "\nIn thread from (startTime " + startTime + " to endTime " + endTime + ")");
+				isSecondTry = true;
+				if(!isSecondTry){
+					++NER.pipelineErrCount;
+				}
+				LOGGER.severe("Pipline Annotation Error, text: " + text + "\nIn Thread from (startTime " + startTimeStr + " to endTime " + endTimeStr + ")\n"
+						+ "There are total of " + NER.pipelineErrCount + " such errors");
 				//e.printStackTrace();
 			}
 		} while(!annotationSuccess);

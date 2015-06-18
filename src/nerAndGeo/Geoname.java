@@ -1,6 +1,7 @@
 package nerAndGeo;
 
 import java.net.UnknownHostException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -24,6 +25,9 @@ public class Geoname {
 	private static Database cacheHost = null;
 	private static DB cacheDB = null;
 	private static DBCollection cacheColl = null;
+	public static int nameCount = 0;
+	public static int cacheHitCount = 0;
+	public static int geonameCount = 0;
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);
 		try {
@@ -215,9 +219,22 @@ public class Geoname {
 	}
 	
 	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+		++Geoname.nameCount; 
 		BasicDBObject geonameObj = getGeonameObjFromCache(name);
 		if(geonameObj == null){
 			geonameObj = getGeonameWithAccountRotate(name);
+			if(geonameObj != null){
+				++Geoname.geonameCount;
+			}
+		}
+		else{
+			++Geoname.cacheHitCount;
+		}
+		
+		if(Geoname.nameCount % 100 == 0){
+			DecimalFormat df = new DecimalFormat("#.00");
+			LOGGER.info(Geoname.nameCount + " names has been encountered, " + Geoname.geonameCount + " are geocoded with geoname, " + Geoname.cacheHitCount + " are found from geoname cache.\n"
+					+ "cache hit rate is " + df.format((double)Geoname.cacheHitCount/Geoname.nameCount));
 		}
 		return geonameObj;
 	}
