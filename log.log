@@ -2,8 +2,8 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041470</millis>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
   <sequence>0</sequence>
   <logger>nerAndGeo.NERThreadPool</logger>
   <level>INFO</level>
@@ -13,41 +13,8 @@
   <message>There are total of 4 threads.</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041478</millis>
-  <sequence>3</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>run</method>
-  <thread>21</thread>
-  <message>Starting new Thread for (StartTime 1426464000000, endTime 1426550400000)</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041478</millis>
-  <sequence>4</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>run</method>
-  <thread>22</thread>
-  <message>Starting new Thread for (StartTime 1426550400000, endTime 1426636800000)</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041477</millis>
-  <sequence>2</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>run</method>
-  <thread>20</thread>
-  <message>Starting new Thread for (StartTime 1426377600000, endTime 1426464000000)</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041477</millis>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
   <sequence>1</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
@@ -57,20 +24,42 @@
   <message>Starting new Thread for (StartTime 1426291200000, endTime 1426377600000)</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041480</millis>
-  <sequence>5</sequence>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>3</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>run</method>
   <thread>21</thread>
-  <message>equivalent to from ObjectId 55061d000000000000000000 to 55076e800000000000000000</message>
+  <message>Starting new Thread for (StartTime 1426464000000, endTime 1426550400000)</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041480</millis>
-  <sequence>6</sequence>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>2</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>20</thread>
+  <message>Starting new Thread for (StartTime 1426377600000, endTime 1426464000000)</message>
+</record>
+<record>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>4</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>22</thread>
+  <message>Starting new Thread for (StartTime 1426550400000, endTime 1426636800000)</message>
+</record>
+<record>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>5</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -79,9 +68,9 @@
   <message>equivalent to from ObjectId 55037a000000000000000000 to 5504cb800000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041481</millis>
-  <sequence>7</sequence>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>6</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -90,9 +79,9 @@
   <message>equivalent to from ObjectId 55076e800000000000000000 to 5508c0000000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041482</millis>
-  <sequence>8</sequence>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>7</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
@@ -101,178 +90,152 @@
   <message>equivalent to from ObjectId 5504cb800000000000000000 to 55061d000000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041514</millis>
+  <date>2015-06-18T15:07:20</date>
+  <millis>1434665240829</millis>
+  <sequence>8</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>21</thread>
+  <message>equivalent to from ObjectId 55061d000000000000000000 to 55076e800000000000000000</message>
+</record>
+<record>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>9</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>22</thread>
-  <message>Querying for (StartTime 1426550400000, endTime 1426636800000), there are total of 11703 items</message>
+  <thread>19</thread>
+  <message>Querying for (StartTime 1426291200000, endTime 1426377600000), there are total of 1107 items
+equivalent to from ObjectId 55037a000000000000000000 to 5504cb800000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041514</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>10</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>22</thread>
-  <message>equivalent to from ObjectId 55076e800000000000000000 to 5508c0000000000000000000</message>
+  <thread>19</thread>
+  <message>inserting entities along with geonames</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041515</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>11</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>22</thread>
-  <message>inserting entities along with geonames</message>
+  <thread>21</thread>
+  <message>Querying for (StartTime 1426464000000, endTime 1426550400000), there are total of 6666 items
+equivalent to from ObjectId 55061d000000000000000000 to 55076e800000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041516</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>12</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>19</thread>
-  <message>Querying for (StartTime 1426291200000, endTime 1426377600000), there are total of 1107 items</message>
+  <thread>21</thread>
+  <message>inserting entities along with geonames</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041516</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>13</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>19</thread>
-  <message>equivalent to from ObjectId 55037a000000000000000000 to 5504cb800000000000000000</message>
+  <thread>20</thread>
+  <message>Querying for (StartTime 1426377600000, endTime 1426464000000), there are total of 4127 items
+equivalent to from ObjectId 5504cb800000000000000000 to 55061d000000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041517</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>14</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>19</thread>
-  <message>inserting entities along with geonames</message>
+  <thread>22</thread>
+  <message>Querying for (StartTime 1426550400000, endTime 1426636800000), there are total of 11703 items
+equivalent to from ObjectId 55076e800000000000000000 to 5508c0000000000000000000</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041517</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>15</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
   <thread>20</thread>
-  <message>Querying for (StartTime 1426377600000, endTime 1426464000000), there are total of 4127 items</message>
+  <message>inserting entities along with geonames</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041517</millis>
+  <date>2015-06-18T15:07:35</date>
+  <millis>1434665255600</millis>
   <sequence>16</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
   <class>nerAndGeo.NERThread</class>
   <method>insertNer</method>
-  <thread>21</thread>
-  <message>Querying for (StartTime 1426464000000, endTime 1426550400000), there are total of 6666 items</message>
+  <thread>22</thread>
+  <message>inserting entities along with geonames</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041518</millis>
+  <date>2015-06-18T15:07:51</date>
+  <millis>1434665271618</millis>
   <sequence>18</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
+  <logger>nerAndGeo.NER</logger>
+  <level>SEVERE</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
   <thread>21</thread>
-  <message>equivalent to from ObjectId 55061d000000000000000000 to 55076e800000000000000000</message>
+  <message>Pipline Annotation Error, text: Jonathan, wife, mother mark Mother’s Sunday: President Goodluck Jonathan; his wife, Patience; and mother, Euni... 
+In thread from (startTime 1426464000000 to endTime 1426550400000)</message>
 </record>
 <record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041519</millis>
+  <date>2015-06-18T15:08:02</date>
+  <millis>1434665282907</millis>
   <sequence>19</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>21</thread>
-  <message>inserting entities along with geonames</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041521</millis>
-  <sequence>17</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>20</thread>
-  <message>equivalent to from ObjectId 5504cb800000000000000000 to 55061d000000000000000000</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:01</date>
-  <millis>1434578041521</millis>
-  <sequence>20</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>20</thread>
-  <message>inserting entities along with geonames</message>
-</record>
-<record>
-  <date>2015-06-17T14:54:44</date>
-  <millis>1434578084929</millis>
-  <sequence>22</sequence>
   <logger>nerAndGeo.NER</logger>
   <level>SEVERE</level>
   <class>nerAndGeo.NER</class>
   <method>annotateDBObject</method>
-  <thread>22</thread>
-  <message>Pipline Annotation Error, text: andersoncooper Biafrans unequivocally rejects Elections in Nigeria because we are not Nigerians NO ELECTION IN BIAFRALAND FREEBIAFRA</message>
-</record>
-<record>
-  <date>2015-06-17T14:55:01</date>
-  <millis>1434578101527</millis>
-  <sequence>24</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
-  <thread>22</thread>
-  <message>From 1434578041470 to 1434578101527, 1029 are processed. The time range is 60057</message>
-</record>
-<record>
-  <date>2015-06-17T14:55:05</date>
-  <millis>1434578105014</millis>
-  <sequence>25</sequence>
-  <logger>nerAndGeo.NER</logger>
-  <level>SEVERE</level>
-  <class>nerAndGeo.NER</class>
-  <method>annotateDBObject</method>
-  <thread>21</thread>
-  <message>Pipline Annotation Error, text: Algeria SidiBelAbbès Nigeria: Resist Further Election Postponement, Buhari Urges Nigerian Youths: [Leadership]...  </message>
-</record>
-<record>
-  <date>2015-06-17T14:56:01</date>
-  <millis>1434578161534</millis>
-  <sequence>28</sequence>
-  <logger>nerAndGeo.NERThread</logger>
-  <level>INFO</level>
-  <class>nerAndGeo.NERThread</class>
-  <method>insertNer</method>
   <thread>19</thread>
-  <message>From 1434578101527 to 1434578161534, 1464 are processed. The time range is 60007</message>
+  <message>Pipline Annotation Error, text: RT Muazuaa: Lovely campaign song for President Goodluck Jonathan.  HatsForward
+In thread from (startTime 1426291200000 to endTime 1426377600000)</message>
+</record>
+<record>
+  <date>2015-06-18T15:08:09</date>
+  <millis>1434665289075</millis>
+  <sequence>20</sequence>
+  <logger>nerAndGeo.NER</logger>
+  <level>SEVERE</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
+  <thread>20</thread>
+  <message>Pipline Annotation Error, text: Men arrested for tearing Patience Jonathan’s posters: The visit of the wife of President Goodluck Jonathan, Mr... 
+In thread from (startTime 1426377600000 to endTime 1426464000000)</message>
+</record>
+<record>
+  <date>2015-06-18T15:08:20</date>
+  <millis>1434665300874</millis>
+  <sequence>22</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>22</thread>
+  <message>From 1434665240829 to 1434665300874, 809 are processed. The time range is 60045</message>
 </record>

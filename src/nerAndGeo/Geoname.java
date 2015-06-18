@@ -173,7 +173,6 @@ public class Geoname {
 				reachLimit = false;
 			}
 			catch(GeoNamesException exception){
-				exception.printStackTrace();
 				String preAccountName = Geoname.accountName;
 				int code = exception.getExceptionCode();
 				//http://www.geonames.org/export/webservice-exception.html
@@ -185,6 +184,9 @@ public class Geoname {
 						}
 					}
 					reachLimit = true;
+				}
+				else{
+					exception.printStackTrace();
 				}
 			}
 		} while(reachLimit);

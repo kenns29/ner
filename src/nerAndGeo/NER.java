@@ -32,9 +32,12 @@ public class NER {
 		LOGGER.addHandler(LoggerAttr.fileHandler);
 	}
 	public static JSONArray performAnnotation(String text) throws IOException{
-			
+		
+		Properties NLPprops = new Properties();
+		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 		Annotation document = new Annotation(text);
-		Main.pipeline.annotate(document);
+		pipeline.annotate(document);
 		
 	
 		JSONArray entities = new JSONArray();
@@ -63,18 +66,30 @@ public class NER {
 	
 	public static BasicDBList annotateDBObject(String text){
 		//StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-		return annotateDBObject(text, Main.pipeline);
+		Properties NLPprops = new Properties();
+		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
+		return annotateDBObject(text, pipeline, -1, -1);
+	}
+	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline){
+		return annotateDBObject(text, pipeline, -1, -1);
 	}
 	
-	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline){
+	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline, long startTime, long endTime){
 		Annotation document = new Annotation(text);
-		try{
-			pipeline.annotate(document);
-		}
-		catch(Exception e){
-			LOGGER.severe("Pipline Annotation Error, text: " + text);
-			e.printStackTrace();
-		}
+		
+		boolean annotationSuccess = false;
+		do{
+			try{
+				pipeline.annotate(document);
+				annotationSuccess = true;
+			}
+			catch(Exception e){
+				annotationSuccess = false;
+				LOGGER.severe("Pipline Annotation Error, text: " + text + "\nIn thread from (startTime " + startTime + " to endTime " + endTime + ")");
+				//e.printStackTrace();
+			}
+		} while(!annotationSuccess);
 		BasicDBList mongoList = new BasicDBList();
 		
 		List<CoreMap> sentences = document.get(SentencesAnnotation.class);
@@ -143,6 +158,9 @@ public class NER {
 		nerThreadPool.run();
 	}
 	
+	
+	
+	//use for single thread NER
 	public static void insertNer(DBCollection coll, String inputField){
 		BasicDBObject query = new BasicDBObject("ner1", null);
 		DBCursor cursor = coll.find();

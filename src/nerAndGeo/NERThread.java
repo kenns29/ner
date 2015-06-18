@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.mongodb.BasicDBList;
@@ -66,7 +67,9 @@ public class NERThread implements Runnable{
 	public void run() {
 		LOGGER.info("Starting new Thread for (StartTime " + startTime + ", endTime " + endTime + ")");
 		LOGGER.info("equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(Main.NLPprops);
+		Properties NLPprops = new Properties();
+		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 		long start = System.currentTimeMillis();
 		try {
 			insertNer(pipeline, Main.configPropertyValues.geoname);
@@ -96,8 +99,7 @@ public class NERThread implements Runnable{
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NER.annotateDBObject(text, pipeline);
-					
+					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTime, endTime);
 					if(!useGeoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
@@ -124,9 +126,9 @@ public class NERThread implements Runnable{
 			cursor.close();
 		}
 	}
-	public void insertNer(boolean useGeoname) throws Exception{
-		insertNer(Main.pipeline, useGeoname);
-	}
+//	public void insertNer(boolean useGeoname) throws Exception{
+//		insertNer(Main.pipeline, useGeoname);
+//	}
 	
 	
 }
