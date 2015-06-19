@@ -103,17 +103,19 @@ public class NERThread implements Runnable{
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
-//					System.out.println("text = " + text);
-//					System.out.println("tweetId = " + mongoObj.getLong("id"));
+					System.out.println("text = " + text);
+					System.out.println("tweetId = " + mongoObj.getLong("id"));
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
 					if(!Main.configPropertyValues.geoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerInputField, entities)));
+											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 					}
 					else if(Main.configPropertyValues.outputOption == 0){
 						BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
-						
+						System.out.println(nerGeonameList.toString());
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
 					}
 					else if(Main.configPropertyValues.outputOption == 1){
 						BasicDBList geonameList = Geoname.makeGeonameList(entities);
