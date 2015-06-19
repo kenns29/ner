@@ -1,0 +1,27 @@
+repositories {
+  mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = "nerAndGeo.Main"
+
+dependencies {
+	compile 'jdom:jdom:1.0'
+	compile 'edu.stanford.nlp:stanford-corenlp:3.5.2'
+	compile 'org.mongodb:mongo-java-driver:3.0.2'
+	compile 'com.googlecode.json-simple:json-simple:1.1.1'
+	compile files('local_jars/geonames-source-1.1.12.jar')
+	compile files('local_jars/stanford-corenlp-3.5.2-models.jar')
+	compile files('local_jars/stanford-corenlp-3.5.2-javadoc.jar')
+}
+
+jar {
+    archiveName = "ner_from_gradle.jar"
+
+    manifest {
+        attributes 'Main-Class': 'nerAndGeo.Main'
+    }
+}
