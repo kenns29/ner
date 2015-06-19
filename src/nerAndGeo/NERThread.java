@@ -109,13 +109,13 @@ public class NERThread implements Runnable{
 					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
 					if(!Main.configPropertyValues.geoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerInputField, entities)));
 					}
 					else{
 						BasicDBList geonameList = Geoname.getGeonameList(entities);
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-											new BasicDBObject("$set", new BasicDBObject("ner", entities)
-																		.append("geoname", geonameList)));
+											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+																		.append(Main.configPropertyValues.geonameOutputField, geonameList)));
 					}
 				}
 				

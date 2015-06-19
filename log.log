@@ -2,8 +2,8 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2015-06-19T10:36:50</date>
-  <millis>1434735410050</millis>
+  <date>2015-06-19T10:47:23</date>
+  <millis>1434736043823</millis>
   <sequence>0</sequence>
   <logger>nerAndGeo.NERThreadPool</logger>
   <level>INFO</level>
@@ -13,8 +13,8 @@
   <message>There are total of 1 threads.</message>
 </record>
 <record>
-  <date>2015-06-19T10:36:50</date>
-  <millis>1434735410061</millis>
+  <date>2015-06-19T10:47:23</date>
+  <millis>1434736043835</millis>
   <sequence>1</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
@@ -25,8 +25,8 @@
 equivalent to from ObjectId 543db9000000000000000000 to 543f0a800000000000000000</message>
 </record>
 <record>
-  <date>2015-06-19T10:37:05</date>
-  <millis>1434735425146</millis>
+  <date>2015-06-19T10:47:38</date>
+  <millis>1434736058874</millis>
   <sequence>2</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>
@@ -37,8 +37,8 @@ equivalent to from ObjectId 543db9000000000000000000 to 543f0a800000000000000000
 equivalent to from ObjectId 543db9000000000000000000 to 543f0a800000000000000000</message>
 </record>
 <record>
-  <date>2015-06-19T10:37:05</date>
-  <millis>1434735425146</millis>
+  <date>2015-06-19T10:47:38</date>
+  <millis>1434736058875</millis>
   <sequence>3</sequence>
   <logger>nerAndGeo.NERThread</logger>
   <level>INFO</level>

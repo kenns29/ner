@@ -12,6 +12,7 @@ public class ConfigPropertyValues {
 	public String coll = null;
 	public String nerInputField = null;
 	public String nerOutputField = null;
+	public String geonameOutputField = null;
 	
 	public int catID = 0;
 	
@@ -68,6 +69,7 @@ public class ConfigPropertyValues {
 		coll = prop.getProperty("coll");
 		nerInputField = prop.getProperty("nerInputField");
 		nerOutputField = prop.getProperty("nerOutputField");
+		geonameOutputField = prop.getProperty("geonameOutputField");
 		
 		catID = Integer.valueOf(prop.getProperty("catID"));
 		core = Integer.valueOf(prop.getProperty("core"));

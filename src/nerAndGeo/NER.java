@@ -186,7 +186,7 @@ public class NER {
 					
 					System.out.println(entities.toString());
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+										new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 					
 					++count;
 				}
@@ -214,7 +214,7 @@ public class NER {
 					BasicDBList entities = NER.annotateDBObject(text);
 					
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
+										new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 				}
 			}
 		}

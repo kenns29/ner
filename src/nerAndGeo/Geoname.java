@@ -314,7 +314,7 @@ public class Geoname {
 //					}
 //				}
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), 
-						new BasicDBObject("$set", new BasicDBObject("geoname1", outList)));
+						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.geonameOutputField, outList)));
 				
 				++count;
 				if(count % 100 == 0){
