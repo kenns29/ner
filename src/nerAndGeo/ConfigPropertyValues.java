@@ -10,6 +10,7 @@ public class ConfigPropertyValues {
 	public int port = 0;
 	public String db = null;
 	public String coll = null;
+	public int outputOption = 0;
 	public String nerInputField = null;
 	public String nerOutputField = null;
 	public String geonameOutputField = null;
@@ -67,6 +68,8 @@ public class ConfigPropertyValues {
 		port = Integer.valueOf(prop.getProperty("port"));
 		db = prop.getProperty("db");
 		coll = prop.getProperty("coll");
+		
+		outputOption = Integer.valueOf(prop.getProperty("outputOption"));
 		nerInputField = prop.getProperty("nerInputField");
 		nerOutputField = prop.getProperty("nerOutputField");
 		geonameOutputField = prop.getProperty("geonameOutputField");

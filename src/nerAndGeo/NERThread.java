@@ -87,7 +87,7 @@ public class NERThread implements Runnable{
 	}
 	
 	public void insertNer(StanfordCoreNLP pipeline) throws Exception{
-		DBCursor cursor = coll.find(query);
+		DBCursor cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
 			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
@@ -111,8 +111,12 @@ public class NERThread implements Runnable{
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerInputField, entities)));
 					}
-					else{
-						BasicDBList geonameList = Geoname.getGeonameList(entities);
+					else if(Main.configPropertyValues.outputOption == 0){
+						BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
+						
+					}
+					else if(Main.configPropertyValues.outputOption == 1){
+						BasicDBList geonameList = Geoname.makeGeonameList(entities);
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 																		.append(Main.configPropertyValues.geonameOutputField, geonameList)));
