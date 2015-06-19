@@ -23,5 +23,6 @@ jar {
 
     manifest {
         attributes 'Main-Class': 'nerAndGeo.Main'
+        attributes("Class-Path": configurations.compile.collect { it.getName() }.join(' '))
     }
 }
