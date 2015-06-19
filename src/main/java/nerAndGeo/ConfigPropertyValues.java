@@ -1,5 +1,7 @@
 package nerAndGeo;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,9 +55,12 @@ public class ConfigPropertyValues {
 	public void getPropValues() throws IOException{
 		getPropValues("config.properties");
 	}
+	@SuppressWarnings("unused")
 	public void getPropValues(String propFileName) throws IOException{
-		Properties prop = new Properties();		
-		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+		Properties prop = new Properties();
+		File file = new File(propFileName);
+		FileInputStream inputStream= new FileInputStream(file);
+		//InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
 		
 		if(inputStream != null){
 			prop.load(inputStream);
