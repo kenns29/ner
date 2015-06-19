@@ -18,6 +18,7 @@ dependencies {
 	compile files('local_jars/stanford-corenlp-3.5.2-javadoc.jar')
 }
 
+/*
 jar {
     archiveName = "ner_from_gradle.jar"
 
@@ -26,3 +27,4 @@ jar {
         attributes("Class-Path": configurations.compile.collect { it.getName() }.join(' '))
     }
 }
+*/
