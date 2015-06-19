@@ -186,7 +186,7 @@ public class NER {
 					
 					System.out.println(entities.toString());
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-										new BasicDBObject("$set", new BasicDBObject("ner1", entities)));
+										new BasicDBObject("$set", new BasicDBObject("ner", entities)));
 					
 					++count;
 				}

@@ -76,7 +76,7 @@ public class NERThread implements Runnable{
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 		long start = System.currentTimeMillis();
 		try {
-			insertNer(pipeline, Main.configPropertyValues.geoname);
+			insertNer(pipeline);
 		} catch (Exception e) {
 			LOGGER.warning("ner parsing error");
 			e.printStackTrace();
@@ -86,12 +86,12 @@ public class NERThread implements Runnable{
 		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
-	public void insertNer(StanfordCoreNLP pipeline, boolean useGeoname) throws Exception{
+	public void insertNer(StanfordCoreNLP pipeline) throws Exception{
 		DBCursor cursor = coll.find(query);
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
 			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
-		if(useGeoname){
+		if(Main.configPropertyValues.geoname){
 			LOGGER.info("inserting entities along with geonames");
 		}
 		else{
@@ -107,7 +107,7 @@ public class NERThread implements Runnable{
 //					System.out.println("tweetId = " + mongoObj.getLong("id"));
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
-					if(!useGeoname){
+					if(!Main.configPropertyValues.geoname){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 											new BasicDBObject("$set", new BasicDBObject("ner", entities)));
 					}
