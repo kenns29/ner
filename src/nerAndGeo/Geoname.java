@@ -245,8 +245,8 @@ public class Geoname {
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
 			BasicDBObject entity = (BasicDBObject) e;
-			String entType = entity.getString("namedEntity");
-			String ent = entity.getString("mentionSpan");
+			String entType = entity.getString("entityType");
+			String ent = entity.getString("entity");
 			if(entType.equals("LOCATION")){
 				BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
 			    if(rObj != null){
@@ -285,8 +285,8 @@ public class Geoname {
 				BasicDBList outList = new BasicDBList();
 				for(Object e : ner){
 					BasicDBObject entity = (BasicDBObject) e;
-					String entType = entity.getString("namedEntity");
-					String ent = entity.getString("mentionSpan");
+					String entType = entity.getString("entityType");
+					String ent = entity.getString("entity");
 					if(entType.equals("LOCATION")){
 						BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
 					    if(rObj != null){
@@ -343,7 +343,7 @@ public class Geoname {
 //		andList.add(new BasicDBObject("ner", new BasicDBObject("$ne", null)));
 //		BasicDBList inList = new BasicDBList();
 //		inList.add("Niger Delta");
-//		andList.add(new BasicDBObject("ner.mentionSpan", new BasicDBObject("$in", inList)));
+//		andList.add(new BasicDBObject("ner.entity", new BasicDBObject("$in", inList)));
 //		orList.add(new BasicDBObject("$and", andList));
 //		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
 //		.append("$or", orList);

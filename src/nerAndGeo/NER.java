@@ -54,7 +54,7 @@ public class NER {
 				String nne = token.getString(NormalizedNamedEntityTagAnnotation.class);
 				LinkedHashMap obj = new LinkedHashMap();
 				if(!ne.equals("O")){
-					obj.put("mentionSpan", word);
+					obj.put("entity", word);
 					obj.put("namedEntity", ne);
 					entities.add(obj);
 				}
@@ -116,8 +116,8 @@ public class NER {
 					if(!ne.equals(previousNe)){
 						
 						if(!finalWord.equals("") && !previousNe.equals("")){
-							mongoObj = new BasicDBObject("mentionSpan", finalWord)
-								.append("namedEntity", previousNe);
+							mongoObj = new BasicDBObject("entity", finalWord)
+								.append("entityType", previousNe);
 							mongoList.add(mongoObj);
 						}
 						previousNe = ne;
@@ -129,8 +129,8 @@ public class NER {
 						else{
 							String finalCandidate = finalWord + " " + word;
 							if(!text.contains(finalCandidate)){
-								mongoObj = new BasicDBObject("mentionSpan", finalWord)
-									.append("namedEntity", previousNe);
+								mongoObj = new BasicDBObject("entity", finalWord)
+									.append("entityType", previousNe);
 								mongoList.add(mongoObj);
 								finalWord = word;
 							} else {
@@ -144,8 +144,8 @@ public class NER {
 				//System.out.println("word = " + word + "\tpos = " + pos + "\tne = " + ne + "\tnne = " + nne);
 			}
 			if(!previousNe.equals("") && !finalWord.equals("")){
-				mongoObj = new BasicDBObject("mentionSpan", finalWord)
-					.append("namedEntity", previousNe);
+				mongoObj = new BasicDBObject("entity", finalWord)
+					.append("entityType", previousNe);
 				mongoList.add(mongoObj);
 			}
 		}

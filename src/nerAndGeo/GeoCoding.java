@@ -189,8 +189,8 @@ public class GeoCoding {
 				BasicDBList outList = new BasicDBList();
 				for(Object e: ner){
 					BasicDBObject entity = (BasicDBObject)e;
-					if(entity.getString("namedEntity").equals("LOCATION")){
-						String inputLoc = entity.getString("mentionSpan");
+					if(entity.getString("entityType").equals("LOCATION")){
+						String inputLoc = entity.getString("entity");
 						if(!(	inputLoc.equals("Africa")
 								|| 	inputLoc.equals("Europe")
 								|| 	inputLoc.equals("Asia")
@@ -234,8 +234,8 @@ public class GeoCoding {
 				BasicDBList outList = new BasicDBList();
 				for(Object e : ner){
 					BasicDBObject entity = (BasicDBObject) e;
-					if(entity.getString("namedEntity").equals("LOCATION")){
-						String inputLoc = entity.getString("mentionSpan");
+					if(entity.getString("entityType").equals("LOCATION")){
+						String inputLoc = entity.getString("entity");
 						if(!(	inputLoc.equals("Africa")
 								|| 	inputLoc.equals("Europe")
 								|| 	inputLoc.equals("Asia")
