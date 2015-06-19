@@ -173,7 +173,9 @@ public class Geoname {
 		do{
 			try{
 				rObj = Geoname.geocode(name);
-				cacheGeonameObj(name, rObj);
+				if(rObj != null){
+					cacheGeonameObj(name, rObj);
+				}
 				reachLimit = false;
 			}
 			catch(GeoNamesException exception){
@@ -212,13 +214,14 @@ public class Geoname {
 		BasicDBObject geonameObj = null;
 		Object obj = cacheColl.findOne(new BasicDBObject("name", name));
 		if(obj != null){
-			geonameObj = (BasicDBObject) obj;
-			geonameObj.removeField("name");
+//			System.out.println("found in cache");
+			geonameObj = (BasicDBObject) ((BasicDBObject) obj).get("geoname");
 		}
 		return geonameObj;
 	}
 	
 	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+//		System.out.println("encounter name " + name);
 		++Geoname.nameCount; 
 		BasicDBObject geonameObj = getGeonameObjFromCache(name);
 		if(geonameObj == null){
@@ -249,6 +252,17 @@ public class Geoname {
 			    if(rObj != null){
 					outList.add(rObj);
 				}
+			    
+//			    System.out.println("##############################");
+//			    System.out.println("Name = " + ent);
+//			    if(rObj != null){
+//			    	System.out.println("geoname = " + rObj.getString("location"));
+//			    }
+//			    else{
+//			    	System.out.println("geoname = null");
+//			    }
+//			    System.out.println("##############################");
+			    
 			}
 		}
 		return outList;
@@ -315,8 +329,8 @@ public class Geoname {
 	}
 	
 	public static void insertGeoNames(DBCollection coll) throws Exception{
-		BasicDBObject query = new BasicDBObject("ner1", new BasicDBObject("$ne", null))
-		.append("geoname1", null);
+		BasicDBObject query = new BasicDBObject("ner", new BasicDBObject("$ne", null))
+		.append("geoname", null);
 		insertGeoNames(coll, query);
 	}
 	

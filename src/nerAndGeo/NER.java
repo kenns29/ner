@@ -90,10 +90,10 @@ public class NER {
 			}
 			catch(Exception e){
 				annotationSuccess = false;
-				isSecondTry = true;
 				if(!isSecondTry){
 					++NER.pipelineErrCount;
 				}
+				isSecondTry = true;
 				LOGGER.severe("Pipline Annotation Error, text: " + text + "\nIn Thread from (startTime " + startTimeStr + " to endTime " + endTimeStr + ")\n"
 						+ "There are total of " + NER.pipelineErrCount + " such errors");
 				//e.printStackTrace();
@@ -171,7 +171,7 @@ public class NER {
 	
 	//use for single thread NER
 	public static void insertNer(DBCollection coll, String inputField){
-		BasicDBObject query = new BasicDBObject("ner1", null);
+		BasicDBObject query = new BasicDBObject("ner", null);
 		DBCursor cursor = coll.find();
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		System.out.println("There are total of " + cursor.count() + "items in the query");

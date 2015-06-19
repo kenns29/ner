@@ -82,7 +82,7 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		LOGGER.info("FinishThread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time
+		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time
 		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
@@ -103,6 +103,8 @@ public class NERThread implements Runnable{
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				if(text != null && text.length() < 1000){
+//					System.out.println("text = " + text);
+//					System.out.println("tweetId = " + mongoObj.getLong("id"));
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
 					if(!useGeoname){
