@@ -102,29 +102,52 @@ public class NERThread implements Runnable{
 				++Main.documentCount;
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
-				if(text != null && text.length() < 1000){
-					System.out.println("text = " + text);
-					System.out.println("tweetId = " + mongoObj.getLong("id"));
-					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					BasicDBList entities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
-					if(!Main.configPropertyValues.geoname){
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
-					}
-					else if(Main.configPropertyValues.outputOption == 0){
-						BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
-						System.out.println(nerGeonameList.toString());
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
-					}
-					else if(Main.configPropertyValues.outputOption == 1){
-						BasicDBList geonameList = Geoname.makeGeonameList(entities);
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-											new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
-																		.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+				String userText = null;
+				
+				BasicDBList userEntities = null;
+				BasicDBList textEntities = null;
+				
+//				System.out.println("tweetId = " + mongoObj.getLong("id"));
+//				System.out.println("text = " + text);
+				if(Main.configPropertyValues.userNer){
+					BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
+					userText = userObj.getString("location");
+					
+					if(userText != null){
+						System.out.println("userText = " + userText);
+						userEntities = NER.annotateDBObject(userText, pipeline, startTimeStr, endTimeStr);
+						userEntities = NER.insertFromFlag(userEntities, "user.location");
 					}
 				}
 				
+				if(text != null && text.length() < 1000){
+					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+					textEntities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
+					textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
+				}
+				
+				BasicDBList entities = new BasicDBList();
+				if(textEntities != null)
+					entities.addAll(textEntities);
+				if(userEntities != null)
+					entities.addAll(userEntities);
+				
+				if(!Main.configPropertyValues.geoname){
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
+				}
+				else if(Main.configPropertyValues.outputOption == 0){
+					BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
+//					System.out.println(nerGeonameList.toString());
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
+				}
+				else if(Main.configPropertyValues.outputOption == 1){
+					BasicDBList geonameList = Geoname.makeGeonameList(entities);
+					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+														.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+				}
 				++NERThreadPool.count;
 				long time = System.currentTimeMillis();
 				if(time - NERThreadPool.preTime >= 60000){

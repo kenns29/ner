@@ -167,7 +167,20 @@ public class NER {
 		nerThreadPool.run();
 	}
 	
-	
+	public static BasicDBList insertFromFlag(BasicDBList ner, String flag){
+		if(flag != null){
+			BasicDBList outList = new BasicDBList();
+			for(Object e : ner){
+				BasicDBObject nerObj = (BasicDBObject)e;
+				nerObj.put("from", flag);
+				outList.add(nerObj);
+			}
+			return outList;
+		}
+		else{
+			return ner;
+		}
+	}
 	
 	//use for single thread NER
 	public static void insertNer(DBCollection coll, String inputField){

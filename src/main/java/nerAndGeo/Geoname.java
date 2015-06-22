@@ -242,6 +242,9 @@ public class Geoname {
 		return geonameObj;
 	}
 	public static BasicDBList makeGeonameList(BasicDBList ner) throws Exception{
+		return makeGeonameList(ner, null);
+	}
+	public static BasicDBList makeGeonameList(BasicDBList ner, String flag) throws Exception{
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
 			BasicDBObject entity = (BasicDBObject) e;
@@ -249,8 +252,12 @@ public class Geoname {
 			String ent = entity.getString("entity");
 			if(entType.equals("LOCATION")){
 				BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
+				
 			    if(rObj != null){
-					outList.add(rObj);
+					if(flag != null){
+						rObj.put("from", flag);
+					}
+			    	outList.add(rObj);
 				}
 			    
 //			    System.out.println("##############################");
@@ -269,6 +276,10 @@ public class Geoname {
 	}
 	
 	public static BasicDBList makeNerGeonameList(BasicDBList ner) throws Exception{
+		return makeNerGeonameList(ner, null);
+	}
+	
+	public static BasicDBList makeNerGeonameList(BasicDBList ner, String flag) throws Exception{
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
 			BasicDBObject entity = (BasicDBObject) e;
@@ -281,11 +292,14 @@ public class Geoname {
 					entity.put("geoname", geonameObj);
 				}
 			}
+			
+			if(flag != null){
+				entity.put("from", flag);
+			}
 			outList.add(entity);
 		}
 		return outList;
 	}
-	
 	///////////////////////////////
 	//Single Thread operations/////
 	///////////////////////////////

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class ConfigPropertyValues {
@@ -19,8 +18,10 @@ public class ConfigPropertyValues {
 	
 	public int catID = 0;
 	
-	public int core = 0;
+	public boolean userNer = true;
+	public String userNerOutputField = null;
 	
+	public int core = 0;
 	public boolean parallel = false;
 	
 	//0: split task by insertion time
@@ -78,10 +79,12 @@ public class ConfigPropertyValues {
 		nerInputField = prop.getProperty("nerInputField");
 		nerOutputField = prop.getProperty("nerOutputField");
 		geonameOutputField = prop.getProperty("geonameOutputField");
-		
 		catID = Integer.valueOf(prop.getProperty("catID"));
-		core = Integer.valueOf(prop.getProperty("core"));
 		
+		userNer = Boolean.parseBoolean(prop.getProperty("userNer"));
+		userNerOutputField = prop.getProperty("userNerOutputField");
+		
+		core = Integer.valueOf(prop.getProperty("core"));
 		parallel = Boolean.parseBoolean(prop.getProperty("parallel"));
 		parallelFlag = Integer.valueOf(prop.getProperty("parallelFlag"));
 		
