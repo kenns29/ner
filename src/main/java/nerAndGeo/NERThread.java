@@ -128,11 +128,15 @@ public class NERThread implements Runnable{
 				
 				BasicDBList entities = new BasicDBList();
 				if(textEntities != null){
-					++NER.textEntitiesDocCount;
+					if(textEntities.size() > 0){
+						++NER.textEntitiesDocCount;
+					}
 					entities.addAll(textEntities);
 				}
 				if(userEntities != null){
-					++NER.userEntitiesDocCount;
+					if(userEntities.size() > 0){
+						++NER.userEntitiesDocCount;
+					}
 					entities.addAll(userEntities);
 				}
 				
@@ -160,8 +164,8 @@ public class NERThread implements Runnable{
 					NERThreadPool.count = 0;
 				}
 				
-				if(Main.documentCount % 1000 == 0){
-					LOGGER.info(Main.documentCount + "documents has been processed. " + NER.textEntitiesDocCount + " documents has entities from text. " + NER.userEntitiesDocCount + " documents has entities from user profile location.");
+				if(Main.documentCount % 100 == 0){
+					LOGGER.info(Main.documentCount + " documents has been processed. " + NER.textEntitiesDocCount + " documents has entities from text. " + NER.userEntitiesDocCount + " documents has entities from user profile location.");
 				}
 			}
 		}
