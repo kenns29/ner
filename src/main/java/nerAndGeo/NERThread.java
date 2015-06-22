@@ -114,7 +114,7 @@ public class NERThread implements Runnable{
 					userText = userObj.getString("location");
 					
 					if(userText != null){
-						System.out.println("userText = " + userText);
+//						System.out.println("userText = " + userText);
 						userEntities = NER.annotateDBObject(userText, pipeline, startTimeStr, endTimeStr);
 						userEntities = NER.insertFromFlag(userEntities, "user.location");
 					}
@@ -127,10 +127,14 @@ public class NERThread implements Runnable{
 				}
 				
 				BasicDBList entities = new BasicDBList();
-				if(textEntities != null)
+				if(textEntities != null){
+					++NER.textEntitiesDocCount;
 					entities.addAll(textEntities);
-				if(userEntities != null)
+				}
+				if(userEntities != null){
+					++NER.userEntitiesDocCount;
 					entities.addAll(userEntities);
+				}
 				
 				if(!Main.configPropertyValues.geoname){
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
@@ -157,7 +161,7 @@ public class NERThread implements Runnable{
 				}
 				
 				if(Main.documentCount % 1000 == 0){
-					LOGGER.info(Main.documentCount + "documents has been processed.");
+					LOGGER.info(Main.documentCount + "documents has been processed. " + NER.textEntitiesDocCount + " documents has entities from text. " + NER.userEntitiesDocCount + " documents has entities from user profile location.");
 				}
 			}
 		}

@@ -27,6 +27,8 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 public class NER {
+	public static int textEntitiesDocCount = 0;
+	public static int userEntitiesDocCount = 0;
 	private static int pipelineErrCount = 0;
 	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
 	static{

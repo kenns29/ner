@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2015-06-22T11:28:38</date>
+  <millis>1434997718891</millis>
+  <sequence>5</sequence>
+  <logger>nerAndGeo.NERThreadPool</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThreadPool</class>
+  <method>run</method>
+  <thread>1</thread>
+  <message>There are total of 4 threads.</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:38</date>
+  <millis>1434997718901</millis>
+  <sequence>6</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>13</thread>
+  <message>Starting new Thread for (StartTime 2014-10-15 00:00:00, UTC, endTime 2014-10-16 00:00:00, UTC)
+equivalent to from ObjectId 543db9000000000000000000 to 543f0a800000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:38</date>
+  <millis>1434997718901</millis>
+  <sequence>7</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>14</thread>
+  <message>Starting new Thread for (StartTime 2014-10-16 00:00:00, UTC, endTime 2014-10-17 00:00:00, UTC)
+equivalent to from ObjectId 543f0a800000000000000000 to 54405c000000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:38</date>
+  <millis>1434997718901</millis>
+  <sequence>8</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>15</thread>
+  <message>Starting new Thread for (StartTime 2014-10-17 00:00:00, UTC, endTime 2014-10-18 00:00:00, UTC)
+equivalent to from ObjectId 54405c000000000000000000 to 5441ad800000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:38</date>
+  <millis>1434997718911</millis>
+  <sequence>9</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>run</method>
+  <thread>16</thread>
+  <message>Starting new Thread for (StartTime 2014-10-18 00:00:00, UTC, endTime 2014-10-19 00:00:00, UTC)
+equivalent to from ObjectId 5441ad800000000000000000 to 5442ff000000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734857</millis>
+  <sequence>10</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>13</thread>
+  <message>Querying for (StartTime 2014-10-15 00:00:00, UTC, endTime 2014-10-16 00:00:00, UTC), there are total of 3655 items
+equivalent to from ObjectId 543db9000000000000000000 to 543f0a800000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734857</millis>
+  <sequence>11</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>13</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734917</millis>
+  <sequence>15</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>16</thread>
+  <message>Querying for (StartTime 2014-10-18 00:00:00, UTC, endTime 2014-10-19 00:00:00, UTC), there are total of 124682 items
+equivalent to from ObjectId 5441ad800000000000000000 to 5442ff000000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734917</millis>
+  <sequence>16</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>16</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734947</millis>
+  <sequence>17</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>14</thread>
+  <message>Querying for (StartTime 2014-10-16 00:00:00, UTC, endTime 2014-10-17 00:00:00, UTC), there are total of 263425 items
+equivalent to from ObjectId 543f0a800000000000000000 to 54405c000000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734947</millis>
+  <sequence>18</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>14</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734977</millis>
+  <sequence>19</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>15</thread>
+  <message>Querying for (StartTime 2014-10-17 00:00:00, UTC, endTime 2014-10-18 00:00:00, UTC), there are total of 229785 items
+equivalent to from ObjectId 54405c000000000000000000 to 5441ad800000000000000000</message>
+</record>
+<record>
+  <date>2015-06-22T11:28:54</date>
+  <millis>1434997734977</millis>
+  <sequence>20</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>15</thread>
+  <message>inserting entities along with geonames</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:08</date>
+  <millis>1434997748265</millis>
+  <sequence>29</sequence>
+  <logger>nerAndGeo.NER</logger>
+  <level>SEVERE</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
+  <thread>15</thread>
+  <message>Pipline Annotation Error, text: RT pepperspray2012: Seem like the government don't know what the fuck they're talking about Ebola
+In Thread from (startTime 2014-10-17 00:00:00, UTC to endTime 2014-10-18 00:00:00, UTC)
+There are total of 1 such errors</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:08</date>
+  <millis>1434997748393</millis>
+  <sequence>30</sequence>
+  <logger>nerAndGeo.NER</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
+  <thread>15</thread>
+  <message>Succeed the annotation after the first attempt. for Thread from (startTime 2014-10-17 00:00:00, UTC to endTime 2014-10-18 00:00:00, UTC)</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:10</date>
+  <millis>1434997750656</millis>
+  <sequence>32</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>100 names has been encountered, 0 are geocoded with geoname, 99 are found from geoname cache.
+cache hit rate is .99</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:17</date>
+  <millis>1434997757337</millis>
+  <sequence>34</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>14</thread>
+  <message>200 names has been encountered, 3 are geocoded with geoname, 191 are found from geoname cache.
+cache hit rate is .95</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:18</date>
+  <millis>1434997758894</millis>
+  <sequence>36</sequence>
+  <logger>nerAndGeo.NER</logger>
+  <level>SEVERE</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
+  <thread>13</thread>
+  <message>Pipline Annotation Error, text: RT WhiteHouse: Ebola is NOT spread through:
+1. Casual contact
+2. Air
+3. Water
+4. Food in the U.S.
+ 
+In Thread from (startTime 2014-10-15 00:00:00, UTC to endTime 2014-10-16 00:00:00, UTC)
+There are total of 2 such errors</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:19</date>
+  <millis>1434997759114</millis>
+  <sequence>37</sequence>
+  <logger>nerAndGeo.NER</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NER</class>
+  <method>annotateDBObject</method>
+  <thread>13</thread>
+  <message>Succeed the annotation after the first attempt. for Thread from (startTime 2014-10-15 00:00:00, UTC to endTime 2014-10-16 00:00:00, UTC)</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:32</date>
+  <millis>1434997772008</millis>
+  <sequence>42</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>16</thread>
+  <message>300 names has been encountered, 28 are geocoded with geoname, 266 are found from geoname cache.
+cache hit rate is .89</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:38</date>
+  <millis>1434997778969</millis>
+  <sequence>45</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>14</thread>
+  <message>From 1434997718891 to 1434997778969, 371 are processed. The time range is 60078</message>
+</record>
+<record>
+  <date>2015-06-22T11:29:48</date>
+  <millis>1434997788707</millis>
+  <sequence>47</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>400 names has been encountered, 45 are geocoded with geoname, 347 are found from geoname cache.
+cache hit rate is .87</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:02</date>
+  <millis>1434997802505</millis>
+  <sequence>50</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>500 names has been encountered, 63 are geocoded with geoname, 430 are found from geoname cache.
+cache hit rate is .86</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:11</date>
+  <millis>1434997811997</millis>
+  <sequence>56</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>15</thread>
+  <message>600 names has been encountered, 76 are geocoded with geoname, 515 are found from geoname cache.
+cache hit rate is .86</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:22</date>
+  <millis>1434997822622</millis>
+  <sequence>59</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>700 names has been encountered, 97 are geocoded with geoname, 593 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:35</date>
+  <millis>1434997835214</millis>
+  <sequence>62</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>16</thread>
+  <message>800 names has been encountered, 112 are geocoded with geoname, 677 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:35</date>
+  <millis>1434997835225</millis>
+  <sequence>63</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>14</thread>
+  <message>800 names has been encountered, 113 are geocoded with geoname, 677 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:39</date>
+  <millis>1434997839046</millis>
+  <sequence>67</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>15</thread>
+  <message>From 1434997778969 to 1434997839046, 609 are processed. The time range is 60077</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:39</date>
+  <millis>1434997839563</millis>
+  <sequence>68</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>14</thread>
+  <message>1000documents has been processed. 1000 documents has entities from text. 1000 documents has entities from user profile location.</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:43</date>
+  <millis>1434997843811</millis>
+  <sequence>72</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>15</thread>
+  <message>900 names has been encountered, 126 are geocoded with geoname, 761 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:30:51</date>
+  <millis>1434997851909</millis>
+  <sequence>80</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>14</thread>
+  <message>1000 names has been encountered, 134 are geocoded with geoname, 853 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:04</date>
+  <millis>1434997864039</millis>
+  <sequence>84</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>15</thread>
+  <message>1100 names has been encountered, 149 are geocoded with geoname, 936 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:11</date>
+  <millis>1434997871575</millis>
+  <sequence>89</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>1200 names has been encountered, 159 are geocoded with geoname, 1024 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:21</date>
+  <millis>1434997881573</millis>
+  <sequence>91</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>14</thread>
+  <message>1300 names has been encountered, 174 are geocoded with geoname, 1109 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:29</date>
+  <millis>1434997889705</millis>
+  <sequence>94</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>15</thread>
+  <message>1400 names has been encountered, 189 are geocoded with geoname, 1192 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:39</date>
+  <millis>1434997899263</millis>
+  <sequence>98</sequence>
+  <logger>nerAndGeo.NERThread</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.NERThread</class>
+  <method>insertNer</method>
+  <thread>16</thread>
+  <message>From 1434997839046 to 1434997899263, 786 are processed. The time range is 60217</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:39</date>
+  <millis>1434997899566</millis>
+  <sequence>99</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>16</thread>
+  <message>1500 names has been encountered, 203 are geocoded with geoname, 1276 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:39</date>
+  <millis>1434997899881</millis>
+  <sequence>100</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>13</thread>
+  <message>1500 names has been encountered, 204 are geocoded with geoname, 1276 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
+<record>
+  <date>2015-06-22T11:31:47</date>
+  <millis>1434997907260</millis>
+  <sequence>104</sequence>
+  <logger>nerAndGeo.Geoname</logger>
+  <level>INFO</level>
+  <class>nerAndGeo.Geoname</class>
+  <method>getGeonameMongoObj</method>
+  <thread>14</thread>
+  <message>1600 names has been encountered, 215 are geocoded with geoname, 1364 are found from geoname cache.
+cache hit rate is .85</message>
+</record>
