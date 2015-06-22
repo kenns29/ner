@@ -3,7 +3,6 @@ package nerAndGeo;
 import java.net.UnknownHostException;
 
 import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 
 
@@ -18,6 +17,7 @@ public class Database{
 	public Database(String name, int port) throws UnknownHostException{
 		mongoClient = new MongoClient(name, port);
 	}
+	
 	public DB getDatabase(String name){
 		return mongoClient.getDB(name);
 	}

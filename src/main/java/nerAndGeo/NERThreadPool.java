@@ -4,7 +4,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
 public class NERThreadPool {
