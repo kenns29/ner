@@ -14,6 +14,7 @@ public class ConfigPropertyValues {
 	public int outputOption = 0;
 	public String nerInputField = null;
 	public String nerOutputField = null;
+	public String geojsonListOutputField = null;
 	public String geonameOutputField = null;
 	
 	public int catID = 0;
@@ -78,6 +79,7 @@ public class ConfigPropertyValues {
 		outputOption = Integer.valueOf(prop.getProperty("outputOption"));
 		nerInputField = prop.getProperty("nerInputField");
 		nerOutputField = prop.getProperty("nerOutputField");
+		geojsonListOutputField = prop.getProperty("geojsonListOutputField");
 		geonameOutputField = prop.getProperty("geonameOutputField");
 		catID = Integer.valueOf(prop.getProperty("catID"));
 		

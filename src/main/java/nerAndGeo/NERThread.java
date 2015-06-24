@@ -76,7 +76,7 @@ public class NERThread implements Runnable{
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 		long start = System.currentTimeMillis();
 		try {
-			insertNer(pipeline);
+			insertNerGeo(pipeline);
 		} catch (Exception e) {
 			LOGGER.warning("ner parsing error");
 			e.printStackTrace();
@@ -86,7 +86,7 @@ public class NERThread implements Runnable{
 		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
-	public void insertNer(StanfordCoreNLP pipeline) throws Exception{
+	public void insertNerGeo(StanfordCoreNLP pipeline) throws Exception{
 		DBCursor cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
@@ -140,22 +140,50 @@ public class NERThread implements Runnable{
 					entities.addAll(userEntities);
 				}
 				
+				BasicDBObject coordinates = (BasicDBObject) mongoObj.get("coordinates");
+				BasicDBObject place = (BasicDBObject) mongoObj.get("place");
+				BasicDBObject location = (BasicDBObject) mongoObj.get("location");
+				
+				GeojsonList geojsonList = new GeojsonList();
+				
+				geojsonList.addFromMongoCoord(coordinates, place, location);
 				if(!Main.configPropertyValues.geoname){
 					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 				}
 				else if(Main.configPropertyValues.outputOption == 0){
 					BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
+					geojsonList.addFromNerGeonameList(nerGeonameList);
 //					System.out.println(nerGeonameList.toString());
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
+					if(geojsonList.isEmpty()){
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
+					}
+					else{
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
+																.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+					}
+					
 				}
 				else if(Main.configPropertyValues.outputOption == 1){
 					BasicDBList geonameList = Geoname.makeGeonameList(entities);
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
-														.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+					geojsonList.addFromGeonameList(geonameList);
+					if(geojsonList.isEmpty()){
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+															.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+					}
+					else{
+						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+															.append(Main.configPropertyValues.geonameOutputField, geonameList)
+															.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+					}
+					
 				}
+				
+				
 				++NERThreadPool.count;
 				long time = System.currentTimeMillis();
 				if(time - NERThreadPool.preTime >= 60000){
