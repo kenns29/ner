@@ -29,6 +29,9 @@ public class ConfigPropertyValues {
 	//1: split task by creation time
 	public int parallelFlag = 0;
 	
+	public int splitOption = 1;
+	public long splitIntervalInMillis = 0;
+	public int numDocsInThread = 0;
 	public boolean ner = false;
 	public boolean geoname = false;
 	public boolean geocoding = false;
@@ -89,6 +92,10 @@ public class ConfigPropertyValues {
 		core = Integer.valueOf(prop.getProperty("core"));
 		parallel = Boolean.parseBoolean(prop.getProperty("parallel"));
 		parallelFlag = Integer.valueOf(prop.getProperty("parallelFlag"));
+		
+		splitOption = Integer.valueOf(prop.getProperty("splitOption"));
+		splitIntervalInMillis = Long.valueOf(prop.getProperty("splitIntervalInMillis"));
+		numDocsInThread = Integer.valueOf(prop.getProperty("numDocsInThread"));
 		
 		ner = Boolean.parseBoolean(prop.getProperty("ner"));
 		geoname = Boolean.parseBoolean(prop.getProperty("geoname"));

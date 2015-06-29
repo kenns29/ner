@@ -26,6 +26,15 @@ public class NERThread implements Runnable{
 	public NERThread(){
 		super();
 	}
+	public NERThread(DBCollection coll, String inputField, long startTime, long endTime, BasicDBObject query){
+		this.coll = coll;
+		this.inputField = inputField;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.startTimeStr = TimeUtilities.js_timestampToString(startTime);
+		this.endTimeStr = TimeUtilities.js_timestampToString(endTime);
+		this.query = query;
+	}
 	public NERThread(DBCollection coll, String inputField, long startTime, long endTime){
 		this.coll = coll;
 		this.inputField = inputField;
@@ -87,7 +96,13 @@ public class NERThread implements Runnable{
 	}
 	
 	public void insertNerGeo(StanfordCoreNLP pipeline) throws Exception{
-		DBCursor cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
+		DBCursor cursor = null;
+		if(Main.configPropertyValues.splitOption == 0){
+			cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
+		}
+		else{
+			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
+		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
 			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
