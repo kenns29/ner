@@ -14,7 +14,7 @@ public class NERThreadPool {
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);
 	}
-	public static int numThreadsInPool = 0;
+	
 	private int numOfThreads = 1;
 	private DBCollection coll = null;
 	private String inputField = null;
@@ -85,15 +85,12 @@ public class NERThreadPool {
 						maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
 					}
 					
-					++NERThreadPool.numThreadsInPool;
-					LOGGER.info("Starting new Thread for (" + TimeUtilities.js_timestampToString(nextStartTime) + " To " + TimeUtilities.js_timestampToString(nextEndTime) + "). "
-							+ "\nThere will be " + NERThreadPool.numThreadsInPool + " threads in the pool.");
+				
+					LOGGER.info("Starting new Thread for (" + TimeUtilities.js_timestampToString(nextStartTime) + " To " + TimeUtilities.js_timestampToString(nextEndTime) + ").");
 					Runnable worker = new NERThread(coll, inputField, nextStartTime, nextEndTime);
 					executor.execute(worker);
 					nextStartTime = nextEndTime;
-					while(NERThreadPool.numThreadsInPool >= Main.configPropertyValues.core){
-						System.out.println(NERThreadPool.numThreadsInPool);
-					}
+				
 					
 				}
 			}

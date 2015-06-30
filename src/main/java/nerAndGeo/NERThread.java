@@ -92,9 +92,7 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		--NERThreadPool.numThreadsInPool;
-		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time
-				+ "\nThere are " + NERThreadPool.numThreadsInPool + " threads in pool");
+		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time);
 		
 //		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
