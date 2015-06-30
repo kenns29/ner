@@ -28,12 +28,12 @@ public class Main {
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.ner){
-				BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(Main.configPropertyValues.core); 
+				BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(4); 
 				if(configPropertyValues.useTimeLimit){
 					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, queue);
 				}
 				else{
-					NER.parallelNER(coll, configPropertyValues.nerInputField, queue);
+					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, queue);
 				}
 			}
 		}
@@ -42,6 +42,6 @@ public class Main {
 				NER.insertNer(coll, configPropertyValues.nerInputField);
 			}
 		}
-		database.close();
+		//database.close();
 	}
 }

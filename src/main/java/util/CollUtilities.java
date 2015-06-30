@@ -35,8 +35,8 @@ public class CollUtilities {
 	}
 	
 	public static ObjectId maxObjectId(DBCollection coll){
-		DBCursor cursor = coll.find().sort(new BasicDBObject("_id", -1)).limit(1);
-		if(cursor.hasNext()){
+		DBCursor cursor = coll.find().sort(new BasicDBObject("_id", -1)).limit(1);		
+		while(cursor.hasNext()){
 			BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 			return mongoObj.getObjectId("_id");
 		}

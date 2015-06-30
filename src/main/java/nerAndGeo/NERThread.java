@@ -115,14 +115,7 @@ public class NERThread implements Runnable{
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");
-//			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime)
-//			+ "\nQuery = " + query.toString());
-		if(Main.configPropertyValues.geoname){
-			LOGGER.info("inserting entities along with geonames");
-		}
-		else{
-			LOGGER.info("inserting entities");
-		}
+		
 		try{
 			while(cursor.hasNext()){
 				++Main.documentCount;

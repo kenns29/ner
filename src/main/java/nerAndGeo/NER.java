@@ -1,9 +1,11 @@
 package nerAndGeo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
@@ -160,18 +162,26 @@ public class NER {
 		BasicDBList result = null;
 		return result;
 	}
+		
+	public static void parallelNER(DBCollection coll, String inputField, long minTime, long maxTime, BlockingQueue<TimeRange> queue){
+		NERTaskManager nerTaskManager = new NERTaskManager(minTime, maxTime, queue, coll);
+		ArrayList<NERThread> NERThreadList = new ArrayList<NERThread>();
+		
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			NERThreadList.add(new NERThread(coll, inputField, queue));
+		}
+		
+		new Thread(nerTaskManager).start();
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			new Thread(NERThreadList.get(i)).start();
+		}
+	}
 	
-	public static void parallelNer(DBCollection coll, String inputField){
+	public static void parallelNER(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
 		long minTime = CollUtilities.minInsertionTime(coll);
 		long maxTime = CollUtilities.maxInsertionTime(coll);
-		parallelNer(coll, inputField, minTime, maxTime);
+		parallelNER(coll, inputField, minTime, maxTime, queue);
 	}
-	
-	public static void parallelNer(DBCollection coll, String inputField, long minTime, long maxTime){
-		NERThreadPool nerThreadPool = new NERThreadPool(coll, inputField, Main.configPropertyValues.core, minTime, maxTime);
-		nerThreadPool.run();
-	}
-	
 	public static BasicDBList insertFromFlag(BasicDBList ner, String flag){
 		if(flag != null){
 			BasicDBList outList = new BasicDBList();

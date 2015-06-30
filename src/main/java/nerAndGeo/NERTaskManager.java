@@ -71,17 +71,18 @@ public class NERTaskManager implements Runnable{
 							+ TimeUtilities.js_timestampToString(nextEndTime));
 					maxObjectId = CollUtilities.maxObjectId(this.coll);
 					maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
-					
-					TimeRange timeRange = new TimeRange(nextStartTime, nextEndTime);
-					LOGGER.info("Inserting new time range " + timeRange.toString() + " to the queue");
-					try {
-						queue.put(timeRange);
-					} catch (InterruptedException e) {
-						LOGGER.severe("INSERTING " + timeRange.toString() + " is INTERRUPTED");
-						e.printStackTrace();
-					}
-					nextStartTime = nextEndTime;
 				}
+				
+				TimeRange timeRange = new TimeRange(nextStartTime, nextEndTime);
+				LOGGER.info("Inserting new time range " + timeRange.toString() + " to the queue");
+				try {
+					queue.put(timeRange);
+					LOGGER.info("time range " + timeRange.toString() + " is inserted to the queue to the queue");
+				} catch (InterruptedException e) {
+					LOGGER.severe("INSERTING " + timeRange.toString() + " is INTERRUPTED");
+					e.printStackTrace();
+				}
+				nextStartTime = nextEndTime;
 			}
 		}
 	}
