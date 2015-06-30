@@ -159,8 +159,8 @@ public class NER {
 	}
 	
 	public static void parallelNer(DBCollection coll, String inputField){
-		long minTime = CollUtilities.minTime(coll);
-		long maxTime = CollUtilities.maxTime(coll);
+		long minTime = CollUtilities.minInsertionTime(coll);
+		long maxTime = CollUtilities.maxInsertionTime(coll);
 		parallelNer(coll, inputField, minTime, maxTime);
 	}
 	

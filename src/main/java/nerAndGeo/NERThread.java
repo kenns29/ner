@@ -42,35 +42,36 @@ public class NERThread implements Runnable{
 		this.endTime = endTime;
 		this.startTimeStr = TimeUtilities.js_timestampToString(startTime);
 		this.endTimeStr = TimeUtilities.js_timestampToString(endTime);
-		//use the catID
+		//do not use the cat id
 		if(Main.configPropertyValues.catID < 0){
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
-				this.query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
-															.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				this.query = new BasicDBObject("timestamp", 
+						new BasicDBObject("$gte", this.startTime)
+						.append("$lt", this.endTime));
 				break;
 			case 0:
 			default:
-				this.query = new BasicDBObject("timestamp", 
-									new BasicDBObject("$gte", this.startTime)
-									.append("$lt", this.endTime));
+				this.query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
+				.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+
 			}
 			
 		}
-		//do not use the cat ID
+		//use the cat id
 		else{
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
 				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
-							.append("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
-											.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				.append("timestamp", 
+					new BasicDBObject("$gte", this.startTime)
+					.append("$lt", this.endTime));
 				break;
 			case 0:
 			default:
 				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
-									.append("timestamp", 
-										new BasicDBObject("$gte", this.startTime)
-										.append("$lt", this.endTime));
+				.append("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
+								.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
 			}
 		}
 		
@@ -78,8 +79,8 @@ public class NERThread implements Runnable{
 	}
 	@Override
 	public void run() {
-		LOGGER.info("Starting new Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + ")\n" 
-				+ "equivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("Started new Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + ")");
+				//+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 		Properties NLPprops = new Properties();
 		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
@@ -91,12 +92,13 @@ public class NERThread implements Runnable{
 			e.printStackTrace();
 		}
 		long time = System.currentTimeMillis() - start;
-		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time
-		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time);
+//		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
 	public void insertNerGeo(StanfordCoreNLP pipeline) throws Exception{
 		DBCursor cursor = null;
+
 		if(Main.configPropertyValues.splitOption == 0){
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
 		}
@@ -104,8 +106,9 @@ public class NERThread implements Runnable{
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items"
-			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
+		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items");
+//			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime)
+//			+ "\nQuery = " + query.toString());
 		if(Main.configPropertyValues.geoname){
 			LOGGER.info("inserting entities along with geonames");
 		}

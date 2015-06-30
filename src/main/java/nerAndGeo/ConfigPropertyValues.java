@@ -40,6 +40,7 @@ public class ConfigPropertyValues {
 	public boolean useTimeLimit = false;
 	public long startTime = 0;
 	public long endTime = 0;
+	public boolean stopAtEnd = true;
 	
 	public boolean useDocLimit = false;
 	public int docLimit = 0;
@@ -113,6 +114,7 @@ public class ConfigPropertyValues {
 		if(!endTimeStr.equals("none")){
 			endTime = Long.getLong(prop.getProperty("endTime"));
 		}
+		stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		
 		useDocLimit = Boolean.parseBoolean(prop.getProperty("useDocLimit"));
 		docLimit = Integer.valueOf(prop.getProperty("docLimit"));

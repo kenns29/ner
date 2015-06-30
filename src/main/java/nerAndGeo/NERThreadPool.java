@@ -47,9 +47,48 @@ public class NERThreadPool {
 		LOGGER.info("There are total of " + numOfThreads + " threads.");
 		ExecutorService executor = Executors.newFixedThreadPool(numOfThreads);
 		if(Main.configPropertyValues.splitOption == 0){
-			for(long t = TimeUtilities.hourFloor(startTime); t < TimeUtilities.hourCeiling(endTime); t+= Main.configPropertyValues.splitIntervalInMillis){
-				Runnable worker = new NERThread(coll, inputField, t, t+Main.configPropertyValues.splitIntervalInMillis);
-				executor.execute(worker);
+			if(Main.configPropertyValues.stopAtEnd){
+				for(long t = TimeUtilities.hourFloor(startTime); t < TimeUtilities.hourCeiling(endTime); t+= Main.configPropertyValues.splitIntervalInMillis){
+					Runnable worker = new NERThread(coll, inputField, t, t+Main.configPropertyValues.splitIntervalInMillis);
+					executor.execute(worker);
+				}
+			}
+			else{
+				nextStartTime = TimeUtilities.minutesFloor(startTime);
+				LOGGER.info("The first startTime = " + TimeUtilities.js_timestampToString(nextStartTime));
+				while(true){
+					LOGGER.info("The startTime = " + TimeUtilities.js_timestampToString(nextStartTime));
+					long nextEndTime = nextStartTime + Main.configPropertyValues.splitIntervalInMillis;
+					ObjectId nextEndObjectId = TimeUtilities.getObjectId(nextEndTime, 0, 0, 0);
+					
+					//Wait for the maxObjectId catches up with the nextEndObjectId
+					ObjectId maxObjectId = CollUtilities.maxObjectId(this.coll);
+					long maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
+					while(nextEndObjectId.compareTo(maxObjectId) >= 0){
+						long timeDiff = nextEndTime - maxTime;
+						LOGGER.info("The query for " + TimeUtilities.js_timestampToString(nextStartTime) 
+								+ " To " 
+								+ TimeUtilities.js_timestampToString(nextEndTime) 
+								+" reached the end, waiting for " + timeDiff + " milliseconds\n"
+								+ "Current max time is " + TimeUtilities.js_timestampToString(maxTime)
+								+ "\nGoing to Sleep.");
+						try {
+							Thread.sleep(timeDiff);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						LOGGER.info("Wake Up for " + TimeUtilities.js_timestampToString(nextStartTime) 
+								+ " To " 
+								+ TimeUtilities.js_timestampToString(nextEndTime));
+						maxObjectId = CollUtilities.maxObjectId(this.coll);
+						maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
+					}
+					
+					LOGGER.info("Starting new Thread for (" + TimeUtilities.js_timestampToString(nextStartTime) + " To " + TimeUtilities.js_timestampToString(nextEndTime) + ")");
+					Runnable worker = new NERThread(coll, inputField, nextStartTime, nextEndTime);
+					executor.execute(worker);
+					nextStartTime = nextEndTime;
+				}
 			}
 		}
 		else{
