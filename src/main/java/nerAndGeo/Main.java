@@ -1,6 +1,11 @@
 package nerAndGeo;
 
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import util.TimeRange;
+
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
@@ -23,12 +28,12 @@ public class Main {
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.ner){
+				BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(Main.configPropertyValues.core); 
 				if(configPropertyValues.useTimeLimit){
-					NER.parallelNer(coll, configPropertyValues.nerInputField, configPropertyValues.startTime, configPropertyValues.endTime);
+					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, queue);
 				}
 				else{
-					
-					NER.parallelNer(coll, configPropertyValues.nerInputField);
+					NER.parallelNER(coll, configPropertyValues.nerInputField, queue);
 				}
 			}
 		}

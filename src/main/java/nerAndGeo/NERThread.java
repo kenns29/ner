@@ -80,24 +80,27 @@ public class NERThread implements Runnable{
 	
 	@Override
 	public void run() {
-		TimeRange timeRange;
-		try {
-			timeRange = queue.take();
-			LOGGER.info("Started new Thread for " + timeRange.toString());
-			Properties NLPprops = new Properties();
-			NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-			StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
-			long start = System.currentTimeMillis();
+		TimeRange timeRange = new TimeRange(0, 0);
+		while(true){
 			try {
-				insertNerGeo(timeRange, pipeline);
-			} catch (Exception e) {
-				LOGGER.warning("ner parsing error");
-				e.printStackTrace();
+				timeRange = queue.take();
+				LOGGER.info("Started new Thread for " + timeRange.toString());
+				Properties NLPprops = new Properties();
+				NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+				StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
+				long start = System.currentTimeMillis();
+				try {
+					insertNerGeo(timeRange, pipeline);
+				} catch (Exception e) {
+					LOGGER.warning("ner parsing error");
+					e.printStackTrace();
+				}
+				long time = System.currentTimeMillis() - start;
+				LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
+			} catch (InterruptedException e1) {
+				LOGGER.severe("TAKING " + timeRange.toString() + " is INTERRUPTED");
+				e1.printStackTrace();
 			}
-			long time = System.currentTimeMillis() - start;
-			LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
 		}
 	}
 	
@@ -138,14 +141,14 @@ public class NERThread implements Runnable{
 					
 					if(userText != null){
 //						System.out.println("userText = " + userText);
-						userEntities = NER.annotateDBObject(userText, pipeline, startTimeStr, endTimeStr);
+						userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
 						userEntities = NER.insertFromFlag(userEntities, "user.location");
 					}
 				}
 				
 				if(text != null && text.length() < 1000){
 					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					textEntities = NER.annotateDBObject(text, pipeline, startTimeStr, endTimeStr);
+					textEntities = NER.annotateDBObject(text, pipeline, timeRange);
 					textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
 				}
 				
@@ -207,12 +210,12 @@ public class NERThread implements Runnable{
 				}
 				
 				
-				++NERThreadPool.count;
+				++NERTaskManager.count;
 				long time = System.currentTimeMillis();
-				if(time - NERThreadPool.preTime >= 60000){
-					LOGGER.info("From " + NERThreadPool.preTime + " to " + time + ", " + NERThreadPool.count + " are processed. The time range is " + (time - NERThreadPool.preTime));
-					NERThreadPool.preTime = time;
-					NERThreadPool.count = 0;
+				if(time - NERTaskManager.preTime >= 60000){
+					LOGGER.info("From " + NERTaskManager.preTime + " to " + time + ", " + NERTaskManager.count + " are processed. The time range is " + (time - NERTaskManager.preTime));
+					NERTaskManager.preTime = time;
+					NERTaskManager.count = 0;
 				}
 				
 				if(Main.documentCount % 100 == 0){

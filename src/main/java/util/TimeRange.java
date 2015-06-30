@@ -6,7 +6,7 @@ public class TimeRange {
 	public long endTime = 0;
 	
 	TimeRange(){}
-	TimeRange(long js_startTime, long js_endTime){
+	public TimeRange(long js_startTime, long js_endTime){
 		this.startTime = js_startTime;
 		this.endTime = js_endTime;
 	}
