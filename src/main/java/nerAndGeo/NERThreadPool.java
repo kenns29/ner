@@ -6,6 +6,9 @@ import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 
+import util.CollUtilities;
+import util.TimeUtilities;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
@@ -95,14 +98,7 @@ public class NERThreadPool {
 				}
 			}
 		}
-		else{
-			nextStartTime = startTime;
-			nextObjectId = TimeUtilities.getObjectId(nextStartTime, 0, 0, 0);
-			do{
-				BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", nextObjectId));
-				
-			}while(true);
-		}
+		
 		executor.shutdown();
 		while(!executor.isTerminated()){}
 		LOGGER.info("all threads finished.");

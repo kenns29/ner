@@ -1,7 +1,11 @@
 package nerAndGeo;
 
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
+
+import util.TimeRange;
+import util.TimeUtilities;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -18,42 +22,29 @@ public class NERThread implements Runnable{
 	}
 	private DBCollection coll = null;
 	private String inputField = null;
-	private BasicDBObject query = null;
-	private long startTime = 0;
-	private long endTime = 0;
-	private String startTimeStr = null;
-	private String endTimeStr = null;
-	public NERThread(){
-		super();
-	}
-	public NERThread(DBCollection coll, String inputField, long startTime, long endTime, BasicDBObject query){
-		this.coll = coll;
-		this.inputField = inputField;
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.startTimeStr = TimeUtilities.js_timestampToString(startTime);
-		this.endTimeStr = TimeUtilities.js_timestampToString(endTime);
-		this.query = query;
-	}
-	public NERThread(DBCollection coll, String inputField, long startTime, long endTime){
-		this.coll = coll;
-		this.inputField = inputField;
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.startTimeStr = TimeUtilities.js_timestampToString(startTime);
-		this.endTimeStr = TimeUtilities.js_timestampToString(endTime);
+	
+	protected final BlockingQueue<TimeRange> queue;
+	
+	/////////////////////////////////
+	/////////Private Methods/////////
+	/////////////////////////////////	
+	private BasicDBObject constructQuery(TimeRange timeRange){
+		long startTime = timeRange.startTime;
+		long endTime = timeRange.endTime;
+		
+		BasicDBObject query = null;
 		//do not use the cat id
 		if(Main.configPropertyValues.catID < 0){
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
-				this.query = new BasicDBObject("timestamp", 
-						new BasicDBObject("$gte", this.startTime)
-						.append("$lt", this.endTime));
+				query = new BasicDBObject("timestamp", 
+						new BasicDBObject("$gte", startTime)
+						.append("$lt", endTime));
 				break;
 			case 0:
 			default:
-				this.query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
-				.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(startTime))
+				.append("$lt", TimeUtilities.getObjectIdFromTimestamp(endTime)));
 
 			}
 			
@@ -62,44 +53,57 @@ public class NERThread implements Runnable{
 		else{
 			switch(Main.configPropertyValues.parallelFlag){
 			case 1:
-				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
+				query = new BasicDBObject("cat", Main.configPropertyValues.catID)
 				.append("timestamp", 
-					new BasicDBObject("$gte", this.startTime)
-					.append("$lt", this.endTime));
+					new BasicDBObject("$gte", startTime)
+					.append("$lt", endTime));
 				break;
 			case 0:
 			default:
-				this.query = new BasicDBObject("cat", Main.configPropertyValues.catID)
-				.append("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(this.startTime))
-								.append("$lt", TimeUtilities.getObjectIdFromTimestamp(this.endTime)));
+				query = new BasicDBObject("cat", Main.configPropertyValues.catID)
+				.append("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(startTime))
+								.append("$lt", TimeUtilities.getObjectIdFromTimestamp(endTime)));
 			}
 		}
 		
-		
+		return query;
 	}
-	@Override
-	public void run() {
-		LOGGER.info("Started new Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + ")");
-				//+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
-		Properties NLPprops = new Properties();
-		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
-		long start = System.currentTimeMillis();
-		try {
-			insertNerGeo(pipeline);
-		} catch (Exception e) {
-			LOGGER.warning("ner parsing error");
-			e.printStackTrace();
-		}
-		long time = System.currentTimeMillis() - start;
-		LOGGER.info("Finished Thread for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "). Elapsed Time = " + time);
+
+	public NERThread(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
+		this.coll = coll;
+		this.inputField = inputField;
+		this.queue = queue;
 		
-//		+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime));
 	}
 	
-	public void insertNerGeo(StanfordCoreNLP pipeline) throws Exception{
+	
+	
+	@Override
+	public void run() {
+		TimeRange timeRange;
+		try {
+			timeRange = queue.take();
+			LOGGER.info("Started new Thread for " + timeRange.toString());
+			Properties NLPprops = new Properties();
+			NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+			StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
+			long start = System.currentTimeMillis();
+			try {
+				insertNerGeo(timeRange, pipeline);
+			} catch (Exception e) {
+				LOGGER.warning("ner parsing error");
+				e.printStackTrace();
+			}
+			long time = System.currentTimeMillis() - start;
+			LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	public void insertNerGeo(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
+		BasicDBObject query = constructQuery(timeRange);
 		DBCursor cursor = null;
-
 		if(Main.configPropertyValues.splitOption == 0){
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
 		}
@@ -107,7 +111,7 @@ public class NERThread implements Runnable{
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for (StartTime " + startTimeStr + ", endTime " + endTimeStr + "), there are total of " + cursor.count() + " items");
+		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");
 //			+ "\nequivalent to from ObjectId " + TimeUtilities.getObjectIdFromTimestamp(startTime) + " to " + TimeUtilities.getObjectIdFromTimestamp(endTime)
 //			+ "\nQuery = " + query.toString());
 		if(Main.configPropertyValues.geoname){

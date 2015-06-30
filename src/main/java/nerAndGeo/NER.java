@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 
+import util.CollUtilities;
+import util.TimeRange;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -60,7 +63,6 @@ public class NER {
 					obj.put("namedEntity", ne);
 					entities.add(obj);
 				}
-				//System.out.println("word = " + word + "\tpos = " + pos + "\tne = " + ne + "\tnne = " + nne);
 			}
 		}
 		
@@ -71,13 +73,13 @@ public class NER {
 		Properties NLPprops = new Properties();
 		NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
-		return annotateDBObject(text, pipeline, "", "");
+		return annotateDBObject(text, pipeline, new TimeRange(0, 0));
 	}
 	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline){
-		return annotateDBObject(text, pipeline, "", "");
+		return annotateDBObject(text, pipeline, new TimeRange(0, 0));
 	}
 	
-	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline, String startTimeStr, String endTimeStr){
+	public static BasicDBList annotateDBObject(String text, StanfordCoreNLP pipeline, TimeRange timeRange){
 		Annotation document = new Annotation(text);
 		
 		boolean annotationSuccess = false;
@@ -87,7 +89,7 @@ public class NER {
 				pipeline.annotate(document);
 				annotationSuccess = true;
 				if(isSecondTry){
-					LOGGER.info("Succeed the annotation after the first attempt. for Thread from (startTime " + startTimeStr + " to endTime " + endTimeStr + ")");
+					LOGGER.info("Succeed the annotation after the first attempt. for Thread from " + timeRange.toString());
 				}
 			}
 			catch(Exception e){
@@ -96,8 +98,9 @@ public class NER {
 					++NER.pipelineErrCount;
 				}
 				isSecondTry = true;
-				LOGGER.severe("Pipline Annotation Error, text: " + text + "\nIn Thread from (startTime " + startTimeStr + " to endTime " + endTimeStr + ")\n"
-						+ "There are total of " + NER.pipelineErrCount + " such errors");
+				LOGGER.severe("Pipline Annotation Error, text: " + text 
+						+ "\nIn Thread from " + timeRange.toString()
+						+ "\nThere are total of " + NER.pipelineErrCount + " such errors");
 				//e.printStackTrace();
 			}
 		} while(!annotationSuccess);

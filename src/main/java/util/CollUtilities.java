@@ -1,4 +1,4 @@
-package nerAndGeo;
+package util;
 
 import org.bson.types.ObjectId;
 
