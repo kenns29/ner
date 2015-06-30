@@ -56,32 +56,6 @@ public class GeojsonList {
 		return rObj;
 	}
 	
-//	public void addFromMongoCoord(BasicDBObject coordinates, BasicDBObject place, BasicDBObject location){
-//		if(coordinates == null){
-//			if(location != null && validLocation(location)){
-//				geometryList.add(makeGeojsonFromLocation(location));
-//			}
-//			else if(place != null){
-//				geometryList.add(makeGeojsonFromPlace(place));
-//			}
-//		}
-//		else{
-//			geometryList.add(makeGeojsonObjFromCoordinates(coordinates));
-//			if(location != null && validLocation(location)){
-//				if(compareCoordinatesWithLocation(coordinates, location)){
-//					if(place != null){
-//						geometryList.add(makeGeojsonFromPlace(place));
-//					}
-//				}
-//			}
-//			else if(place != null){
-//				geometryList.add(makeGeojsonFromPlace(place));
-//			}
-//		}
-//		
-//		updateCollectionGeometries();
-//	}
-	
 	public void addFromMongoCoord(BasicDBObject coordinates, BasicDBObject place, BasicDBObject location){
 		if(coordinates != null){
 			geometryList.add(makeGeojsonObjFromCoordinates(coordinates));

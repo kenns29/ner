@@ -260,16 +260,6 @@ public class Geoname {
 			    	outList.add(rObj);
 				}
 			    
-//			    System.out.println("##############################");
-//			    System.out.println("Name = " + ent);
-//			    if(rObj != null){
-//			    	System.out.println("geoname = " + rObj.getString("location"));
-//			    }
-//			    else{
-//			    	System.out.println("geoname = null");
-//			    }
-//			    System.out.println("##############################");
-			    
 			}
 		}
 		return outList;
