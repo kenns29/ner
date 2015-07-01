@@ -23,7 +23,6 @@ public class NERTaskManager implements Runnable{
 	private long endTime = 0;
 	
 	public static int count = 0;
-	public static long preTime = System.currentTimeMillis();
 	
 	public NERTaskManager(long startTime, long endTime, BlockingQueue<TimeRange> queue, DBCollection coll){
 		this.startTime = startTime;

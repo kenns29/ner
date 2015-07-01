@@ -302,7 +302,7 @@ public class Geoname {
 			while(cursor.hasNext()){
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				BasicDBList ner = (BasicDBList) mongoObj.get("ner1");
-				String text = mongoObj.getString("sentence");
+//				String text = mongoObj.getString("sentence");
 				BasicDBList outList = new BasicDBList();
 				for(Object e : ner){
 					BasicDBObject entity = (BasicDBObject) e;

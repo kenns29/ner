@@ -1,7 +1,6 @@
 package nerAndGeo;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
@@ -189,8 +188,9 @@ public class NER {
 		}
 		
 		while(true){
-			long time = System.currentTimeMillis();
-			if(time - Main.mainPreTime >= 60000){
+			try {
+				Thread.sleep(60000);
+				long time = System.currentTimeMillis();
 				String msg = "";
 				for(int i = 0; i < Main.configPropertyValues.core; i++){
 					msg += NERThreadList.list.get(i).threadStatus.toString() + "\n";
@@ -200,7 +200,9 @@ public class NER {
 						+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
 						+ "\nThe Safe Object Id is " + safeObjectId.toString());
 				NERTaskManager.count = 0;
-				Main.mainPreTime = time;
+				Main.mainPreTime = time;	
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 	}
