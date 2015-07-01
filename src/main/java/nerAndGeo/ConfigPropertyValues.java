@@ -52,6 +52,8 @@ public class ConfigPropertyValues {
 	public String cacheCollection = null;
 	public int cacheLimit = -1;
 	
+	public int statusHttpServerPort = 0;
+	public String statusHttpServerPath = null;
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -126,5 +128,7 @@ public class ConfigPropertyValues {
 		cacheCollection = prop.getProperty("cacheCollection");
 		cacheLimit = Integer.valueOf(prop.getProperty("cacheLimit"));
 		
+		statusHttpServerPort = Integer.valueOf(prop.getProperty("statusHttpServerPort"));
+		statusHttpServerPath = prop.getProperty("statusHttpServerPath");
 	}
 }

@@ -12,6 +12,7 @@ import com.mongodb.DBCollection;
 public class Main {
 	public static ConfigPropertyValues configPropertyValues = null;
 	public static int documentCount = 0;
+	public static long mainPreTime = System.currentTimeMillis();
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");

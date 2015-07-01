@@ -117,12 +117,17 @@ public class NERThread implements Runnable{
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");
+		this.threadStatus.timeRange = timeRange;
 		
 		try{
 			while(cursor.hasNext()){
 				++Main.documentCount;
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
+				this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
+				this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
+				this.threadStatus.currentTweetId = mongoObj.getLong("id");
+				
 				String userText = null;
 				
 				BasicDBList userEntities = null;
@@ -206,13 +211,6 @@ public class NERThread implements Runnable{
 				
 				
 				++NERTaskManager.count;
-				long time = System.currentTimeMillis();
-				if(time - NERTaskManager.preTime >= 60000){
-					LOGGER.info("From " + NERTaskManager.preTime + " to " + time + ", " + NERTaskManager.count + " are processed. The time range is " + (time - NERTaskManager.preTime));
-					NERTaskManager.preTime = time;
-					NERTaskManager.count = 0;
-				}
-				
 				if(Main.documentCount % 100 == 0){
 					LOGGER.info(Main.documentCount + " documents has been processed. " + NER.textEntitiesDocCount + " documents has entities from text. " + NER.userEntitiesDocCount + " documents has entities from user profile location.");
 				}

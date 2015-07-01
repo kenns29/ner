@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.json.simple.JSONArray;
 
+import simpleHttpServer.StatusHttpServer;
 import util.CollUtilities;
 import util.ThreadStatus;
 import util.TimeRange;
@@ -35,6 +36,7 @@ import edu.stanford.nlp.util.CoreMap;
 public class NER {
 	public static int textEntitiesDocCount = 0;
 	public static int userEntitiesDocCount = 0;
+	public static ArrayList<NERThread> NERThreadList = new ArrayList<NERThread>();
 	private static int pipelineErrCount = 0;
 	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
 	static{
@@ -163,11 +165,12 @@ public class NER {
 		BasicDBList result = null;
 		return result;
 	}
-		
+	
+	//////////////////////////////
+	/////Parallel NER Driver//////
+	//////////////////////////////
 	public static void parallelNER(DBCollection coll, String inputField, long minTime, long maxTime, BlockingQueue<TimeRange> queue){
 		NERTaskManager nerTaskManager = new NERTaskManager(minTime, maxTime, queue, coll);
-		ArrayList<NERThread> NERThreadList = new ArrayList<NERThread>();
-		
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			NERThreadList.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
 		}
@@ -176,6 +179,26 @@ public class NER {
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			new Thread(NERThreadList.get(i)).start();
 		}
+		
+		try {
+			@SuppressWarnings("unused")
+			StatusHttpServer statusHttpServer = new StatusHttpServer();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		while(true){
+			long time = System.currentTimeMillis();
+			if(time - Main.mainPreTime >= 60000){
+				String msg = "";
+				for(int i = 0; i < Main.configPropertyValues.core; i++){
+					msg += NERThreadList.get(i).threadStatus.toString() + "\n";
+				}
+				LOGGER.info(msg + "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds.");
+				NERTaskManager.count = 0;
+				Main.mainPreTime = time;
+			}
+		}
 	}
 	
 	public static void parallelNER(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
@@ -183,6 +206,11 @@ public class NER {
 		long maxTime = CollUtilities.maxInsertionTime(coll);
 		parallelNER(coll, inputField, minTime, maxTime, queue);
 	}
+	
+	
+	////////////////////////////////
+	//// ///////Other///////////////
+	////////////////////////////////
 	public static BasicDBList insertFromFlag(BasicDBList ner, String flag){
 		if(flag != null){
 			BasicDBList outList = new BasicDBList();
