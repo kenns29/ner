@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
+import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 
 import simpleHttpServer.StatusHttpServer;
@@ -36,7 +37,7 @@ import edu.stanford.nlp.util.CoreMap;
 public class NER {
 	public static int textEntitiesDocCount = 0;
 	public static int userEntitiesDocCount = 0;
-	public static ArrayList<NERThread> NERThreadList = new ArrayList<NERThread>();
+	
 	private static int pipelineErrCount = 0;
 	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
 	static{
@@ -172,12 +173,12 @@ public class NER {
 	public static void parallelNER(DBCollection coll, String inputField, long minTime, long maxTime, BlockingQueue<TimeRange> queue){
 		NERTaskManager nerTaskManager = new NERTaskManager(minTime, maxTime, queue, coll);
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
-			NERThreadList.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
+			NERThreadList.list.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
 		}
 		
 		new Thread(nerTaskManager).start();
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
-			new Thread(NERThreadList.get(i)).start();
+			new Thread(NERThreadList.list.get(i)).start();
 		}
 		
 		try {
@@ -192,9 +193,12 @@ public class NER {
 			if(time - Main.mainPreTime >= 60000){
 				String msg = "";
 				for(int i = 0; i < Main.configPropertyValues.core; i++){
-					msg += NERThreadList.get(i).threadStatus.toString() + "\n";
+					msg += NERThreadList.list.get(i).threadStatus.toString() + "\n";
 				}
-				LOGGER.info(msg + "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds.");
+				ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
+				LOGGER.info(msg
+						+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
+						+ "\nThe Safe Object Id is " + safeObjectId.toString());
 				NERTaskManager.count = 0;
 				Main.mainPreTime = time;
 			}
@@ -206,7 +210,6 @@ public class NER {
 		long maxTime = CollUtilities.maxInsertionTime(coll);
 		parallelNER(coll, inputField, minTime, maxTime, queue);
 	}
-	
 	
 	////////////////////////////////
 	//// ///////Other///////////////
