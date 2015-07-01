@@ -4,6 +4,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
+import util.ThreadStatus;
 import util.TimeRange;
 import util.TimeUtilities;
 
@@ -23,6 +24,7 @@ public class NERThread implements Runnable{
 	private DBCollection coll = null;
 	private String inputField = null;
 	
+	public ThreadStatus threadStatus = null;
 	protected final BlockingQueue<TimeRange> queue;
 	
 	/////////////////////////////////
@@ -69,11 +71,11 @@ public class NERThread implements Runnable{
 		return query;
 	}
 
-	public NERThread(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
+	public NERThread(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue, ThreadStatus threadStatus){
 		this.coll = coll;
 		this.inputField = inputField;
 		this.queue = queue;
-		
+		this.threadStatus = threadStatus;
 	}
 	
 	

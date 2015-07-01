@@ -12,6 +12,7 @@ import util.TimeUtilities;
 import com.mongodb.DBCollection;
 
 public class NERTaskManager implements Runnable{
+	
 	private static final Logger LOGGER = Logger.getLogger(NERTaskManager.class.getName());
 	static{
 		LOGGER.addHandler(LoggerAttr.fileHandler);

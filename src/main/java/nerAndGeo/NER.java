@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 
 import util.CollUtilities;
+import util.ThreadStatus;
 import util.TimeRange;
 
 import com.mongodb.BasicDBList;
@@ -168,7 +169,7 @@ public class NER {
 		ArrayList<NERThread> NERThreadList = new ArrayList<NERThread>();
 		
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
-			NERThreadList.add(new NERThread(coll, inputField, queue));
+			NERThreadList.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
 		}
 		
 		new Thread(nerTaskManager).start();
