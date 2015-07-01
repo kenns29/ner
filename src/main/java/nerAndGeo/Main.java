@@ -10,6 +10,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
 public class Main {
+	public static BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(4);
 	public static ConfigPropertyValues configPropertyValues = null;
 	public static int documentCount = 0;
 	public static long mainPreTime = System.currentTimeMillis();
@@ -29,9 +30,8 @@ public class Main {
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.ner){
-				BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(4); 
 				if(configPropertyValues.useTimeLimit){
-					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, queue);
+					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, Main.queue);
 				}
 				else{
 					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, queue);
