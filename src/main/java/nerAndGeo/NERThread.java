@@ -17,12 +17,14 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger(NERThread.class.getName());
+	private static final int RETRY_LIMIT = 2;
 	static{
-		//LOGGER.addHandler(LoggerAttr.consoleHandler);
 		LOGGER.addHandler(LoggerAttr.fileHandler);
 	}
+	
 	private DBCollection coll = null;
 	private String inputField = null;
+	private int unexpectedExceptionCount = 0;
 	
 	public ThreadStatus threadStatus = null;
 	protected final BlockingQueue<TimeRange> queue;
@@ -82,27 +84,56 @@ public class NERThread implements Runnable{
 	
 	@Override
 	public void run() {
-		TimeRange timeRange = new TimeRange(0, 0);
+		TimeRange timeRange = null;
 		while(true){
 			try {
 				timeRange = queue.take();
-				LOGGER.info("Started new Thread for " + timeRange.toString());
-				Properties NLPprops = new Properties();
-				NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
-				StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
-				long start = System.currentTimeMillis();
-				try {
-					insertNerGeo(timeRange, pipeline);
-				} catch (Exception e) {
-					LOGGER.warning("ner parsing error");
-					e.printStackTrace();
-				}
-				long time = System.currentTimeMillis() - start;
-				LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
+				this.threadStatus.timeRange = timeRange;
+				
 			} catch (InterruptedException e1) {
-				LOGGER.severe("TAKING " + timeRange.toString() + " is INTERRUPTED");
-				e1.printStackTrace();
+				LOGGER.severe("TAKING " + timeRange.toString() + " is INTERRUPTED"
+						+ "\nStack trace: " + e1.getStackTrace());
+				continue;
+			} 
+			
+			boolean retryFlag = false;
+			do{
+				try{
+					LOGGER.info("Started new Thread for " + timeRange.toString());
+					Properties NLPprops = new Properties();
+					NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
+					StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
+					long start = System.currentTimeMillis();
+					try {
+						insertNerGeo(timeRange, pipeline);
+					} catch (Exception e) {
+						LOGGER.warning("ner parsing error");
+						e.printStackTrace();
+					}
+					long time = System.currentTimeMillis() - start;
+					LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
+					double[] crash = new double[1];
+		        	crash[2] = 10;
+				}
+				catch(Exception e){
+					++this.unexpectedExceptionCount;
+					LOGGER.severe("Unexpected Exception on " + timeRange.toString() + " occured."
+							+ "\nStack trace: " + e.getStackTrace());
+					
+					if(this.unexpectedExceptionCount >= RETRY_LIMIT){
+						retryFlag = false;
+						String msg = "Time Range " + timeRange.toString() + " has not been fully processed."
+									+ "\nPossible document that causes the error is " + this.threadStatus.currentObjectId + "."
+									+ "\nCurrent Thread Status is " + this.threadStatus.toString() + ".";
+						
+						LOGGER.severe(msg);
+					}
+					else{
+						retryFlag = true;
+					}
+				}
 			}
+			while(retryFlag);
 		}
 	}
 	
@@ -116,9 +147,7 @@ public class NERThread implements Runnable{
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");
-		this.threadStatus.timeRange = timeRange;
-		
+		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");	
 		try{
 			while(cursor.hasNext()){
 				++Main.documentCount;

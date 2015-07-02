@@ -13,6 +13,7 @@ dependencies {
 	compile 'edu.stanford.nlp:stanford-corenlp:3.5.2'
 	compile 'org.mongodb:mongo-java-driver:3.0.2'
 	compile 'com.googlecode.json-simple:json-simple:1.1.1'
+	compile 'log4j:log4j:1.2.17'
 	compile files('local_jars/geonames-source-1.1.12.jar')
 	compile files('local_jars/stanford-corenlp-3.5.2-models.jar')
 	compile files('local_jars/stanford-corenlp-3.5.2-javadoc.jar')
