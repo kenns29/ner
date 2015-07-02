@@ -6,6 +6,8 @@ import org.bson.types.ObjectId;
 
 public class NERThreadList {
 	public static ArrayList<NERThread> list = new ArrayList<NERThread>();
+	public static ArrayList<Thread> threadList = new ArrayList<Thread>();
+	
 	public static ObjectId getSafeObjectId(ArrayList<NERThread> nerThreadList){
 		if(nerThreadList.size() > 1){
 			ObjectId smallestObjectId = nerThreadList.get(0).threadStatus.currentObjectId;

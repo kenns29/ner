@@ -86,11 +86,14 @@ public class NERThread implements Runnable{
 	
 	@Override
 	public void run() {
+		this.threadStatus.systemThreadId = Thread.currentThread().getId();
 		TimeRange timeRange = null;
 		while(true){
 			try {
+				this.threadStatus.isBlocked = true;
 				timeRange = queue.take();
 				this.threadStatus.timeRange = timeRange;
+				this.threadStatus.isBlocked = false;
 				
 			} catch (InterruptedException e1) {
 				LOGGER.info("TAKING " + timeRange.toString() + " is INTERRUPTED"

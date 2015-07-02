@@ -39,7 +39,7 @@ public class NER {
 	
 	private static int pipelineErrCount = 0;
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
-
+	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static JSONArray performAnnotation(String text) throws IOException{
 		
 		Properties NLPprops = new Properties();
@@ -173,9 +173,13 @@ public class NER {
 			NERThreadList.list.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
 		}
 		
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			NERThreadList.threadList.add(new Thread(NERThreadList.list.get(i)));
+		}
+		
 		new Thread(nerTaskManager).start();
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
-			new Thread(NERThreadList.list.get(i)).start();
+			NERThreadList.threadList.get(i).start();
 		}
 		
 		try {
@@ -188,17 +192,38 @@ public class NER {
 		while(true){
 			try {
 				Thread.sleep(60000);
-				long time = System.currentTimeMillis();
-				String msg = "";
-				for(int i = 0; i < Main.configPropertyValues.core; i++){
-					msg += NERThreadList.list.get(i).threadStatus.toString() + "\n";
+				synchronized(NER.class){
+					long time = System.currentTimeMillis();
+					String msg = "";
+					for(int i = 0; i < Main.configPropertyValues.core; i++){
+						msg += NERThreadList.list.get(i).threadStatus.toString() + "\n";
+					}
+					ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
+					LOGGER.info(msg
+							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
+							+ "\nThe Safe Object Id is " + safeObjectId.toString());
+					NERTaskManager.count = 0;
+					Main.mainPreTime = time;
+					
+					for(int i = 0; i < Main.configPropertyValues.core; i++){
+						Thread t = NERThreadList.threadList.get(i);
+						if(!t.isAlive()){
+							ThreadStatus tStatus = NERThreadList.list.get(i).threadStatus;
+							String msg1 = "";
+							msg1 += tStatus.toThreadIdString() + " is inactive."
+									+ "\nCurrent Thread Status: " + tStatus.toString();
+							LOGGER.error(msg1);
+							
+							String msg2 = "Time Range " + tStatus.timeRange.toString() + " has not been fully processed."
+									+ "\nPossible document that causes the error is " + tStatus.currentObjectId + "."
+									+ "\nCurrent Thread Status is " + tStatus.toString() + ".";
+						
+							HIGH_PRIORITY_LOGGER.fatal(msg2);
+							NERThreadList.threadList.set(i, new Thread(NERThreadList.list.get(i)));
+							NERThreadList.threadList.get(i).start();
+						}
+					}
 				}
-				ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
-				LOGGER.info(msg
-						+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
-						+ "\nThe Safe Object Id is " + safeObjectId.toString());
-				NERTaskManager.count = 0;
-				Main.mainPreTime = time;	
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
