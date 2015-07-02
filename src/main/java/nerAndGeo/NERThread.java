@@ -2,7 +2,7 @@ package nerAndGeo;
 
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import util.ThreadStatus;
 import util.TimeRange;
@@ -14,13 +14,15 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import org.apache.log4j.*;
 
 public class NERThread implements Runnable{
-	private static final Logger LOGGER = Logger.getLogger(NERThread.class.getName());
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static final int RETRY_LIMIT = 2;
-	static{
-		LOGGER.addHandler(LoggerAttr.fileHandler);
-	}
+//	static{
+//		LOGGER.addHandler(LoggerAttr.fileHandler);
+//	}
 	
 	private DBCollection coll = null;
 	private String inputField = null;
@@ -91,7 +93,7 @@ public class NERThread implements Runnable{
 				this.threadStatus.timeRange = timeRange;
 				
 			} catch (InterruptedException e1) {
-				LOGGER.severe("TAKING " + timeRange.toString() + " is INTERRUPTED"
+				LOGGER.info("TAKING " + timeRange.toString() + " is INTERRUPTED"
 						+ "\nStack trace: " + e1.getStackTrace());
 				continue;
 			} 
@@ -107,18 +109,15 @@ public class NERThread implements Runnable{
 					try {
 						insertNerGeo(timeRange, pipeline);
 					} catch (Exception e) {
-						LOGGER.warning("ner parsing error");
+						LOGGER.info("ner parsing error");
 						e.printStackTrace();
 					}
 					long time = System.currentTimeMillis() - start;
 					LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
-					double[] crash = new double[1];
-		        	crash[2] = 10;
 				}
 				catch(Exception e){
 					++this.unexpectedExceptionCount;
-					LOGGER.severe("Unexpected Exception on " + timeRange.toString() + " occured."
-							+ "\nStack trace: " + e.getStackTrace());
+					LOGGER.error("Unexpected Exception on " + timeRange.toString() + " occured.", e);
 					
 					if(this.unexpectedExceptionCount >= RETRY_LIMIT){
 						retryFlag = false;
@@ -126,7 +125,7 @@ public class NERThread implements Runnable{
 									+ "\nPossible document that causes the error is " + this.threadStatus.currentObjectId + "."
 									+ "\nCurrent Thread Status is " + this.threadStatus.toString() + ".";
 						
-						LOGGER.severe(msg);
+						HIGH_PRIORITY_LOGGER.fatal(msg, e);
 					}
 					else{
 						retryFlag = true;

@@ -1,4 +1,4 @@
-package nerAndGeo;
+package configProperties;
 
 import java.io.File;
 import java.io.FileInputStream;

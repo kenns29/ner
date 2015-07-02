@@ -1,13 +1,19 @@
 package nerAndGeo;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import org.apache.log4j.PropertyConfigurator;
 
 import util.TimeRange;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+
+import configProperties.ConfigPropertyValues;
 
 public class Main {
 	public static BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(4);
@@ -17,6 +23,10 @@ public class Main {
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
+			Properties props = new Properties();
+			InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("log4j.properties");
+			props.load(inputStream);
+			PropertyConfigurator.configure(props);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

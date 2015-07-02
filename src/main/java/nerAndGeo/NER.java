@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 
@@ -38,10 +38,8 @@ public class NER {
 	public static int userEntitiesDocCount = 0;
 	
 	private static int pipelineErrCount = 0;
-	private static final Logger LOGGER = Logger.getLogger(NER.class.getName());
-	static{
-		LOGGER.addHandler(LoggerAttr.fileHandler);
-	}
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+
 	public static JSONArray performAnnotation(String text) throws IOException{
 		
 		Properties NLPprops = new Properties();
@@ -103,9 +101,9 @@ public class NER {
 					++NER.pipelineErrCount;
 				}
 				isSecondTry = true;
-				LOGGER.severe("Pipline Annotation Error, text: " + text 
+				LOGGER.error("Pipline Annotation Error, text: " + text 
 						+ "\nIn Thread from " + timeRange.toString()
-						+ "\nThere are total of " + NER.pipelineErrCount + " such errors");
+						+ "\nThere are total of " + NER.pipelineErrCount + " such errors", e);
 				//e.printStackTrace();
 			}
 		} while(!annotationSuccess);

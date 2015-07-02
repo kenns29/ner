@@ -1,8 +1,8 @@
 package nerAndGeo;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
 import util.CollUtilities;
@@ -12,10 +12,7 @@ import util.TimeUtilities;
 import com.mongodb.DBCollection;
 
 public class NERTaskManager implements Runnable{ 
-	private static final Logger LOGGER = Logger.getLogger(NERTaskManager.class.getName());
-	static{
-		LOGGER.addHandler(LoggerAttr.fileHandler);
-	}
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	
 	private final BlockingQueue<TimeRange> queue;
 	private DBCollection coll = null;
@@ -78,7 +75,7 @@ public class NERTaskManager implements Runnable{
 					queue.put(timeRange);
 					LOGGER.info("time range " + timeRange.toString() + " is inserted to the queue to the queue");
 				} catch (InterruptedException e) {
-					LOGGER.severe("INSERTING " + timeRange.toString() + " is INTERRUPTED");
+					LOGGER.error("INSERTING " + timeRange.toString() + " is INTERRUPTED", e);
 					e.printStackTrace();
 				}
 				nextStartTime = nextEndTime;

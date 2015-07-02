@@ -3,8 +3,8 @@ package nerAndGeo;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.geonames.BoundingBox;
 import org.geonames.GeoNamesException;
 import org.geonames.InsufficientStyleException;
@@ -21,7 +21,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Geoname {
-	private static Logger LOGGER = Logger.getLogger(Geoname.class.getName());
+	private static Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Database cacheHost = null;
 	private static DB cacheDB = null;
 	private static DBCollection cacheColl = null;
@@ -29,7 +29,6 @@ public class Geoname {
 	public static int cacheHitCount = 0;
 	public static int geonameCount = 0;
 	static{
-		LOGGER.addHandler(LoggerAttr.fileHandler);
 		try {
 			cacheHost = new Database(Main.configPropertyValues.cacheHost, Main.configPropertyValues.cachePort);
 			cacheDB = cacheHost.getDatabase(Main.configPropertyValues.cacheDatabase);
@@ -186,7 +185,7 @@ public class Geoname {
 					synchronized(Geoname.class){
 						if(preAccountName.equals(Geoname.accountName)){
 							Geoname.cycleAccountName();
-							LOGGER.config("Setting Current Geoname Account: " + Geoname.accountName);
+							LOGGER.info("Setting Current Geoname Account: " + Geoname.accountName);
 						}
 					}
 					reachLimit = true;
