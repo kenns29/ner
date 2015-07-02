@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.log4j.PropertyConfigurator;
 
@@ -16,13 +17,14 @@ import com.mongodb.DBCollection;
 import configProperties.ConfigPropertyValues;
 
 public class Main {
-	public static BlockingQueue<TimeRange> queue = new ArrayBlockingQueue<TimeRange>(4);
+	public static BlockingQueue<TimeRange> queue = null;
 	public static ConfigPropertyValues configPropertyValues = null;
 	public static int documentCount = 0;
 	public static long mainPreTime = System.currentTimeMillis();
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
+			queue = new PriorityBlockingQueue<TimeRange>(Main.configPropertyValues.queueSize);
 			Properties props = new Properties();
 			InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("log4j.properties");
 			props.load(inputStream);

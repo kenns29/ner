@@ -23,6 +23,7 @@ public class ConfigPropertyValues {
 	public String userNerOutputField = null;
 	
 	public int core = 0;
+	public int queueSize = 4;
 	public boolean parallel = false;
 	
 	//0: split task by insertion time
@@ -93,6 +94,7 @@ public class ConfigPropertyValues {
 		userNerOutputField = prop.getProperty("userNerOutputField");
 		
 		core = Integer.valueOf(prop.getProperty("core"));
+		queueSize = Integer.valueOf(prop.getProperty("queueSize"));
 		parallel = Boolean.parseBoolean(prop.getProperty("parallel"));
 		parallelFlag = Integer.valueOf(prop.getProperty("parallelFlag"));
 		
@@ -110,11 +112,11 @@ public class ConfigPropertyValues {
 		String startTimeStr = prop.getProperty("startTime");
 		String endTimeStr = prop.getProperty("endTime");
 		if(!startTimeStr.equals("none")){
-			startTime = Long.getLong(prop.getProperty("startTime"));
+			startTime = Long.valueOf(prop.getProperty("startTime")).longValue();
 		}
 		
 		if(!endTimeStr.equals("none")){
-			endTime = Long.getLong(prop.getProperty("endTime"));
+			endTime = Long.valueOf(prop.getProperty("endTime")).longValue();
 		}
 		stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		

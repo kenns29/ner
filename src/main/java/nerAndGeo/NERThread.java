@@ -129,6 +129,7 @@ public class NERThread implements Runnable{
 									+ "\nCurrent Thread Status is " + this.threadStatus.toString() + ".";
 						
 						HIGH_PRIORITY_LOGGER.fatal(msg, e);
+						this.unexpectedExceptionCount = 0;
 					}
 					else{
 						retryFlag = true;
