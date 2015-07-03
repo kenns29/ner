@@ -172,7 +172,9 @@ public class Geoname {
 		BasicDBObject rObj = null;
 		boolean reachLimit = false;
 		do{
+			String preAccountName = Geoname.accountName;
 			try{
+				
 				rObj = Geoname.geocode(name);
 				if(rObj != null){
 					cacheGeonameObj(name, rObj);
@@ -180,7 +182,6 @@ public class Geoname {
 				reachLimit = false;
 			}
 			catch(GeoNamesException exception){
-				String preAccountName = Geoname.accountName;
 				int code = exception.getExceptionCode();
 				//http://www.geonames.org/export/webservice-exception.html
 				if(code == 19 || code == 10){
@@ -193,7 +194,7 @@ public class Geoname {
 					reachLimit = true;
 				}
 				else{
-					exception.printStackTrace();
+					LOGGER.error("Geoname Error", exception);
 				}
 			}
 		} while(reachLimit);
