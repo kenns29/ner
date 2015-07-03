@@ -24,7 +24,7 @@ public class Main {
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
-			queue = new PriorityBlockingQueue<TimeRange>(Main.configPropertyValues.queueSize);
+			queue = new ArrayBlockingQueue<TimeRange>(6);
 			Properties props = new Properties();
 			InputStream inputStream = Main.class.getClassLoader().getResourceAsStream("log4j.properties");
 			props.load(inputStream);

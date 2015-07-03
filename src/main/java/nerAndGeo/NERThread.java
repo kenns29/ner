@@ -150,7 +150,9 @@ public class NERThread implements Runnable{
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + cursor.count() + " items");	
+		int numDocs = cursor.count();
+		this.threadStatus.numDocs = numDocs;
+		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + numDocs + " items");	
 		try{
 			while(cursor.hasNext()){
 				++Main.documentCount;

@@ -28,6 +28,8 @@ public class Geoname {
 	public static int nameCount = 0;
 	public static int cacheHitCount = 0;
 	public static int geonameCount = 0;
+	public static int perGeonameCount = 0;
+	public static int perCacheHitCount = 0;
 	static{
 		try {
 			cacheHost = new Database(Main.configPropertyValues.cacheHost, Main.configPropertyValues.cachePort);
@@ -227,16 +229,22 @@ public class Geoname {
 			geonameObj = getGeonameWithAccountRotate(name);
 			if(geonameObj != null){
 				++Geoname.geonameCount;
+				++Geoname.perGeonameCount;
 			}
 		}
 		else{
 			++Geoname.cacheHitCount;
+			++Geoname.perCacheHitCount;
 		}
 		
 		if(Geoname.nameCount % 100 == 0){
 			DecimalFormat df = new DecimalFormat("#.00");
-			LOGGER.info(Geoname.nameCount + " names has been encountered, " + Geoname.geonameCount + " are geocoded with geoname, " + Geoname.cacheHitCount + " are found from geoname cache.\n"
-					+ "cache hit rate is " + df.format((double)Geoname.cacheHitCount/Geoname.nameCount));
+			LOGGER.info("Overall, " + Geoname.nameCount + " names has been encountered, " + Geoname.geonameCount + " are geocoded with geoname, " + Geoname.cacheHitCount + " are found from geoname cache.\n"
+					+ "\nAmong the last 100 names, " + Geoname.perGeonameCount + " are geocoded with geoname, " + Geoname.perCacheHitCount + " are found from the geoname cache."
+					+ "\nThe cache hit rate is " + df.format((double)Geoname.perCacheHitCount/100)
+					+ "\nThe overall cache hit rate is " + df.format((double)Geoname.cacheHitCount/ Geoname.nameCount));
+			Geoname.perGeonameCount = 0;
+			Geoname.perCacheHitCount = 0;
 		}
 		return geonameObj;
 	}

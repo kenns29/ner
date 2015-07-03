@@ -18,32 +18,35 @@ public class HttpServerHandler implements HttpHandler {
 
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
-		String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
-		threadTable += ThreadStatus.makeHttpTableHeader();
-		for(int i = 0; i < NERThreadList.list.size(); i++){
-			threadTable += NERThreadList.list.get(i).threadStatus.toHttpTableRowEntry();
+		String response = "";
+		synchronized(this){
+			String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
+			threadTable += ThreadStatus.makeHttpTableHeader();
+			for(int i = 0; i < NERThreadList.list.size(); i++){
+				threadTable += NERThreadList.list.get(i).threadStatus.toHttpTableRowEntry();
+			}
+			threadTable += "</table>";
+			
+			String queueTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
+			queueTable += TimeRange.makeHttpTableHeader();
+			Iterator<TimeRange> queueIterator = Main.queue.iterator();
+			while(queueIterator.hasNext()){
+				TimeRange timeRange = queueIterator.next();
+				queueTable += timeRange.toHttpTableRowEntry();
+			}
+			queueTable += "</table>";
+			
+			ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
+			
+			response = "<html><body>";
+			response += "<p> Current Thread Status </p>";
+			response += threadTable;
+			response += "<p> The Current Safest Object Id is " + safeObjectId.toString() + "</p>";
+			response += "<p> Current Tasks Queued </p>";
+			response += queueTable;
+			response += "</body></html>";
 		}
-		threadTable += "</table>";
-		
-		String queueTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
-		queueTable += TimeRange.makeHttpTableHeader();
-		Iterator<TimeRange> queueIterator = Main.queue.iterator();
-		while(queueIterator.hasNext()){
-			TimeRange timeRange = queueIterator.next();
-			queueTable += timeRange.toHttpTableRowEntry();
-		}
-		queueTable += "</table>";
-		
-		ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
-		
-		String response = "<html><body>";
-		response += "<p> Current Thread Status </p>";
-		response += threadTable;
-		response += "<p> The Current Safest Object Id is " + safeObjectId.toString() + "</p>";
-		response += "<p> Current Tasks Queued </p>";
-		response += queueTable;
-		response += "</body></html>";
-        httpExchange.sendResponseHeaders(200, response.length());
+		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
         os.close();
