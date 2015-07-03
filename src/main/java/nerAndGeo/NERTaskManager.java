@@ -20,7 +20,6 @@ public class NERTaskManager implements Runnable{
 	private long startTime = 0;
 	private long endTime = 0;
 	
-	public static AtomicInteger count = new AtomicInteger(0);
 	public NERTaskManager(long startTime, long endTime, BlockingQueue<TimeRange> queue, DBCollection coll){
 		this.startTime = startTime;
 		this.endTime = endTime;
