@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
@@ -34,10 +35,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 public class NER {
-	public static int textEntitiesDocCount = 0;
-	public static int userEntitiesDocCount = 0;
-	
-	private static int pipelineErrCount = 0;
+	private static AtomicInteger pipelineErrCount = new AtomicInteger(0);
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static JSONArray performAnnotation(String text) throws IOException{
@@ -97,13 +95,16 @@ public class NER {
 			}
 			catch(Exception e){
 				annotationSuccess = false;
-				if(!isSecondTry){
-					++NER.pipelineErrCount;
+				synchronized(NER.class){
+					int pCount = pipelineErrCount.intValue();
+					if(!isSecondTry){
+						pCount = pipelineErrCount.incrementAndGet();
+					}
+					isSecondTry = true;
+					LOGGER.error("Pipline Annotation Error, text: " + text 
+							+ "\nIn Thread from " + timeRange.toString()
+							+ "\nThere are total of " + pCount + " such errors", e);
 				}
-				isSecondTry = true;
-				LOGGER.error("Pipline Annotation Error, text: " + text 
-						+ "\nIn Thread from " + timeRange.toString()
-						+ "\nThere are total of " + NER.pipelineErrCount + " such errors", e);
 				//e.printStackTrace();
 			}
 		} while(!annotationSuccess);
@@ -159,6 +160,7 @@ public class NER {
 		}
 		return mongoList;
 	}
+
 	public static BasicDBList annotateDBObject(String text, int length){
 		BasicDBList result = null;
 		return result;
@@ -200,9 +202,9 @@ public class NER {
 					}
 					ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
 					LOGGER.info(msg
-							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + NERTaskManager.count + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
+							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + Main.timelyDocCount.intValue() + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
 							+ "\nThe Safe Object Id is " + safeObjectId.toString());
-					NERTaskManager.count = 0;
+					Main.timelyDocCount.set(0);
 					Main.mainPreTime = time;
 					
 					for(int i = 0; i < Main.configPropertyValues.core; i++){

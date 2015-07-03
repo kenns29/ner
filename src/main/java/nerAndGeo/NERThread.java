@@ -155,7 +155,7 @@ public class NERThread implements Runnable{
 		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + numDocs + " items");	
 		try{
 			while(cursor.hasNext()){
-				++Main.documentCount;
+				int documentCount = Main.documentCount.incrementAndGet();
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
 				String text = mongoObj.getString(inputField);
 				this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
@@ -187,15 +187,17 @@ public class NERThread implements Runnable{
 				}
 				
 				BasicDBList entities = new BasicDBList();
+				int textEntitiesDocCount = Main.textEntitiesDocCount.intValue();
+				int userEntitiesDocCount = Main.userEntitiesDocCount.intValue();
 				if(textEntities != null){
 					if(textEntities.size() > 0){
-						++NER.textEntitiesDocCount;
+						textEntitiesDocCount =  Main.textEntitiesDocCount.incrementAndGet();
 					}
 					entities.addAll(textEntities);
 				}
 				if(userEntities != null){
 					if(userEntities.size() > 0){
-						++NER.userEntitiesDocCount;
+						userEntitiesDocCount = Main.userEntitiesDocCount.incrementAndGet();
 					}
 					entities.addAll(userEntities);
 				}
@@ -244,9 +246,9 @@ public class NERThread implements Runnable{
 				}
 				
 				
-				++NERTaskManager.count;
-				if(Main.documentCount % 100 == 0){
-					LOGGER.info(Main.documentCount + " documents has been processed. " + NER.textEntitiesDocCount + " documents has entities from text. " + NER.userEntitiesDocCount + " documents has entities from user profile location.");
+				Main.timelyDocCount.incrementAndGet();
+				if(documentCount % 100 == 0){
+					LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
 				}
 			}
 		}

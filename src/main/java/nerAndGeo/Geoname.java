@@ -3,6 +3,7 @@ package nerAndGeo;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.geonames.BoundingBox;
@@ -21,15 +22,18 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Geoname {
+	private static final int GEONAME_RETRY_LIMIT = 2;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Database cacheHost = null;
 	private static DB cacheDB = null;
 	private static DBCollection cacheColl = null;
-	public static int nameCount = 0;
-	public static int cacheHitCount = 0;
-	public static int geonameCount = 0;
-	public static int perGeonameCount = 0;
-	public static int perCacheHitCount = 0;
+	private static AtomicInteger nameCount = new AtomicInteger(0);
+	private static AtomicInteger cacheHitCount = new AtomicInteger(0);
+	private static AtomicInteger geonameCount = new AtomicInteger(0);
+	private static AtomicInteger perGeonameCount = new AtomicInteger(0);
+	private static AtomicInteger perCacheHitCount = new AtomicInteger(0);
+	
+	private static AtomicInteger accountNumber = new AtomicInteger(0);
 	static{
 		try {
 			cacheHost = new Database(Main.configPropertyValues.cacheHost, Main.configPropertyValues.cachePort);
@@ -40,10 +44,10 @@ public class Geoname {
 		}
 		
 	}
-	private static int accountNumber = 0;
+
 	public static String accountName = getAccountName();
 	public static String getAccountName(){
-		if(accountNumber == 0){
+		if(accountNumber.intValue() == 0){
 			return "labuse";
 		}
 		else{
@@ -52,9 +56,11 @@ public class Geoname {
 	}
 	
 	private static void cycleAccountNumber(){
-		++accountNumber;
-		if(accountNumber > 10){
-			accountNumber = 0;
+		synchronized(Geoname.class){
+			int n = accountNumber.incrementAndGet();
+			if(n > 10){
+				accountNumber.set(0);
+			}
 		}
 	}
 	
@@ -170,6 +176,7 @@ public class Geoname {
 	 
 	 public static BasicDBObject getGeonameWithAccountRotate(String name) throws Exception{
 		BasicDBObject rObj = null;
+		int unexpectedExceptionCount = 0;
 		boolean reachLimit = false;
 		do{
 			String preAccountName = Geoname.accountName;
@@ -193,11 +200,14 @@ public class Geoname {
 					}
 					reachLimit = true;
 				}
+				else if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
+					++unexpectedExceptionCount;
+				}
 				else{
 					LOGGER.error("Geoname Error", exception);
 				}
 			}
-		} while(reachLimit);
+		} while(reachLimit && unexpectedExceptionCount <= GEONAME_RETRY_LIMIT);
 		return rObj;
 	}
 	public static BasicDBObject makeCacheObj(String name, BasicDBObject geonameObj){
@@ -216,36 +226,49 @@ public class Geoname {
 		BasicDBObject geonameObj = null;
 		Object obj = cacheColl.findOne(new BasicDBObject("name", name));
 		if(obj != null){
-//			System.out.println("found in cache");
 			geonameObj = (BasicDBObject) ((BasicDBObject) obj).get("geoname");
 		}
 		return geonameObj;
 	}
 	
 	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
-//		System.out.println("encounter name " + name);
-		++Geoname.nameCount; 
+		boolean cacheHit = false;
+		boolean geonameHit = false;
 		BasicDBObject geonameObj = getGeonameObjFromCache(name);
+		
 		if(geonameObj == null){
 			geonameObj = getGeonameWithAccountRotate(name);
 			if(geonameObj != null){
-				++Geoname.geonameCount;
-				//++Geoname.perGeonameCount;
+				geonameHit = true;
 			}
 		}
 		else{
-			++Geoname.cacheHitCount;
-			//++Geoname.perCacheHitCount;
+			cacheHit = true;
 		}
 		
-		if(Geoname.nameCount % 100 == 0){
-			DecimalFormat df = new DecimalFormat("#.00");
-			LOGGER.info("Overall, " + Geoname.nameCount + " names has been encountered, " + Geoname.geonameCount + " are geocoded with geoname, " + Geoname.cacheHitCount + " are found from geoname cache.\n"
-					//+ "\nAmong the last 100 names, " + Geoname.perGeonameCount + " are geocoded with geoname, " + Geoname.perCacheHitCount + " are found from the geoname cache."
-					//+ "\nThe cache hit rate is " + df.format((double)Geoname.perCacheHitCount/100)
-					+ "\nThe overall cache hit rate is " + df.format((double)Geoname.cacheHitCount/ Geoname.nameCount));
-			//Geoname.perGeonameCount = 0;
-			//Geoname.perCacheHitCount = 0;
+		synchronized(Geoname.class){
+			int nCount = Geoname.nameCount.incrementAndGet();
+			int gCount = Geoname.geonameCount.intValue();
+			int cCount = Geoname.cacheHitCount.intValue();
+			int pgCount = Geoname.perGeonameCount.intValue();
+			int pcCount = Geoname.perCacheHitCount.intValue();
+			if(cacheHit){
+				cCount = Geoname.cacheHitCount.incrementAndGet();
+				pcCount = Geoname.perCacheHitCount.incrementAndGet();
+			}
+			else if(geonameHit){
+				gCount = Geoname.geonameCount.incrementAndGet();
+				pgCount = Geoname.perGeonameCount.incrementAndGet();
+			}
+			if(nCount % 100 == 0){
+				DecimalFormat df = new DecimalFormat("#.00");
+				LOGGER.info("Overall, " + nCount + " names has been encountered, " + gCount + " are geocoded with geoname, " + cCount + " are found from geoname cache.\n"
+						+ "\nAmong the last 100 names, " + pgCount + " are geocoded with geoname, " + pcCount + " are found from the geoname cache."
+						+ "\nThe cache hit rate is " + df.format((double)pcCount/100)
+						+ "\nThe overall cache hit rate is " + df.format((double)cCount/ nCount));
+				Geoname.perGeonameCount.set(0);
+				Geoname.perCacheHitCount.set(0);
+			}
 		}
 		return geonameObj;
 	}

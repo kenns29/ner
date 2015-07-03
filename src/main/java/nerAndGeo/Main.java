@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.PropertyConfigurator;
 
@@ -19,8 +20,13 @@ import configProperties.ConfigPropertyValues;
 public class Main {
 	public static BlockingQueue<TimeRange> queue = null;
 	public static ConfigPropertyValues configPropertyValues = null;
-	public static int documentCount = 0;
+	
+	public static AtomicInteger documentCount = new AtomicInteger(0);
+	public static AtomicInteger timelyDocCount = new AtomicInteger(0);
+	public static AtomicInteger textEntitiesDocCount = new AtomicInteger(0);
+	public static AtomicInteger userEntitiesDocCount = new AtomicInteger(0);
 	public static long mainPreTime = System.currentTimeMillis();
+	
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
