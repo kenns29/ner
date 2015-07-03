@@ -15,6 +15,8 @@ import org.geonames.ToponymSearchCriteria;
 import org.geonames.ToponymSearchResult;
 import org.geonames.WebService;
 
+import util.ThreadStatus;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -24,6 +26,7 @@ import com.mongodb.DBCursor;
 public class Geoname {
 	private static final int GEONAME_RETRY_LIMIT = 2;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static Database cacheHost = null;
 	private static DB cacheDB = null;
 	private static DBCollection cacheColl = null;
@@ -174,7 +177,7 @@ public class Geoname {
 	 }
 	 
 	 
-	 public static BasicDBObject getGeonameWithAccountRotate(String name) throws Exception{
+	 public static BasicDBObject getGeonameWithAccountRotate(String name, ThreadStatus threadStatus) throws Exception{
 		BasicDBObject rObj = null;
 		int unexpectedExceptionCount = 0;
 		boolean reachLimit = false;
@@ -204,7 +207,10 @@ public class Geoname {
 					++unexpectedExceptionCount;
 				}
 				else{
-					LOGGER.error("Geoname Error", exception);
+					HIGH_PRIORITY_LOGGER.error("Current Document is not fully processed by geoname."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to Unexpected Geoname Error", exception);
+					
 				}
 			}
 		} while(reachLimit && unexpectedExceptionCount <= GEONAME_RETRY_LIMIT);
@@ -231,13 +237,13 @@ public class Geoname {
 		return geonameObj;
 	}
 	
-	public static BasicDBObject getGeonameMongoObj(String name) throws Exception{
+	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{
 		boolean cacheHit = false;
 		boolean geonameHit = false;
 		BasicDBObject geonameObj = getGeonameObjFromCache(name);
 		
 		if(geonameObj == null){
-			geonameObj = getGeonameWithAccountRotate(name);
+			geonameObj = getGeonameWithAccountRotate(name, threadStatus);
 			if(geonameObj != null){
 				geonameHit = true;
 			}
@@ -272,17 +278,17 @@ public class Geoname {
 		}
 		return geonameObj;
 	}
-	public static BasicDBList makeGeonameList(BasicDBList ner) throws Exception{
-		return makeGeonameList(ner, null);
+	public static BasicDBList makeGeonameList(BasicDBList ner, ThreadStatus threadStatus) throws Exception{
+		return makeGeonameList(ner, null, threadStatus);
 	}
-	public static BasicDBList makeGeonameList(BasicDBList ner, String flag) throws Exception{
+	public static BasicDBList makeGeonameList(BasicDBList ner, String flag, ThreadStatus threadStatus) throws Exception{
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
 			BasicDBObject entity = (BasicDBObject) e;
 			String entType = entity.getString("entityType");
 			String ent = entity.getString("entity");
 			if(entType.equals("LOCATION")){
-				BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
+				BasicDBObject rObj = Geoname.getGeonameMongoObj(ent, threadStatus);
 				
 			    if(rObj != null){
 					if(flag != null){
@@ -296,11 +302,11 @@ public class Geoname {
 		return outList;
 	}
 	
-	public static BasicDBList makeNerGeonameList(BasicDBList ner) throws Exception{
-		return makeNerGeonameList(ner, null);
+	public static BasicDBList makeNerGeonameList(BasicDBList ner, ThreadStatus threadStatus) throws Exception{
+		return makeNerGeonameList(ner, null, threadStatus);
 	}
 	
-	public static BasicDBList makeNerGeonameList(BasicDBList ner, String flag) throws Exception{
+	public static BasicDBList makeNerGeonameList(BasicDBList ner, String flag, ThreadStatus threadStatus) throws Exception{
 		BasicDBList outList = new BasicDBList();
 		for(Object e : ner){
 			BasicDBObject entity = (BasicDBObject) e;
@@ -308,7 +314,7 @@ public class Geoname {
 			String ent = entity.getString("entity");
 			
 			if(entType.equals("LOCATION")){
-				BasicDBObject geonameObj = Geoname.getGeonameMongoObj(ent);
+				BasicDBObject geonameObj = Geoname.getGeonameMongoObj(ent, threadStatus);
 				if(geonameObj != null){
 					entity.put("geoname", geonameObj);
 				}
@@ -340,7 +346,7 @@ public class Geoname {
 					String entType = entity.getString("entityType");
 					String ent = entity.getString("entity");
 					if(entType.equals("LOCATION")){
-						BasicDBObject rObj = Geoname.getGeonameMongoObj(ent);
+						BasicDBObject rObj = Geoname.getGeonameMongoObj(ent, new ThreadStatus(0));
 					    if(rObj != null){
 							outList.add(rObj);
 						}

@@ -214,7 +214,7 @@ public class NERThread implements Runnable{
 							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 				}
 				else if(Main.configPropertyValues.outputOption == 0){
-					BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities);
+					BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
 					geojsonList.addFromNerGeonameList(nerGeonameList);
 //					System.out.println(nerGeonameList.toString());
 					if(geojsonList.isEmpty()){
@@ -229,7 +229,7 @@ public class NERThread implements Runnable{
 					
 				}
 				else if(Main.configPropertyValues.outputOption == 1){
-					BasicDBList geonameList = Geoname.makeGeonameList(entities);
+					BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
 					geojsonList.addFromGeonameList(geonameList);
 					if(geojsonList.isEmpty()){
 						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
