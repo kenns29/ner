@@ -109,12 +109,7 @@ public class NERThread implements Runnable{
 					NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 					StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 					long start = System.currentTimeMillis();
-					try {
-						insertNerGeo(timeRange, pipeline);
-					} catch (Exception e) {
-						LOGGER.info("ner parsing error");
-						e.printStackTrace();
-					}
+					insertNerGeo(timeRange, pipeline);
 					long time = System.currentTimeMillis() - start;
 					LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
 				}
