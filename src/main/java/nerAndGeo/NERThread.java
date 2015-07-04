@@ -247,7 +247,7 @@ public class NERThread implements Runnable{
 				
 				
 				Main.timelyDocCount.incrementAndGet();
-				if(documentCount % 100 == 0){
+				if(documentCount % 1000 == 0){
 					LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
 				}
 			}

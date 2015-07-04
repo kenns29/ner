@@ -266,11 +266,11 @@ public class Geoname {
 				gCount = Geoname.geonameCount.incrementAndGet();
 				pgCount = Geoname.perGeonameCount.incrementAndGet();
 			}
-			if(nCount % 100 == 0){
+			if(nCount % 5000 == 0){
 				DecimalFormat df = new DecimalFormat("#.00");
 				LOGGER.info("Overall, " + nCount + " names has been encountered, " + gCount + " are geocoded with geoname, " + cCount + " are found from geoname cache.\n"
-						+ "\nAmong the last 100 names, " + pgCount + " are geocoded with geoname, " + pcCount + " are found from the geoname cache."
-						+ "\nThe cache hit rate is " + df.format((double)pcCount/100)
+						+ "\nAmong the last 5000 names, " + pgCount + " are geocoded with geoname, " + pcCount + " are found from the geoname cache."
+						+ "\nThe cache hit rate is " + df.format((double)pcCount/5000)
 						+ "\nThe overall cache hit rate is " + df.format((double)cCount/ nCount));
 				Geoname.perGeonameCount.set(0);
 				Geoname.perCacheHitCount.set(0);

@@ -227,7 +227,9 @@ public class NER {
 					}
 				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				HIGH_PRIORITY_LOGGER.fatal("Main Thread Interrupted.", e);
+			} catch (Exception e){
+				HIGH_PRIORITY_LOGGER.fatal("Main Thread Unexpected Exception", e);
 			}
 		}
 	}
