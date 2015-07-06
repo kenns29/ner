@@ -104,59 +104,66 @@ public class NERTaskManager implements Runnable{
 				}
 			}
 		}
-		else{//Split tasks by number of documents
-			if(Main.configPropertyValues.stopAtEnd){
-				/////////////////////////
-				/// To BE impl //////////
-				/////////////////////////
-			}
-			else{
-				ObjectId nextStartObjectId = this.startObjectId;
-				while(true){
-					BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId));
-					BasicDBObject field = new BasicDBObject("_id", 1)
-					.append("coordinates", 1)
-					.append("created_at", 1)
-					.append("id", 1)
-					.append("text", 1)
-					.append("timestamp", 1)
-					.append("place", 1)
-					.append("location", 1)
-					.append("user.location", 1);
-					
-					boolean retryFlag = false;
-					int unexpectedExceptionCount = 0;
-					ArrayList<DBObject> mongoObjList = null;
+		//Split tasks by number of documents
+		else{
+			ObjectId nextStartObjectId = this.startObjectId;
+			boolean continueFlag = true;
+			while(continueFlag){
+				BasicDBObject query = null;
+				if(Main.configPropertyValues.stopAtEnd){
+					query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId)
+													.append("$lte", this.endObjectId));
+				}
+				else{
+					query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId));
+				}
+				BasicDBObject field = new BasicDBObject("_id", 1)
+				.append("coordinates", 1)
+				.append("created_at", 1)
+				.append("id", 1)
+				.append("text", 1)
+				.append("timestamp", 1)
+				.append("place", 1)
+				.append("location", 1)
+				.append("user.location", 1);
+				
+				boolean retryFlag = false;
+				int unexpectedExceptionCount = 0;
+				ArrayList<DBObject> mongoObjList = null;
+				do{
+					DBCursor cursor = null;
+					boolean retryFlag1 = false;
+					int unexpectedExceptionCount1 = 0;
+					//Query the documents
 					do{
-						DBCursor cursor = null;
-						boolean retryFlag1 = false;
-						int unexpectedExceptionCount1 = 0;
-						//Query the documents
-						do{
-							try{
-								cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread + 1);
+						try{
+							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread + 1);
+						}
+						catch(Exception e){
+							++unexpectedExceptionCount1;
+							if(unexpectedExceptionCount1 > this.CURSOR_RETRY_LIMIT1){
+								retryFlag1 = false;
+								unexpectedExceptionCount1 = 0;
+								String msg = "Time Range starts with " + nextStartObjectId.toHexString() + " has not been successfully inserted to the queue."
+										+ "\nDue to Unexpected Error during the query.";
+								
+								HIGH_PRIORITY_LOGGER.fatal(msg, e);
 							}
-							catch(Exception e){
-								++unexpectedExceptionCount1;
-								if(unexpectedExceptionCount1 > this.CURSOR_RETRY_LIMIT1){
-									retryFlag1 = false;
-									unexpectedExceptionCount1 = 0;
-									String msg = "Time Range starts with " + nextStartObjectId.toHexString() + " has not been successfully inserted to the queue."
-											+ "\nDue to Unexpected Error during the query.";
-									
-									HIGH_PRIORITY_LOGGER.fatal(msg, e);
-								}
-								else{
-									retryFlag1 = true;
-								}
+							else{
+								retryFlag1 = true;
 							}
 						}
-						while(retryFlag1);
-						
-						//Converting the cursor to array
-						if(cursor != null){
-							//If the cursor has fewer documents than numDocsInThread + 1
-							if(cursor.count() < Main.configPropertyValues.numDocsInThread + 1){
+					}
+					while(retryFlag1);
+					
+					//Converting the cursor to array
+					if(cursor != null){
+						//If the cursor has fewer documents than numDocsInThread + 1
+						if(cursor.count() < Main.configPropertyValues.numDocsInThread + 1){
+							if(Main.configPropertyValues.stopAtEnd){
+								continueFlag = false;
+							}
+							else{
 								long timeDiff = 300000; //5min
 								LOGGER.info("The query for " + nextStartObjectId.toHexString() 
 										+" reached the end, waiting for " + timeDiff + " milliseconds."
@@ -170,52 +177,53 @@ public class NERTaskManager implements Runnable{
 								LOGGER.info("Wake Up for task starting at " + nextStartObjectId.toHexString());
 								continue; //Back to the beginning of the do loop
 							}
-							
-							try{
-								mongoObjList = (ArrayList<DBObject>) cursor.toArray();
-								
-							}
-							catch(Exception e){
-								++unexpectedExceptionCount;
-								if(unexpectedExceptionCount > this.CURSOR_RETRY_LIMIT){
-									retryFlag = false;
-									unexpectedExceptionCount = 0;
-									String msg = "Time Range starts with " + nextStartObjectId.toHexString() + " has not been successfully inserted to the queue."
-											+ "\nDue to Unexpected Error while converting the cursor to array.";
-									
-									HIGH_PRIORITY_LOGGER.fatal(msg, e);
-								}
-								else{
-									retryFlag = true;
-								}
-							}
-							finally{
-								cursor.close();
-							}
 						}
-					}
-					while(retryFlag);
-					
-					//put the task into the queue
-					if(mongoObjList != null){ 
-						BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.remove(mongoObjList.size() - 1);
 						
-						BasicDBObject lastObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
-						ObjectId nextEndObjectId = lastObj.getObjectId("_id");
-						TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList);
-						try {
-							queue.put(timeRange);
-							LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue to the queue");
-						} catch (InterruptedException e) {
-							LOGGER.error("INSERTING Object id range " + timeRange.toObjectIdString() + ", with time range " +  timeRange.toString() + " is INTERRUPTED", e);
+						try{
+							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+							
 						}
-						nextStartObjectId = nextStartObj.getObjectId("_id");
+						catch(Exception e){
+							++unexpectedExceptionCount;
+							if(unexpectedExceptionCount > this.CURSOR_RETRY_LIMIT){
+								retryFlag = false;
+								unexpectedExceptionCount = 0;
+								String msg = "Time Range starts with " + nextStartObjectId.toHexString() + " has not been successfully inserted to the queue."
+										+ "\nDue to Unexpected Error while converting the cursor to array.";
+								
+								HIGH_PRIORITY_LOGGER.fatal(msg, e);
+							}
+							else{
+								retryFlag = true;
+							}
+						}
+						finally{
+							cursor.close();
+						}
 					}
-					else{
-						/////////////////////////
-						/// To BE impl //////////
-						/////////////////////////
+				}
+				while(retryFlag);
+				
+				//put the task into the queue
+				if(mongoObjList != null){ 
+					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.remove(mongoObjList.size() - 1);
+					
+					BasicDBObject lastObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
+					ObjectId nextEndObjectId = lastObj.getObjectId("_id");
+					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList);
+					try {
+						queue.put(timeRange);
+						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue to the queue");
+					} catch (InterruptedException e) {
+						LOGGER.error("INSERTING Object id range " + timeRange.toObjectIdString() + ", with time range " +  timeRange.toString() + " is INTERRUPTED", e);
 					}
+					nextStartObjectId = nextStartObj.getObjectId("_id");
+				}
+				//Query did not succeed, need to pick an arbitrary next starting point
+				else{
+					long nextStartTime = TimeUtilities.getTimestampFromObjectId(nextStartObjectId);
+					nextStartObjectId = TimeUtilities.getObjectId(nextStartTime + 300000, 0, 0, 0); 
+					HIGH_PRIORITY_LOGGER.fatal("Query did not succeed, Picking an arbitrary Object ID " + nextStartObjectId.toHexString() + " as next starting point.");
 				}
 			}
 		}
