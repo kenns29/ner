@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 
 import util.ThreadStatus;
 import util.TimeRange;
+import nerAndGeo.Geoname;
 import nerAndGeo.Main;
 import nerAndGeo.NERThreadList;
 
@@ -44,6 +45,7 @@ public class HttpServerHandler implements HttpHandler {
 			response += "<p> The Current Safest Object Id is " + safeObjectId.toString() + "</p>";
 			response += "<p> Current Tasks Queued </p>";
 			response += queueTable;
+			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
 			response += "</body></html>";
 		}
 		httpExchange.sendResponseHeaders(200, response.length());
