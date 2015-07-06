@@ -108,7 +108,9 @@ public class NERTaskManager implements Runnable{
 		else{
 			ObjectId nextStartObjectId = this.startObjectId;
 			boolean continueFlag = true;
+			boolean skipFlag = false;
 			while(continueFlag){
+				skipFlag = false;
 				BasicDBObject query = null;
 				if(Main.configPropertyValues.stopAtEnd){
 					query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId)
@@ -158,6 +160,7 @@ public class NERTaskManager implements Runnable{
 					
 					//Converting the cursor to array
 					if(cursor != null){
+						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 						//If the cursor has fewer documents than numDocsInThread + 1
 						if(cursor.count() < Main.configPropertyValues.numDocsInThread + 1){
 							if(Main.configPropertyValues.stopAtEnd){
@@ -175,7 +178,9 @@ public class NERTaskManager implements Runnable{
 								}
 								
 								LOGGER.info("Wake Up for task starting at " + nextStartObjectId.toHexString());
-								continue; //Back to the beginning of the do loop
+								cursor.close();
+								skipFlag = true;
+								break; 
 							}
 						}
 						
@@ -205,7 +210,7 @@ public class NERTaskManager implements Runnable{
 				while(retryFlag);
 				
 				//put the task into the queue
-				if(mongoObjList != null){ 
+				if(mongoObjList != null && !skipFlag){ 
 					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.remove(mongoObjList.size() - 1);
 					
 					BasicDBObject lastObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
@@ -220,10 +225,12 @@ public class NERTaskManager implements Runnable{
 					nextStartObjectId = nextStartObj.getObjectId("_id");
 				}
 				//Query did not succeed, need to pick an arbitrary next starting point
-				else{
+				else if(!skipFlag){
 					long nextStartTime = TimeUtilities.getTimestampFromObjectId(nextStartObjectId);
+					String msg = "Query for starting point " + nextStartObjectId.toHexString() + " did not succeed. ";
 					nextStartObjectId = TimeUtilities.getObjectId(nextStartTime + 300000, 0, 0, 0); 
-					HIGH_PRIORITY_LOGGER.fatal("Query did not succeed, Picking an arbitrary Object ID " + nextStartObjectId.toHexString() + " as next starting point.");
+					msg += "Picking an arbitrary Object ID " + nextStartObjectId.toHexString() + " as next starting point.";
+					HIGH_PRIORITY_LOGGER.fatal(msg);
 				}
 			}
 		}

@@ -25,7 +25,7 @@ import org.apache.log4j.*;
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	private static final int RETRY_LIMIT = 0;
+	private static final int RETRY_LIMIT = 1;
 //	static{
 //		LOGGER.addHandler(LoggerAttr.fileHandler);
 //	}
@@ -110,22 +110,22 @@ public class NERThread implements Runnable{
 			boolean retryFlag = false;
 			do{
 				try{
-					LOGGER.info("Started new Thread for " + timeRange.toString());
+					LOGGER.info("Started new Thread for " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString());
 					Properties NLPprops = new Properties();
 					NLPprops.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
 					StanfordCoreNLP pipeline = new StanfordCoreNLP(NLPprops);
 					long start = System.currentTimeMillis();
 					insertNerGeo(timeRange, pipeline);
 					long time = System.currentTimeMillis() - start;
-					LOGGER.info("Finished Thread for " + timeRange.toString() +". Elapsed Time = " + time);
+					LOGGER.info("Finished Thread for " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() +". Elapsed Time = " + time);
 				}
 				catch(Exception e){
 					++this.unexpectedExceptionCount;
-					LOGGER.error("Unexpected Exception on " + timeRange.toString() + " occured.", e);
+					LOGGER.error("Unexpected Exception on " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() + " occured.", e);
 					
-					if(this.unexpectedExceptionCount >= RETRY_LIMIT){
+					if(this.unexpectedExceptionCount > RETRY_LIMIT){
 						retryFlag = false;
-						String msg = "Time Range " + timeRange.toString() + " has not been fully processed."
+						String msg = "Time Range " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() + " has not been fully processed."
 									+ "\nPossible document that causes the error is " + this.threadStatus.currentObjectId + "."
 									+ "\nCurrent Thread Status is " + this.threadStatus.toString() + ".";
 						
@@ -134,6 +134,7 @@ public class NERThread implements Runnable{
 					}
 					else{
 						retryFlag = true;
+						LOGGER.error("Retry " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString());
 					}
 				}
 			}
