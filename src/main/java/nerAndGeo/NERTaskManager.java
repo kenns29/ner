@@ -164,7 +164,7 @@ public class NERTaskManager implements Runnable{
 								continueFlag = false;
 							}
 							else{
-								long timeDiff = 300000; //5min
+								long timeDiff = 60000; //wait 1min
 								LOGGER.info("The query for " + nextStartObjectId.toHexString() 
 										+" reached the end, waiting for " + timeDiff + " milliseconds."
 										+ "\nGoing to Sleep.");
