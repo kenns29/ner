@@ -1,8 +1,11 @@
 package nerAndGeo;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 //import java.util.logging.Logger;
+
+
 
 
 import util.ThreadStatus;
@@ -13,6 +16,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
@@ -139,15 +143,14 @@ public class NERThread implements Runnable{
 	
 	public void insertNerGeo(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		BasicDBObject query = constructQuery(timeRange);
-		DBCursor cursor = null;
 		if(Main.configPropertyValues.splitOption == 0){
-			cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
+			DBCursor cursor = coll.find(query).sort(new BasicDBObject("_id", 1));
+			cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+			insertNerGeoFromCursor(cursor, timeRange, pipeline);
 		}
 		else{
-			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
+			insertNerGeoFromArray(timeRange, pipeline);
 		}
-		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-		insertNerGeoFromCursor(cursor, timeRange, pipeline);
 	}	
 	
 	public void insertNerGeoFromCursor(DBCursor cursor, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
@@ -164,7 +167,14 @@ public class NERThread implements Runnable{
 			cursor.close();
 		}
 	}
-	
+
+	public void insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
+		this.threadStatus.numDocs = timeRange.mongoObjList.size();
+		for(DBObject obj : timeRange.mongoObjList){
+			BasicDBObject mongoObj = (BasicDBObject) obj;
+			insertOneNerGeo(mongoObj, timeRange, pipeline);
+		}
+	}
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
 		this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);

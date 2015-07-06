@@ -8,6 +8,7 @@ public class ThreadStatus {
 				+ "<td>Thread ID</td>"
 				+ "<td>System Thread ID</td>"
 				+ "<td>Current Time Range</td>"
+				+ "<td>Current Object ID Range</td>"
 				+ "<td>Number of Documents in Thread</td>"
 				+ "<td>Current Object ID</td>"
 				+ "<td>Current Insertion Timestamp</td>"
@@ -34,7 +35,8 @@ public class ThreadStatus {
 	public String toString(){
 		return "(thread id = " + this.threadId 
 				+ ", system thread id = " + this.systemThreadId 
-				+ ", current time range =  " + this.timeRange.toString() 
+				+ ", current time range =  " + this.timeRange.toString()
+				+ ", current object id range = " + this.timeRange.toObjectIdString()
 				+ ", number of documents = " + this.numDocs
 				+ ", current object id = " + currentObjectId 
 				+ ", current insertion time = " + currentInsertionTime 
@@ -51,6 +53,7 @@ public class ThreadStatus {
 				+ "<td>" + this.threadId + "</td>"
 				+ "<td>" + this.systemThreadId + "</td>"
 				+ "<td>" + this.timeRange.toString() + "</td>"
+				+ "<td>" + this.timeRange.toObjectIdString() + "</td>"
 				+ "<td>" + this.numDocs + "</td>"
 				+ "<td>" + this.currentObjectId + "</td>"
 				+ "<td>" + this.currentInsertionTime + "</td>"
