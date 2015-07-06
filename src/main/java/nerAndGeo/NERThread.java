@@ -4,6 +4,7 @@ import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 //import java.util.logging.Logger;
 
+
 import util.ThreadStatus;
 import util.TimeRange;
 import util.TimeUtilities;
@@ -14,12 +15,13 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+
 import org.apache.log4j.*;
 
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	private static final int RETRY_LIMIT = 2;
+	private static final int RETRY_LIMIT = 0;
 //	static{
 //		LOGGER.addHandler(LoggerAttr.fileHandler);
 //	}
@@ -145,110 +147,118 @@ public class NERThread implements Runnable{
 			cursor = coll.find(query).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 		}
 		cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+		insertNerGeoFromCursor(cursor, timeRange, pipeline);
+	}	
+	
+	public void insertNerGeoFromCursor(DBCursor cursor, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		int numDocs = cursor.count();
 		this.threadStatus.numDocs = numDocs;
 		LOGGER.info("Querying for "+ timeRange.toString() + ", there are total of " + numDocs + " items");	
 		try{
 			while(cursor.hasNext()){
-				int documentCount = Main.documentCount.incrementAndGet();
 				BasicDBObject mongoObj = (BasicDBObject) cursor.next();
-				String text = mongoObj.getString(inputField);
-				this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
-				this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
-				this.threadStatus.currentTweetId = mongoObj.getLong("id");
-				
-				String userText = null;
-				
-				BasicDBList userEntities = null;
-				BasicDBList textEntities = null;
-				
-//				System.out.println("tweetId = " + mongoObj.getLong("id"));
-//				System.out.println("text = " + text);
-				if(Main.configPropertyValues.userNer){
-					BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
-					userText = userObj.getString("location");
-					
-					if(userText != null){
-//						System.out.println("userText = " + userText);
-						userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
-						userEntities = NER.insertFromFlag(userEntities, "user.location");
-					}
-				}
-				
-				if(text != null && text.length() < 1000){
-					text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
-					textEntities = NER.annotateDBObject(text, pipeline, timeRange);
-					textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
-				}
-				
-				BasicDBList entities = new BasicDBList();
-				int textEntitiesDocCount = Main.textEntitiesDocCount.intValue();
-				int userEntitiesDocCount = Main.userEntitiesDocCount.intValue();
-				if(textEntities != null){
-					if(textEntities.size() > 0){
-						textEntitiesDocCount =  Main.textEntitiesDocCount.incrementAndGet();
-					}
-					entities.addAll(textEntities);
-				}
-				if(userEntities != null){
-					if(userEntities.size() > 0){
-						userEntitiesDocCount = Main.userEntitiesDocCount.incrementAndGet();
-					}
-					entities.addAll(userEntities);
-				}
-				
-				BasicDBObject coordinates = (BasicDBObject) mongoObj.get("coordinates");
-				BasicDBObject place = (BasicDBObject) mongoObj.get("place");
-				BasicDBObject location = (BasicDBObject) mongoObj.get("location");
-				
-				GeojsonList geojsonList = new GeojsonList();
-				
-				geojsonList.addFromMongoCoord(coordinates, place, location);
-				if(!Main.configPropertyValues.geoname){
-					coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-							new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
-				}
-				else if(Main.configPropertyValues.outputOption == 0){
-					BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
-					geojsonList.addFromNerGeonameList(nerGeonameList);
-//					System.out.println(nerGeonameList.toString());
-					if(geojsonList.isEmpty()){
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
-					}
-					else{
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
-																.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
-					}
-					
-				}
-				else if(Main.configPropertyValues.outputOption == 1){
-					BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
-					geojsonList.addFromGeonameList(geonameList);
-					if(geojsonList.isEmpty()){
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
-															.append(Main.configPropertyValues.geonameOutputField, geonameList)));
-					}
-					else{
-						coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
-								new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
-															.append(Main.configPropertyValues.geonameOutputField, geonameList)
-															.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
-					}
-					
-				}
-				
-				
-				Main.timelyDocCount.incrementAndGet();
-				if(documentCount % 1000 == 0){
-					LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
-				}
+				insertOneNerGeo(mongoObj, timeRange, pipeline);
 			}
 		}
 		finally{
 			cursor.close();
 		}
-	}	
+	}
+	
+	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
+		this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
+		this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
+		this.threadStatus.currentTweetId = mongoObj.getLong("id");
+		
+		int documentCount = Main.documentCount.incrementAndGet();
+		String text = mongoObj.getString(inputField);
+		String userText = null;
+		
+		BasicDBList userEntities = null;
+		BasicDBList textEntities = null;
+		
+//		System.out.println("tweetId = " + mongoObj.getLong("id"));
+//		System.out.println("text = " + text);
+		if(Main.configPropertyValues.userNer){
+			BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
+			userText = userObj.getString("location");
+			
+			if(userText != null){
+//				System.out.println("userText = " + userText);
+				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
+				userEntities = NER.insertFromFlag(userEntities, "user.location");
+			}
+		}
+		
+		if(text != null && text.length() < 1000){
+			text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+			textEntities = NER.annotateDBObject(text, pipeline, timeRange);
+			textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
+		}
+		
+		BasicDBList entities = new BasicDBList();
+		int textEntitiesDocCount = Main.textEntitiesDocCount.intValue();
+		int userEntitiesDocCount = Main.userEntitiesDocCount.intValue();
+		if(textEntities != null){
+			if(textEntities.size() > 0){
+				textEntitiesDocCount =  Main.textEntitiesDocCount.incrementAndGet();
+			}
+			entities.addAll(textEntities);
+		}
+		if(userEntities != null){
+			if(userEntities.size() > 0){
+				userEntitiesDocCount = Main.userEntitiesDocCount.incrementAndGet();
+			}
+			entities.addAll(userEntities);
+		}
+		
+		BasicDBObject coordinates = (BasicDBObject) mongoObj.get("coordinates");
+		BasicDBObject place = (BasicDBObject) mongoObj.get("place");
+		BasicDBObject location = (BasicDBObject) mongoObj.get("location");
+		
+		GeojsonList geojsonList = new GeojsonList();
+		
+		geojsonList.addFromMongoCoord(coordinates, place, location);
+		if(!Main.configPropertyValues.geoname){
+			coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+					new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
+		}
+		else if(Main.configPropertyValues.outputOption == 0){
+			BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
+			geojsonList.addFromNerGeonameList(nerGeonameList);
+//			System.out.println(nerGeonameList.toString());
+			if(geojsonList.isEmpty()){
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
+			}
+			else{
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
+														.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+			}
+			
+		}
+		else if(Main.configPropertyValues.outputOption == 1){
+			BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
+			geojsonList.addFromGeonameList(geonameList);
+			if(geojsonList.isEmpty()){
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+													.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+			}
+			else{
+				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
+													.append(Main.configPropertyValues.geonameOutputField, geonameList)
+													.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+			}
+			
+		}
+		
+		
+		Main.timelyDocCount.incrementAndGet();
+		if(documentCount % 1000 == 0){
+			LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
+		}
+	}
 }

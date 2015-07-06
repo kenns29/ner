@@ -19,6 +19,7 @@ import configProperties.ConfigPropertyValues;
 
 public class Main {
 	public static BlockingQueue<TimeRange> queue = null;
+	
 	public static ConfigPropertyValues configPropertyValues = null;
 	
 	public static AtomicInteger documentCount = new AtomicInteger(0);
