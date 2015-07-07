@@ -11,6 +11,7 @@ public class StatusHttpServer {
 	public StatusHttpServer() throws IOException{
 		HttpServer server = HttpServer.create(new InetSocketAddress(Main.configPropertyValues.statusHttpServerHost, Main.configPropertyValues.statusHttpServerPort), 0);
         server.createContext("/" + Main.configPropertyValues.statusHttpServerPath, new HttpServerHandler());
+        server.createContext("/json", new HttpServerHandlerJSON());
         server.createContext("/test", new HttpServerHandlerTest());
         server.setExecutor(null); // creates a default executor
         server.start();

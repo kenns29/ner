@@ -1,13 +1,14 @@
 package nerAndGeo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+
 import org.bson.types.ObjectId;
-import com.mongodb.DBObject;
 
 public class NERThreadList {
 	public static ArrayList<NERThread> list = new ArrayList<NERThread>();
 	public static ArrayList<Thread> threadList = new ArrayList<Thread>();
-	public static ArrayList<ArrayList<DBObject>> threadDataList = new ArrayList<ArrayList<DBObject>>();
 	
 	public static ObjectId getSafeObjectId(ArrayList<NERThread> nerThreadList){
 		if(nerThreadList.size() > 1){
@@ -22,5 +23,13 @@ public class NERThreadList {
 		else{
 			return null;
 		}
+	}
+	
+	public static synchronized LinkedList<LinkedHashMap<String, Object>> nerThreadStatusToLinkedList(){
+		LinkedList<LinkedHashMap<String, Object>> rL = new LinkedList<LinkedHashMap<String, Object>>();
+		for(NERThread t : list){
+			rL.add(t.threadStatus.toLinkedHashMap());
+		}
+		return rL;
 	}
 }

@@ -1,5 +1,7 @@
 package util;
 
+import java.util.LinkedHashMap;
+
 import org.bson.types.ObjectId;
 
 public class ThreadStatus {
@@ -64,7 +66,18 @@ public class ThreadStatus {
 		
 		return msg;
 	}
-	
+	public LinkedHashMap<String, Object> toLinkedHashMap(){
+		LinkedHashMap<String, Object> rLm = new LinkedHashMap<String, Object>();
+		rLm.put("threadId", this.threadId);
+		rLm.put("systemThreadId", this.systemThreadId);
+		rLm.put("timeRange", this.timeRange.toLinkedHashMap());
+		rLm.put("numDocs", this.numDocs);
+		rLm.put("currentObjectId", this.currentObjectId.toHexString());
+		rLm.put("currentInsertionTime", this.currentInsertionTime);
+		rLm.put("currentTweetId", this.currentTweetId);
+		rLm.put("currentStatus", currentStatus());
+		return rLm;
+	}
 	private String currentStatus(){
 		if(this.isActive){
 			if(this.isBlocked){

@@ -1,6 +1,7 @@
 package util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
@@ -57,6 +58,15 @@ public class TimeRange implements Comparable{
 				+ "<td>" + this.startObjectId.toHexString() + "</td>"
 				+ "<td>" + this.endObjectId.toHexString() + "</td>"
 				+ "</tr>";
+	}
+	
+	public LinkedHashMap<String, Object> toLinkedHashMap(){
+		LinkedHashMap<String, Object> rLm = new LinkedHashMap<String, Object>();
+		rLm.put("startTime",this.startTime);
+		rLm.put("endTime", this.endTime);
+		rLm.put("startObjectId", this.startObjectId.toHexString());
+		rLm.put("endObjectId", this.endObjectId.toHexString());
+		return rLm;
 	}
 	@Override
 	public int compareTo(Object obj) {
