@@ -169,6 +169,31 @@ public class NER {
 	//////////////////////////////
 	/////Parallel NER Driver//////
 	//////////////////////////////
+	public static void parallelNER(DBCollection coll, String inputField, ObjectId startObjectId, ObjectId endObjectId, BlockingQueue<TimeRange> queue){
+		NERTaskManager nerTaskManager = new NERTaskManager(startObjectId, endObjectId, queue, coll);
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			NERThreadList.list.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
+		}
+		
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			NERThreadList.threadList.add(new Thread(NERThreadList.list.get(i)));
+		}
+		
+		new Thread(nerTaskManager).start();
+		for(int i = 0; i < Main.configPropertyValues.core; i++){
+			NERThreadList.threadList.get(i).start();
+		}
+		
+		try {
+			@SuppressWarnings("unused")
+			StatusHttpServer statusHttpServer = new StatusHttpServer();
+		} catch (IOException e) {
+			HIGH_PRIORITY_LOGGER.fatal("Did not successfully start the server", e);;
+		}
+		
+		checkStatus();
+	}
+	
 	public static void parallelNER(DBCollection coll, String inputField, long minTime, long maxTime, BlockingQueue<TimeRange> queue){
 		NERTaskManager nerTaskManager = new NERTaskManager(minTime, maxTime, queue, coll);
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
@@ -188,9 +213,19 @@ public class NER {
 			@SuppressWarnings("unused")
 			StatusHttpServer statusHttpServer = new StatusHttpServer();
 		} catch (IOException e) {
-			e.printStackTrace();
+			HIGH_PRIORITY_LOGGER.fatal("Did not successfully start the server", e);;
 		}
 		
+		checkStatus();
+	}
+	
+	public static void parallelNER(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
+		long minTime = CollUtilities.minInsertionTime(coll);
+		long maxTime = CollUtilities.maxInsertionTime(coll);
+		parallelNER(coll, inputField, minTime, maxTime, queue);
+	}
+	
+	private static void checkStatus(){
 		while(true){
 			try {
 				Thread.sleep(60000);
@@ -233,13 +268,6 @@ public class NER {
 			}
 		}
 	}
-	
-	public static void parallelNER(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
-		long minTime = CollUtilities.minInsertionTime(coll);
-		long maxTime = CollUtilities.maxInsertionTime(coll);
-		parallelNER(coll, inputField, minTime, maxTime, queue);
-	}
-	
 	////////////////////////////////
 	//// ///////Other///////////////
 	////////////////////////////////

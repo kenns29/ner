@@ -52,6 +52,9 @@ public class Main {
 				if(configPropertyValues.useTimeLimit){
 					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, Main.queue);
 				}
+				else if(configPropertyValues.useObjectIdLimit){
+					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startObjectId, Main.configPropertyValues.endObjectId, Main.queue);
+				}
 				else{
 					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, queue);
 				}
