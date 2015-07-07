@@ -220,9 +220,18 @@ public class NER {
 	}
 	
 	public static void parallelNER(DBCollection coll, String inputField, BlockingQueue<TimeRange> queue){
-		long minTime = CollUtilities.minInsertionTime(coll);
-		long maxTime = CollUtilities.maxInsertionTime(coll);
-		parallelNER(coll, inputField, minTime, maxTime, queue);
+		// 0: split simply by time intervals
+		// 1: split by the number of documents
+		if(Main.configPropertyValues.splitOption == 0){
+			long minTime = CollUtilities.minInsertionTime(coll);
+			long maxTime = CollUtilities.maxInsertionTime(coll);
+			parallelNER(coll, inputField, minTime, maxTime, queue);
+		}
+		else{
+			ObjectId minObjectId = CollUtilities.minObjectId(coll);
+			ObjectId maxObjectId = CollUtilities.maxObjectId(coll);
+			parallelNER(coll, inputField, minObjectId, maxObjectId, queue);
+		}
 	}
 	
 	private static void checkStatus(){
