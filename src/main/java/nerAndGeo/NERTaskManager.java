@@ -139,6 +139,7 @@ public class NERTaskManager implements Runnable{
 					do{
 						try{
 							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
+							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", there are total of " + cursor.count() + " items");
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount1;
