@@ -32,7 +32,8 @@ public class NERTaskManager implements Runnable{
 	private final int CURSOR_RETRY_LIMIT = 2;
 	//for query
 	private final int CURSOR_RETRY_LIMIT1 = 6;
-	
+	//maximum time a task can wait
+	private final int MAX_WAIT_TIME = 180000; //3 min
 	public NERTaskManager(long startTime, long endTime, BlockingQueue<TimeRange> queue, DBCollection coll){
 		this.startTime = startTime;
 		this.endTime = endTime;
@@ -106,18 +107,19 @@ public class NERTaskManager implements Runnable{
 		}
 		//Split tasks by number of documents
 		else{
-			ObjectId nextStartObjectId = this.startObjectId;
+			ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
 			boolean continueFlag = true;
 			boolean skipFlag = false;
+			int waitTimeCount = 0;
 			while(continueFlag){
 				skipFlag = false;
 				BasicDBObject query = null;
 				if(Main.configPropertyValues.stopAtEnd){
-					query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId)
+					query = new BasicDBObject("_id", new BasicDBObject("$gt", nextStartObjectId)
 													.append("$lte", this.endObjectId));
 				}
 				else{
-					query = new BasicDBObject("_id", new BasicDBObject("$gte", nextStartObjectId));
+					query = new BasicDBObject("_id", new BasicDBObject("$gt", nextStartObjectId));
 				}
 				BasicDBObject field = new BasicDBObject("_id", 1)
 				.append("coordinates", 1)
@@ -139,7 +141,7 @@ public class NERTaskManager implements Runnable{
 					//Query the documents
 					do{
 						try{
-							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread + 1);
+							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount1;
@@ -162,7 +164,7 @@ public class NERTaskManager implements Runnable{
 					if(cursor != null){
 						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 						//If the cursor has fewer documents than numDocsInThread + 1
-						if(cursor.count() < Main.configPropertyValues.numDocsInThread + 1){
+						if(cursor.count() < Main.configPropertyValues.numDocsInThread){
 							if(Main.configPropertyValues.stopAtEnd){
 								continueFlag = false;
 							}
@@ -171,22 +173,28 @@ public class NERTaskManager implements Runnable{
 								LOGGER.info("The query for " + nextStartObjectId.toHexString() 
 										+" reached the end, waiting for " + timeDiff + " milliseconds."
 										+ "\nGoing to Sleep.");
-								try {
-									Thread.sleep(timeDiff);
-								} catch (InterruptedException e) {
-									LOGGER.error("Task Manager Interrupted while sleeping", e);
-								}
 								
-								LOGGER.info("Wake Up for task starting at " + nextStartObjectId.toHexString());
-								cursor.close();
-								skipFlag = true;
-								break; 
+								if(waitTimeCount < this.MAX_WAIT_TIME){
+									waitTimeCount += timeDiff;
+									try {
+										Thread.sleep(timeDiff);
+									} catch (InterruptedException e) {
+										LOGGER.error("Task Manager Interrupted while sleeping", e);
+									}
+									
+									LOGGER.info("Wake Up for task starting at " + nextStartObjectId.toHexString());
+									cursor.close();
+									skipFlag = true;
+									break; 
+								}
+								else{
+									waitTimeCount = 0;
+								}
 							}
 						}
 						
 						try{
 							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
-							
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount;
@@ -210,11 +218,10 @@ public class NERTaskManager implements Runnable{
 				while(retryFlag);
 				
 				//put the task into the queue
-				if(mongoObjList != null && !skipFlag){ 
-					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.remove(mongoObjList.size() - 1);
+				if(mongoObjList != null && mongoObjList.size() > 0 && !skipFlag){ 
+					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
 					
-					BasicDBObject lastObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
-					ObjectId nextEndObjectId = lastObj.getObjectId("_id");
+					ObjectId nextEndObjectId = nextStartObj.getObjectId("_id");
 					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList);
 					try {
 						queue.put(timeRange);
@@ -225,7 +232,7 @@ public class NERTaskManager implements Runnable{
 					nextStartObjectId = nextStartObj.getObjectId("_id");
 				}
 				//Query did not succeed, need to pick an arbitrary next starting point
-				else if(!skipFlag){
+				else if(mongoObjList == null && !skipFlag){
 					long nextStartTime = TimeUtilities.getTimestampFromObjectId(nextStartObjectId);
 					String msg = "Query for starting point " + nextStartObjectId.toHexString() + " did not succeed. ";
 					nextStartObjectId = TimeUtilities.getObjectId(nextStartTime + 300000, 0, 0, 0); 

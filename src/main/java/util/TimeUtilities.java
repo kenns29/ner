@@ -1,5 +1,6 @@
 package util;
 
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -99,4 +100,15 @@ public class TimeUtilities {
 		return sdf.format(new Date(js_timestamp));
 	}
 	
+	public static ObjectId decrementObjectId(ObjectId objectId){
+		BigInteger bi = new BigInteger(objectId.toHexString(), 16);
+		bi = bi.subtract(new BigInteger("1"));
+		return new ObjectId(bi.toString(16));
+	}
+	
+	public static ObjectId incrementObjectId(ObjectId objectId){
+		BigInteger bi = new BigInteger(objectId.toHexString(), 16);
+		bi.add(new BigInteger("1"));
+		return new ObjectId(bi.toString(16));
+	}
 }

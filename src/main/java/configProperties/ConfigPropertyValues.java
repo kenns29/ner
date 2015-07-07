@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.bson.types.ObjectId;
+
 public class ConfigPropertyValues {
 	public String host = null;
 	public int port = 0;
@@ -41,6 +43,9 @@ public class ConfigPropertyValues {
 	public boolean useTimeLimit = false;
 	public long startTime = 0;
 	public long endTime = 0;
+	public boolean useObjectIdLimit = false;
+	public ObjectId startObjectId = null;
+	public ObjectId endObjectId = null;
 	public boolean stopAtEnd = true;
 	
 	public boolean useDocLimit = false;
@@ -119,6 +124,12 @@ public class ConfigPropertyValues {
 		if(!endTimeStr.equals("none")){
 			endTime = Long.valueOf(prop.getProperty("endTime")).longValue();
 		}
+		
+		
+		useObjectIdLimit = Boolean.parseBoolean(prop.getProperty("useObjectIdLimit"));
+		startObjectId = new ObjectId(prop.getProperty("startObjectId"));
+		endObjectId = new ObjectId(prop.getProperty("endObjectId"));
+		
 		stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		
 		useDocLimit = Boolean.parseBoolean(prop.getProperty("useDocLimit"));
