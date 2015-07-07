@@ -2,10 +2,7 @@ package nerAndGeo;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.log4j.Logger;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import util.CollUtilities;
