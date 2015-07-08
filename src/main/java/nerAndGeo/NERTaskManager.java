@@ -29,8 +29,6 @@ public class NERTaskManager implements Runnable{
 	private final int CURSOR_RETRY_LIMIT = 2;
 	//for query
 	private final int CURSOR_RETRY_LIMIT1 = 6;
-	//maximum time a task can wait
-	private final int MAX_WAIT_TIME = 180000; //3 min
 	public NERTaskManager(long startTime, long endTime, BlockingQueue<TimeRange> queue, DBCollection coll){
 		this.startTime = startTime;
 		this.endTime = endTime;
@@ -47,6 +45,32 @@ public class NERTaskManager implements Runnable{
 		this.endTime = TimeUtilities.getTimestampFromObjectId(endObjectId);
 		this.queue = queue;
 		this.coll = coll;
+	}
+	
+	private BasicDBObject constructQuery(ObjectId startObjectId, ObjectId endObjectId){
+		BasicDBObject query = null;
+		if(Main.configPropertyValues.stopAtEnd){
+			if(Main.configPropertyValues.catID < 0){
+				query = new BasicDBObject("_id", new BasicDBObject("$gt", startObjectId)
+												.append("$lte", endObjectId));
+			}
+			else{
+				query = new BasicDBObject("_id", new BasicDBObject("$gt", startObjectId)
+													.append("$lte", endObjectId))
+						.append("cat", Main.configPropertyValues.catID);
+			}
+		}
+		else{
+			if (Main.configPropertyValues.catID < 0){
+				query = new BasicDBObject("_id", new BasicDBObject("$gt", startObjectId));
+			}
+			else{
+				query = new BasicDBObject("_id", new BasicDBObject("$gt", startObjectId))
+						.append("cat", Main.configPropertyValues.catID);
+			}
+			
+		}
+		return query;
 	}
 	public void run(){
 		LOGGER.info("There are total of " + Main.configPropertyValues.core + " threads.");
@@ -111,14 +135,7 @@ public class NERTaskManager implements Runnable{
 			while(continueFlag){
 				waitFlag = false;
 				ObjectId startObjectId = nextStartObjectId;
-				BasicDBObject query = null;
-				if(Main.configPropertyValues.stopAtEnd){
-					query = new BasicDBObject("_id", new BasicDBObject("$gt", nextStartObjectId)
-													.append("$lte", this.endObjectId));
-				}
-				else{
-					query = new BasicDBObject("_id", new BasicDBObject("$gt", nextStartObjectId));
-				}
+				BasicDBObject query = this.constructQuery(nextStartObjectId, this.endObjectId);
 				BasicDBObject field = new BasicDBObject("_id", 1)
 				.append("coordinates", 1)
 				.append("created_at", 1)
