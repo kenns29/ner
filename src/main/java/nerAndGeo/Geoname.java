@@ -240,7 +240,10 @@ public class Geoname {
 	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{
 		boolean cacheHit = false;
 		boolean geonameHit = false;
-		BasicDBObject geonameObj = getGeonameObjFromCache(name);
+		BasicDBObject geonameObj = null;
+		if(Main.configPropertyValues.useGeonameCache){
+			geonameObj = getGeonameObjFromCache(name);
+		}
 		
 		if(geonameObj == null){
 			geonameObj = getGeonameWithAccountRotate(name, threadStatus);

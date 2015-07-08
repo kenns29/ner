@@ -35,11 +35,8 @@ public class ConfigPropertyValues {
 	public int splitOption = 1;
 	public long splitIntervalInMillis = 0;
 	public int numDocsInThread = 0;
-	public boolean ner = false;
 	public boolean geoname = false;
-	public boolean geocoding = false;
 	
-	public boolean overwrite = true;
 	public boolean useTimeLimit = false;
 	public long startTime = 0;
 	public long endTime = 0;
@@ -48,19 +45,15 @@ public class ConfigPropertyValues {
 	public ObjectId endObjectId = null;
 	public boolean stopAtEnd = true;
 	
-	public boolean useDocLimit = false;
-	public int docLimit = 0;
-	
 	public boolean useGeonameCache = true;
 	public String cacheHost = null;
 	public int cachePort = 0;
 	public String cacheDatabase = null;
 	public String cacheCollection = null;
-	public int cacheLimit = -1;
 	
 	public String statusHttpServerHost = null;
 	public int statusHttpServerPort = 0;
-	public String statusHttpServerPath = null;
+
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -108,12 +101,8 @@ public class ConfigPropertyValues {
 		splitIntervalInMillis = Long.valueOf(prop.getProperty("splitIntervalInMillis"));
 		numDocsInThread = Integer.valueOf(prop.getProperty("numDocsInThread"));
 		
-		ner = Boolean.parseBoolean(prop.getProperty("ner"));
 		geoname = Boolean.parseBoolean(prop.getProperty("geoname"));
-		geocoding = Boolean.parseBoolean(prop.getProperty("geocoding"));
-		
-		overwrite = Boolean.parseBoolean(prop.getProperty("overwrite"));
-		
+				
 		useTimeLimit = Boolean.parseBoolean(prop.getProperty("useTimeLimit"));
 		String startTimeStr = prop.getProperty("startTime");
 		String endTimeStr = prop.getProperty("endTime");
@@ -132,18 +121,13 @@ public class ConfigPropertyValues {
 		
 		stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		
-		useDocLimit = Boolean.parseBoolean(prop.getProperty("useDocLimit"));
-		docLimit = Integer.valueOf(prop.getProperty("docLimit"));
-		
 		cacheHost = prop.getProperty("cacheHost");
 		cachePort = Integer.valueOf(prop.getProperty("cachePort"));
 		useGeonameCache = Boolean.parseBoolean(prop.getProperty("useGeonameCache"));
 		cacheDatabase = prop.getProperty("cacheDatabase");
 		cacheCollection = prop.getProperty("cacheCollection");
-		cacheLimit = Integer.valueOf(prop.getProperty("cacheLimit"));
 		
 		statusHttpServerHost = prop.getProperty("statusHttpServerHost");
 		statusHttpServerPort = Integer.valueOf(prop.getProperty("statusHttpServerPort"));
-		statusHttpServerPath = prop.getProperty("statusHttpServerPath");
 	}
 }

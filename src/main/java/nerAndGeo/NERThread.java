@@ -92,14 +92,20 @@ public class NERThread implements Runnable{
 	
 	@Override
 	public void run() {
-		this.threadStatus.systemThreadId = Thread.currentThread().getId();
+		synchronized(NER.class){
+			this.threadStatus.systemThreadId = Thread.currentThread().getId();
+		}
 		TimeRange timeRange = null;
 		while(true){
 			try {
-				this.threadStatus.isBlocked = true;
+				synchronized(NER.class){
+					this.threadStatus.isBlocked = true;
+				}
 				timeRange = queue.take();
-				this.threadStatus.timeRange = timeRange;
-				this.threadStatus.isBlocked = false;
+				synchronized(NER.class){
+					this.threadStatus.timeRange = timeRange;
+					this.threadStatus.isBlocked = false;
+				}
 				
 			} catch (InterruptedException e1) {
 				LOGGER.info("TAKING " + timeRange.toString() + " is INTERRUPTED"
@@ -177,10 +183,11 @@ public class NERThread implements Runnable{
 		}
 	}
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
-		this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
-		this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
-		this.threadStatus.currentTweetId = mongoObj.getLong("id");
-		
+		synchronized(NER.class){
+			this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
+			this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
+			this.threadStatus.currentTweetId = mongoObj.getLong("id");
+		}
 		int documentCount = Main.documentCount.incrementAndGet();
 		String text = mongoObj.getString(inputField);
 		String userText = null;

@@ -65,22 +65,19 @@ public class Main {
 		DBCollection coll = db.getCollection(configPropertyValues.coll);
 		
 		if(configPropertyValues.parallel){
-			if(configPropertyValues.ner){
-				if(configPropertyValues.useTimeLimit){
-					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, Main.queue);
-				}
-				else if(configPropertyValues.useObjectIdLimit){
-					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startObjectId, Main.configPropertyValues.endObjectId, Main.queue);
-				}
-				else{
-					NER.parallelNER(coll, Main.configPropertyValues.nerInputField, queue);
-				}
+			if(configPropertyValues.useTimeLimit){
+				NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startTime, Main.configPropertyValues.endTime, Main.queue);
+			}
+			else if(configPropertyValues.useObjectIdLimit){
+				NER.parallelNER(coll, Main.configPropertyValues.nerInputField, Main.configPropertyValues.startObjectId, Main.configPropertyValues.endObjectId, Main.queue);
+			}
+			else{
+				NER.parallelNER(coll, Main.configPropertyValues.nerInputField, queue);
 			}
 		}
 		else{
-			if(configPropertyValues.ner){
-				NER.insertNer(coll, configPropertyValues.nerInputField);
-			}
+			NER.insertNer(coll, configPropertyValues.nerInputField);
+			
 		}
 		//database.close();
 	}
