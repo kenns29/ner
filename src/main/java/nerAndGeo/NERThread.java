@@ -47,7 +47,7 @@ public class NERThread implements Runnable{
 		BasicDBObject query = null;
 		//do not use the cat id
 		if(Main.configPropertyValues.catID < 0){
-			switch(Main.configPropertyValues.parallelFlag){
+			switch(Main.configPropertyValues.useInsertionOrCreationTime){
 			case 1:
 				query = new BasicDBObject("timestamp", 
 						new BasicDBObject("$gte", startTime)
@@ -63,7 +63,7 @@ public class NERThread implements Runnable{
 		}
 		//use the cat id
 		else{
-			switch(Main.configPropertyValues.parallelFlag){
+			switch(Main.configPropertyValues.useInsertionOrCreationTime){
 			case 1:
 				query = new BasicDBObject("cat", Main.configPropertyValues.catID)
 				.append("timestamp", 

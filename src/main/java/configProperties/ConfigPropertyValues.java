@@ -30,7 +30,7 @@ public class ConfigPropertyValues {
 	
 	//0: split task by insertion time
 	//1: split task by creation time
-	public int parallelFlag = 0;
+	public int useInsertionOrCreationTime = 0;
 	
 	public int splitOption = 1;
 	public long splitIntervalInMillis = 0;
@@ -38,8 +38,8 @@ public class ConfigPropertyValues {
 	public boolean geoname = false;
 	
 	public boolean useTimeLimit = false;
-	public long startTime = 0;
-	public long endTime = 0;
+	public long startTime = -1;
+	public long endTime = -1;
 	public boolean useObjectIdLimit = false;
 	public ObjectId startObjectId = null;
 	public ObjectId endObjectId = null;
@@ -95,7 +95,7 @@ public class ConfigPropertyValues {
 		core = Integer.valueOf(prop.getProperty("core"));
 		queueSize = Integer.valueOf(prop.getProperty("queueSize"));
 		parallel = Boolean.parseBoolean(prop.getProperty("parallel"));
-		parallelFlag = Integer.valueOf(prop.getProperty("parallelFlag"));
+		useInsertionOrCreationTime = Integer.valueOf(prop.getProperty("useInsertionOrCreationTime"));
 		
 		splitOption = Integer.valueOf(prop.getProperty("splitOption"));
 		splitIntervalInMillis = Long.valueOf(prop.getProperty("splitIntervalInMillis"));
@@ -109,15 +109,29 @@ public class ConfigPropertyValues {
 		if(!startTimeStr.equals("none")){
 			startTime = Long.valueOf(prop.getProperty("startTime")).longValue();
 		}
+		else{
+			startTime = -1;
+		}
 		
 		if(!endTimeStr.equals("none")){
 			endTime = Long.valueOf(prop.getProperty("endTime")).longValue();
 		}
+		else{
+			endTime = -1;
+		}
 		
 		
 		useObjectIdLimit = Boolean.parseBoolean(prop.getProperty("useObjectIdLimit"));
-		startObjectId = new ObjectId(prop.getProperty("startObjectId"));
-		endObjectId = new ObjectId(prop.getProperty("endObjectId"));
+		String startObjectIdStr = prop.getProperty("startObjectId");
+		String endObjectIdStr = prop.getProperty("endObjectId");
+		
+		if(!startObjectIdStr.equals("none")){
+			startObjectId = new ObjectId(startObjectIdStr);
+		}
+		
+		if(!endObjectIdStr.equals("none")){
+			endObjectId = new ObjectId(endObjectIdStr);
+		}
 		
 		stopAtEnd = Boolean.parseBoolean(prop.getProperty("stopAtEnd"));
 		

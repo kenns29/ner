@@ -169,7 +169,22 @@ public class NER {
 	//////////////////////////////
 	/////Parallel NER Driver//////
 	//////////////////////////////
-	public static void parallelNER(DBCollection coll, String inputField, ObjectId startObjectId, ObjectId endObjectId, BlockingQueue<TimeRange> queue){
+	public static void parallelNER(DBCollection coll, String inputField, ObjectId pStartObjectId, ObjectId pEndObjectId, BlockingQueue<TimeRange> queue){
+		ObjectId startObjectId = null;
+		ObjectId endObjectId = null;
+		if(pStartObjectId == null){
+			startObjectId = CollUtilities.minObjectId(coll);
+		}
+		else{
+			startObjectId = pStartObjectId;
+		}
+		if(pEndObjectId == null){
+			endObjectId = CollUtilities.maxObjectId(coll);
+		}
+		else{
+			endObjectId = pEndObjectId;
+		}
+		
 		NERTaskManager nerTaskManager = new NERTaskManager(startObjectId, endObjectId, queue, coll);
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			NERThreadList.list.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
@@ -194,7 +209,33 @@ public class NER {
 		checkStatus();
 	}
 	
-	public static void parallelNER(DBCollection coll, String inputField, long minTime, long maxTime, BlockingQueue<TimeRange> queue){
+	public static void parallelNER(DBCollection coll, String inputField, long pMinTime, long pMaxTime, BlockingQueue<TimeRange> queue){
+		long minTime = -1;
+		long maxTime = -1;
+		if(pMinTime < 0){
+			if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+				minTime = CollUtilities.minInsertionTime(coll);
+			}
+			else{
+				minTime = CollUtilities.minTime(coll);
+			}
+		}
+		else{
+			minTime = pMinTime;
+		}
+		
+		if(pMaxTime < 0){
+			if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+				maxTime = CollUtilities.maxInsertionTime(coll);
+			}
+			else{
+				maxTime = CollUtilities.maxTime(coll);
+			}
+		}
+		else{
+			maxTime = pMaxTime;
+		}
+		
 		NERTaskManager nerTaskManager = new NERTaskManager(minTime, maxTime, queue, coll);
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			NERThreadList.list.add(new NERThread(coll, inputField, queue, new ThreadStatus(i)));
