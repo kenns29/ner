@@ -10,6 +10,7 @@ import util.ThreadStatus;
 import util.TimeRange;
 import nerAndGeo.Geoname;
 import nerAndGeo.Main;
+import nerAndGeo.NER;
 import nerAndGeo.NERThreadList;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -20,7 +21,7 @@ public class HttpServerHandler implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = "";
-		synchronized(this){
+		synchronized(NER.class){
 			String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			threadTable += ThreadStatus.makeHttpTableHeader();
 			for(int i = 0; i < NERThreadList.list.size(); i++){

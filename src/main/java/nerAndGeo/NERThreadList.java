@@ -25,10 +25,12 @@ public class NERThreadList {
 		}
 	}
 	
-	public static synchronized LinkedList<LinkedHashMap<String, Object>> nerThreadStatusToLinkedList(){
+	public static LinkedList<LinkedHashMap<String, Object>> nerThreadStatusToLinkedList(){
 		LinkedList<LinkedHashMap<String, Object>> rL = new LinkedList<LinkedHashMap<String, Object>>();
-		for(NERThread t : list){
-			rL.add(t.threadStatus.toLinkedHashMap());
+		synchronized(NER.class){
+			for(NERThread t : list){
+				rL.add(t.threadStatus.toLinkedHashMap());
+			}
 		}
 		return rL;
 	}
