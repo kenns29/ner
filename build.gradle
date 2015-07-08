@@ -7,6 +7,8 @@ apply plugin: 'eclipse'
 apply plugin: 'application'
 
 mainClassName = "nerAndGeo.Main"
+archivesBaseName = 'nerExtractor'
+version = '1.0.0'
 
 dependencies {
 	compile 'jdom:jdom:1.0'
@@ -19,13 +21,19 @@ dependencies {
 	compile files('local_jars/stanford-corenlp-3.5.2-javadoc.jar')
 }
 
-/*
+task copyConfig(type : Copy){
+	from 'config.properties'
+    into '$buildDir/bin'
+}
+
 jar {
-    archiveName = "ner_from_gradle.jar"
+    archiveName = "nerExtractor.jar"
 
     manifest {
-        attributes 'Main-Class': 'nerAndGeo.Main'
-        attributes("Class-Path": configurations.compile.collect { it.getName() }.join(' '))
+        attributes 'Main-Class': 'nerAndGeo.Main',
+        		   'Implementation-Title': 'nerExtractor', 
+				   'Implementation-Version': version,
+				   'Implementation-Vendor': 'vaderlab',
+        		   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
     }
 }
-*/
