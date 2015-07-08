@@ -106,10 +106,11 @@ public class NERTaskManager implements Runnable{
 		else{
 			ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
 			boolean continueFlag = true;
-			boolean skipFlag = false;
-			int waitTimeCount = 0;
+			boolean waitFlag = false;
+			int waitTime = 60000; //1 min
 			while(continueFlag){
-				skipFlag = false;
+				waitFlag = false;
+				ObjectId startObjectId = nextStartObjectId;
 				BasicDBObject query = null;
 				if(Main.configPropertyValues.stopAtEnd){
 					query = new BasicDBObject("_id", new BasicDBObject("$gt", nextStartObjectId)
@@ -167,27 +168,7 @@ public class NERTaskManager implements Runnable{
 								continueFlag = false;
 							}
 							else{
-								long timeDiff = 60000; //wait 1min
-								LOGGER.info("The query for " + nextStartObjectId.toHexString() 
-										+" reached the end, waiting for " + timeDiff + " milliseconds."
-										+ "\nGoing to Sleep.");
-								
-								if(waitTimeCount < this.MAX_WAIT_TIME){
-									waitTimeCount += timeDiff;
-									try {
-										Thread.sleep(timeDiff);
-									} catch (InterruptedException e) {
-										LOGGER.error("Task Manager Interrupted while sleeping", e);
-									}
-									
-									LOGGER.info("Wake Up for task starting at " + nextStartObjectId.toHexString());
-									cursor.close();
-									skipFlag = true;
-									break; 
-								}
-								else{
-									waitTimeCount = 0;
-								}
+								waitFlag = true;
 							}
 						}
 						
@@ -216,7 +197,7 @@ public class NERTaskManager implements Runnable{
 				while(retryFlag);
 				
 				//put the task into the queue
-				if(mongoObjList != null && mongoObjList.size() > 0 && !skipFlag){ 
+				if(mongoObjList != null && mongoObjList.size() > 0){ 
 					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
 					
 					ObjectId nextEndObjectId = nextStartObj.getObjectId("_id");
@@ -230,12 +211,26 @@ public class NERTaskManager implements Runnable{
 					nextStartObjectId = nextStartObj.getObjectId("_id");
 				}
 				//Query did not succeed, need to pick an arbitrary next starting point
-				else if(mongoObjList == null && !skipFlag){
+				else if(mongoObjList == null){
 					long nextStartTime = TimeUtilities.getTimestampFromObjectId(nextStartObjectId);
 					String msg = "Query for starting point " + nextStartObjectId.toHexString() + " did not succeed. ";
 					nextStartObjectId = TimeUtilities.getObjectId(nextStartTime + 300000, 0, 0, 0); 
 					msg += "Picking an arbitrary Object ID " + nextStartObjectId.toHexString() + " as next starting point.";
 					HIGH_PRIORITY_LOGGER.fatal(msg);
+				}
+				
+				if(waitFlag){
+					LOGGER.info("The query for " + startObjectId.toHexString() 
+							+" has almost reached the end, waiting for " + waitTime + " milliseconds."
+							+ "\nGoing to Sleep and wait for " + nextStartObjectId.toHexString() + ".");
+					
+					try {
+						Thread.sleep(waitTime);
+					} catch (InterruptedException e) {
+						LOGGER.error("Task Manager Interrupted while sleeping", e);
+					}
+					
+					LOGGER.info("Wake Up for old task at" + startObjectId.toHexString() + ", starting a new task at " + nextStartObjectId.toHexString());
 				}
 			}
 		}
