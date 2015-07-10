@@ -156,8 +156,10 @@ public class NERTaskManager implements Runnable{
 					//Query the documents
 					do{
 						try{
+							long systime = System.currentTimeMillis();
 							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
-							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", there are total of " + cursor.count() + " items");
+							long newSystime = System.currentTimeMillis();
+							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", there are total of " + cursor.count() + " items, query took " + (newSystime - systime) + " milliseconds.");
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount1;
@@ -190,7 +192,10 @@ public class NERTaskManager implements Runnable{
 						}
 						
 						try{
+							long systime = System.currentTimeMillis();
 							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+							long newSystime = System.currentTimeMillis();
+							LOGGER.info("Converted cursor to array for " + nextStartObjectId.toHexString() + ", it took " + (newSystime - systime) + " milliseconds.");
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount;
