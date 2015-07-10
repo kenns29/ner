@@ -15,11 +15,9 @@ public class NERThreadList {
 			synchronized(NER.class){
 				ObjectId smallestObjectId = nerThreadList.get(0).threadStatus.currentObjectId;
 				int i = 1;
-				while(smallestObjectId == null){
+				for(; i < nerThreadList.size() && smallestObjectId == null; i++){
 					smallestObjectId = nerThreadList.get(i).threadStatus.currentObjectId;
-					++i;
 				}
-				
 				for(int j = i; j < nerThreadList.size(); j++){
 					ObjectId nextObjectId = nerThreadList.get(j).threadStatus.currentObjectId;
 					if(nextObjectId != null && smallestObjectId.compareTo(nextObjectId) >= 1){
