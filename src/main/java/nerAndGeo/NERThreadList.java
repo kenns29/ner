@@ -11,14 +11,24 @@ public class NERThreadList {
 	public static ArrayList<Thread> threadList = new ArrayList<Thread>();
 	
 	public static ObjectId getSafeObjectId(ArrayList<NERThread> nerThreadList){
-		if(nerThreadList.size() > 1){
-			ObjectId smallestObjectId = nerThreadList.get(0).threadStatus.currentObjectId;
-			for(int i = 1; i < nerThreadList.size(); i++){
-				if(smallestObjectId.compareTo(nerThreadList.get(i).threadStatus.currentObjectId) >= 1){
+		if(nerThreadList.size() > 0){
+			synchronized(NER.class){
+				ObjectId smallestObjectId = nerThreadList.get(0).threadStatus.currentObjectId;
+				int i = 1;
+				while(smallestObjectId == null){
 					smallestObjectId = nerThreadList.get(i).threadStatus.currentObjectId;
+					++i;
 				}
+				
+				for(int j = i; j < nerThreadList.size(); j++){
+					ObjectId nextObjectId = nerThreadList.get(j).threadStatus.currentObjectId;
+					if(nextObjectId != null && smallestObjectId.compareTo(nextObjectId) >= 1){
+						smallestObjectId = nextObjectId;
+					}
+				}
+				
+				return smallestObjectId;
 			}
-			return smallestObjectId;
 		}
 		else{
 			return null;
