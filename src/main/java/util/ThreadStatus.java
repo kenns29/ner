@@ -37,8 +37,8 @@ public class ThreadStatus {
 	public String toString(){
 		return "(thread id = " + this.threadId 
 				+ ", system thread id = " + this.systemThreadId 
-				+ ", current time range =  " + this.timeRange.toString()
-				+ ", current object id range = " + this.timeRange.toObjectIdString()
+				+ ", current time range =  " + ((this.timeRange != null) ?  this.timeRange.toString() : "empty")
+				+ ", current object id range = " + ((this.timeRange != null) ? this.timeRange.toObjectIdString() : "empty")
 				+ ", number of documents = " + this.numDocs
 				+ ", current object id = " + currentObjectId 
 				+ ", current insertion time = " + currentInsertionTime 
@@ -54,7 +54,7 @@ public class ThreadStatus {
 		String msg = "<tr>"
 				+ "<td>" + this.threadId + "</td>"
 				+ "<td>" + this.systemThreadId + "</td>"
-				+ "<td>" + this.timeRange.toString() + "</td>"
+				+ "<td>" + ((this.timeRange != null) ? this.timeRange.toString() : null) + "</td>"
 				+ "<td>" + this.timeRange.toObjectIdString() + "</td>"
 				+ "<td>" + this.numDocs + "</td>"
 				+ "<td>" + this.currentObjectId + "</td>"
@@ -70,7 +70,7 @@ public class ThreadStatus {
 		LinkedHashMap<String, Object> rLm = new LinkedHashMap<String, Object>();
 		rLm.put("threadId", this.threadId);
 		rLm.put("systemThreadId", this.systemThreadId);
-		rLm.put("timeRange", this.timeRange.toLinkedHashMap());
+		rLm.put("timeRange", (this.timeRange != null) ? this.timeRange.toLinkedHashMap() : null);
 		rLm.put("numDocs", this.numDocs);
 		rLm.put("currentObjectId", this.currentObjectId.toHexString());
 		rLm.put("currentInsertionTime", this.currentInsertionTime);
