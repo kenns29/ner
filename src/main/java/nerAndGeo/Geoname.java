@@ -24,7 +24,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Geoname {
-	private static final int GEONAME_RETRY_LIMIT = 2;
+	private static final int GEONAME_RETRY_LIMIT = 3;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	private static Database cacheHost = null;
@@ -73,6 +73,7 @@ public class Geoname {
 	}
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
+		 //WebService.setConnectTimeOut(1);
 	 	 WebService.setUserName(accountName); // add your username here
 	 	 //System.out.println("accountName = " + accountName);
 		 //System.out.println("location = " + name);
@@ -180,7 +181,7 @@ public class Geoname {
 	 public static BasicDBObject getGeonameWithAccountRotate(String name, ThreadStatus threadStatus) throws Exception{
 		BasicDBObject rObj = null;
 		int unexpectedExceptionCount = 0;
-		boolean reachLimit = false;
+		boolean retryFlag = false;
 		do{
 			String preAccountName = Geoname.accountName;
 			try{
@@ -189,7 +190,7 @@ public class Geoname {
 				if(rObj != null){
 					cacheGeonameObj(name, rObj);
 				}
-				reachLimit = false;
+				retryFlag = false;
 			}
 			catch(GeoNamesException exception){
 				int code = exception.getExceptionCode();
@@ -201,19 +202,43 @@ public class Geoname {
 							LOGGER.info("Setting Current Geoname Account: " + Geoname.accountName);
 						}
 					}
-					reachLimit = true;
+					retryFlag = true;
 				}
 				else if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
 					++unexpectedExceptionCount;
-				}
-				else{
-					HIGH_PRIORITY_LOGGER.error("Current Document is not fully processed by geoname."
+					retryFlag = true;
+					LOGGER.error("Geoname Error, Current Document encountered a Geoname Error, attempting retry." 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to Unexpected Geoname Error", exception);
+				}
+				else{
+					unexpectedExceptionCount = 0;
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("Geoname Exception, Current Document is not fully processed by geoname."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to Unexpected Geoname Error", exception);
+					throw exception;
 					
 				}
 			}
-		} while(reachLimit && unexpectedExceptionCount <= GEONAME_RETRY_LIMIT);
+			catch(Exception exception){
+				if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
+					++unexpectedExceptionCount;
+					retryFlag = true;
+					LOGGER.error("Java Error, Current Document encountered a Geoname Error, attempting retry." 
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to Unexpected Geoname Error", exception);
+				}
+				else{
+					unexpectedExceptionCount = 0;
+					retryFlag = false;
+					HIGH_PRIORITY_LOGGER.error("Java Exception, Current Document is not fully processed by geoname."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to Unexpected Geoname Error", exception);
+					throw exception;
+				}
+			}
+		} while(retryFlag && unexpectedExceptionCount <= GEONAME_RETRY_LIMIT);
 		return rObj;
 	}
 	public static BasicDBObject makeCacheObj(String name, BasicDBObject geonameObj){
