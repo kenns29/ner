@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -220,6 +221,9 @@ public class Geoname {
 					throw exception;
 					
 				}
+			}
+			catch(SocketTimeoutException exception){
+				
 			}
 			catch(Exception exception){
 				if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){

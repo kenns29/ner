@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
+
 public class ThreadStatus {
 	public static String makeHttpTableHeader(){
 		String msg = "<tr>"
@@ -30,6 +32,7 @@ public class ThreadStatus {
 	public boolean isActive = true;
 	public boolean isBlocked = false;
 	
+	public BasicDBObject mongoObj = null;
 	public ThreadStatus(int threadId){
 		this.threadId = threadId;
 	}
