@@ -4,6 +4,8 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class GeojsonList {
+	private static final double INVALID_DOUBLE = -1000.0;
+	
 	public BasicDBList geometryList = new BasicDBList();
 	public BasicDBObject geometryCollection = new BasicDBObject();
 	public GeojsonList(){
@@ -58,7 +60,10 @@ public class GeojsonList {
 	
 	public void addFromMongoCoord(BasicDBObject coordinates, BasicDBObject place, BasicDBObject location){
 		if(coordinates != null){
-			geometryList.add(makeGeojsonObjFromCoordinates(coordinates));
+			BasicDBObject newCoordinates = makeGeojsonObjFromCoordinates(coordinates);
+			if(newCoordinates != null){
+				geometryList.add(newCoordinates);
+			}
 		}
 		if(place != null){
 			geometryList.add(makeGeojsonFromPlace(place));
@@ -73,13 +78,19 @@ public class GeojsonList {
 	public BasicDBObject makeGeojsonObjFromCoordinates(BasicDBObject coordinates){
 		String type = coordinates.getString("type");
 		BasicDBList point = (BasicDBList) coordinates.get("coordinates");
-		double lat = (double) point.get(1);
-		double lng = (double) point.get(0);
-		BasicDBList newPoint = new BasicDBList();
-		newPoint.add(lat);
-		newPoint.add(lng);
-		return new BasicDBObject("type", type)
-					.append("coordinates", newPoint);
+		double lat = getDoubleFromCoordinatesItem(point.get(1));
+		double lng = getDoubleFromCoordinatesItem(point.get(0));
+		
+		if(lat != INVALID_DOUBLE && lng != INVALID_DOUBLE){
+			BasicDBList newPoint = new BasicDBList();
+			newPoint.add(lat);
+			newPoint.add(lng);
+			return new BasicDBObject("type", type)
+						.append("coordinates", newPoint);
+		}
+		else{
+			return null;
+		}
 	}
 	
 	public BasicDBObject makeGeojsonFromLocation(BasicDBObject location){
@@ -124,11 +135,11 @@ public class GeojsonList {
 		}
 	}
 	
-	public static boolean comparePoints(BasicDBList firstPoint, BasicDBList secondPoint){
-		double firstLat = (double) firstPoint.get(0);
-		double firstLng = (double) firstPoint.get(1);
-		double secondLat = (double) secondPoint.get(0);
-		double secondLng = (double) secondPoint.get(1);
+	private boolean comparePoints(BasicDBList firstPoint, BasicDBList secondPoint){
+		double firstLat = getDoubleFromCoordinatesItem(firstPoint.get(0));
+		double firstLng = getDoubleFromCoordinatesItem(firstPoint.get(1));
+		double secondLat = getDoubleFromCoordinatesItem(secondPoint.get(0));
+		double secondLng = getDoubleFromCoordinatesItem(secondPoint.get(1));
 		
 		if(firstLat == secondLat && firstLng == secondLng){
 			return true;
@@ -162,6 +173,18 @@ public class GeojsonList {
 		}
 		else{
 			return true;
+		}
+	}
+	
+	private double getDoubleFromCoordinatesItem(Object coordItem){
+		if(coordItem instanceof Double){
+			return ((Double)coordItem).doubleValue();
+		}
+		else if(coordItem instanceof Integer){
+			return ((Integer) coordItem).doubleValue();
+		}
+		else{
+			return INVALID_DOUBLE;
 		}
 	}
 }

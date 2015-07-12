@@ -222,9 +222,9 @@ public class Geoname {
 					
 				}
 			}
-			catch(SocketTimeoutException exception){
-				
-			}
+//			catch(SocketTimeoutException exception){
+//				
+//			}
 			catch(Exception exception){
 				if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
 					++unexpectedExceptionCount;

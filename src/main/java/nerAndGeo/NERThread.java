@@ -195,14 +195,11 @@ public class NERThread implements Runnable{
 		BasicDBList userEntities = null;
 		BasicDBList textEntities = null;
 		
-//		System.out.println("tweetId = " + mongoObj.getLong("id"));
-//		System.out.println("text = " + text);
 		if(Main.configPropertyValues.userNer){
 			BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
 			userText = userObj.getString("location");
 			
 			if(userText != null){
-//				System.out.println("userText = " + userText);
 				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
 				userEntities = NER.insertFromFlag(userEntities, "user.location");
 			}
