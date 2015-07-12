@@ -28,9 +28,15 @@ public class Geoname {
 	private static final int GEONAME_RETRY_LIMIT = 3;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
+	
 	private static Database cacheHost = null;
 	private static DB cacheDB = null;
 	private static DBCollection cacheColl = null;
+	
+	private static Database nullCacheHost = null;
+	private static DB nullCacheDB = null;
+	private static DBCollection nullCacheColl = null;
+	
 	private static AtomicInteger nameCount = new AtomicInteger(0);
 	private static AtomicInteger cacheHitCount = new AtomicInteger(0);
 	private static AtomicInteger geonameCount = new AtomicInteger(0);
@@ -43,6 +49,10 @@ public class Geoname {
 			cacheHost = new Database(Main.configPropertyValues.cacheHost, Main.configPropertyValues.cachePort);
 			cacheDB = cacheHost.getDatabase(Main.configPropertyValues.cacheDatabase);
 			cacheColl = cacheDB.getCollection(Main.configPropertyValues.cacheCollection);
+			
+			nullCacheHost = new Database(Main.configPropertyValues.nullCacheHost, Main.configPropertyValues.nullCachePort);
+			nullCacheDB = nullCacheHost.getDatabase(Main.configPropertyValues.nullCacheDatabase);
+			nullCacheColl = nullCacheDB.getCollection(Main.configPropertyValues.nullCacheCollection);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -222,9 +232,13 @@ public class Geoname {
 					
 				}
 			}
-//			catch(SocketTimeoutException exception){
-//				
-//			}
+			catch(SocketTimeoutException exception){
+				retryFlag = false;
+				LOGGER.error("Java Error, Current Document encountered a Geoname Error, no retry." 
+						+ "\nCurrent Thread Status: " + threadStatus.toString()
+						+ "\nDue to SocketTimeoutException", exception);
+				Main.retryCacheColl.update(new BasicDBObject("_id", threadStatus.currentObjectId), threadStatus.currentMongoObj, true, false);
+			}
 			catch(Exception exception){
 				if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
 					++unexpectedExceptionCount;

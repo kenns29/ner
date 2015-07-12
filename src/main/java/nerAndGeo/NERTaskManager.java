@@ -2,10 +2,12 @@ package nerAndGeo;
 
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
+
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
 import util.CollUtilities;
+import util.TaskType;
 import util.TimeRange;
 import util.TimeUtilities;
 
@@ -77,83 +79,121 @@ public class NERTaskManager implements Runnable{
 		
 		//Split Tasks by time interval
 		if(Main.configPropertyValues.splitOption == 0){
-			if(Main.configPropertyValues.stopAtEnd){
-				for(long t = TimeUtilities.hourFloor(startTime); t < TimeUtilities.hourCeiling(endTime); t+= Main.configPropertyValues.splitIntervalInMillis){
-					try {
-						queue.put(new TimeRange(t, t + Main.configPropertyValues.splitIntervalInMillis));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			else{
-				long nextStartTime = TimeUtilities.minutesFloor(startTime);
-				while(true){
-					long nextEndTime = nextStartTime + Main.configPropertyValues.splitIntervalInMillis;
-					ObjectId nextEndObjectId = TimeUtilities.getObjectId(nextEndTime, 0, 0, 0);
-					ObjectId maxObjectId = CollUtilities.maxObjectId(this.coll);
-					long maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
-					
-					while(nextEndObjectId.compareTo(maxObjectId) >= 0){
-						long timeDiff = nextEndTime - maxTime;
-						LOGGER.info("The query for " + TimeUtilities.js_timestampToString(nextStartTime) 
-								+ " To " 
-								+ TimeUtilities.js_timestampToString(nextEndTime) 
-								+" reached the end, waiting for " + timeDiff + " milliseconds\n"
-								+ "Current max time is " + TimeUtilities.js_timestampToString(maxTime)
-								+ "\nGoing to Sleep.");
-						try {
-							Thread.sleep(timeDiff);
-						} catch (InterruptedException e) {
-							LOGGER.error("Task Manager Interrupted while sleeping", e);
-						}
-						LOGGER.info("Wake Up for " + TimeUtilities.js_timestampToString(nextStartTime) 
-								+ " To " 
-								+ TimeUtilities.js_timestampToString(nextEndTime));
-						maxObjectId = CollUtilities.maxObjectId(this.coll);
-						maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
-					}
-					
-					TimeRange timeRange = new TimeRange(nextStartTime, nextEndTime);
-					LOGGER.info("Inserting new time range " + timeRange.toString() + " to the queue");
-					try {
-						queue.put(timeRange);
-						LOGGER.info("time range " + timeRange.toString() + " is inserted to the queue to the queue");
-					} catch (InterruptedException e) {
-						LOGGER.error("INSERTING " + timeRange.toString() + " is INTERRUPTED", e);
-					}
-					nextStartTime = nextEndTime;
-				}
-			}
+			splitTasksByTimeInterval();
 		}
 		//Split tasks by number of documents
 		else{
-			ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
-			boolean continueFlag = true;
-			boolean waitFlag = false;
-			int waitTime = 60000; //1 min
-			while(continueFlag){
+			splitTasksByNumDocuments();
+		}
+	}
+	
+	//Split Tasks by time interval
+	private void splitTasksByTimeInterval(){
+		if(Main.configPropertyValues.stopAtEnd){
+			for(long t = TimeUtilities.hourFloor(startTime); t < TimeUtilities.hourCeiling(endTime); t+= Main.configPropertyValues.splitIntervalInMillis){
+				try {
+					queue.put(new TimeRange(t, t + Main.configPropertyValues.splitIntervalInMillis));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else{
+			long nextStartTime = TimeUtilities.minutesFloor(startTime);
+			while(true){
+				long nextEndTime = nextStartTime + Main.configPropertyValues.splitIntervalInMillis;
+				ObjectId nextEndObjectId = TimeUtilities.getObjectId(nextEndTime, 0, 0, 0);
+				ObjectId maxObjectId = CollUtilities.maxObjectId(this.coll);
+				long maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
+				
+				while(nextEndObjectId.compareTo(maxObjectId) >= 0){
+					long timeDiff = nextEndTime - maxTime;
+					LOGGER.info("The query for " + TimeUtilities.js_timestampToString(nextStartTime) 
+							+ " To " 
+							+ TimeUtilities.js_timestampToString(nextEndTime) 
+							+" reached the end, waiting for " + timeDiff + " milliseconds\n"
+							+ "Current max time is " + TimeUtilities.js_timestampToString(maxTime)
+							+ "\nGoing to Sleep.");
+					try {
+						Thread.sleep(timeDiff);
+					} catch (InterruptedException e) {
+						LOGGER.error("Task Manager Interrupted while sleeping", e);
+					}
+					LOGGER.info("Wake Up for " + TimeUtilities.js_timestampToString(nextStartTime) 
+							+ " To " 
+							+ TimeUtilities.js_timestampToString(nextEndTime));
+					maxObjectId = CollUtilities.maxObjectId(this.coll);
+					maxTime = TimeUtilities.getTimestampFromObjectId(maxObjectId);
+				}
+				
+				TimeRange timeRange = new TimeRange(nextStartTime, nextEndTime);
+				LOGGER.info("Inserting new time range " + timeRange.toString() + " to the queue");
+				try {
+					queue.put(timeRange);
+					LOGGER.info("time range " + timeRange.toString() + " is inserted to the queue to the queue");
+				} catch (InterruptedException e) {
+					LOGGER.error("INSERTING " + timeRange.toString() + " is INTERRUPTED", e);
+				}
+				nextStartTime = nextEndTime;
+			}
+		}
+	}
+	
+	//Split tasks by number of documents
+	private void splitTasksByNumDocuments(){
+		BasicDBObject field = new BasicDBObject("_id", 1)
+		.append("coordinates", 1)
+		.append("created_at", 1)
+		.append("id", 1)
+		.append("text", 1)
+		.append("timestamp", 1)
+		.append("place", 1)
+		.append("location", 1)
+		.append("user.location", 1);
+		
+		ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
+		boolean continueFlag = true;
+		boolean waitFlag = false;
+		int waitTime = 60000; //1 min
+		while(continueFlag){
+			//Queue Tasks on Retry Cache
+			if(Main.retryCacheColl.count() > 0){
+				BasicDBObject query = new BasicDBObject();
+				
+				DBCursor cursor = null;
+				cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1));
+				ArrayList<DBObject> mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+				if(mongoObjList != null && mongoObjList.size() > 0){
+					BasicDBObject startObject = (BasicDBObject) mongoObjList.get(0);
+					BasicDBObject endObject = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
+					
+					ObjectId startObjectId = startObject.getObjectId("_id");
+					ObjectId endObjectId = endObject.getObjectId("_id");
+					
+					TimeRange timeRange = new TimeRange(startObjectId, endObjectId, mongoObjList, TaskType.RETRY_TASK);
+					
+					try {
+						queue.put(timeRange);
+					} catch (InterruptedException e) {
+						LOGGER.error("INSERTING Object id range " + timeRange.toObjectIdString() + ", with time range " +  timeRange.toString() + " is INTERRUPTED", e);
+					}
+				}
+				
+			}
+			//Queue Tasks on the main data
+			else{
 				waitFlag = false;
 				ObjectId startObjectId = nextStartObjectId;
 				BasicDBObject query = this.constructQuery(nextStartObjectId, this.endObjectId);
-				BasicDBObject field = new BasicDBObject("_id", 1)
-				.append("coordinates", 1)
-				.append("created_at", 1)
-				.append("id", 1)
-				.append("text", 1)
-				.append("timestamp", 1)
-				.append("place", 1)
-				.append("location", 1)
-				.append("user.location", 1);
-				
+	
 				boolean retryFlag = false;
 				int unexpectedExceptionCount = 0;
 				ArrayList<DBObject> mongoObjList = null;
 				do{
+					//Query the documents
 					DBCursor cursor = null;
 					boolean retryFlag1 = false;
 					int unexpectedExceptionCount1 = 0;
-					//Query the documents
 					do{
 						try{
 							long systime = System.currentTimeMillis();
@@ -223,7 +263,7 @@ public class NERTaskManager implements Runnable{
 					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
 					
 					ObjectId nextEndObjectId = nextStartObj.getObjectId("_id");
-					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList);
+					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList, TaskType.NORMAL_TASK);
 					try {
 						queue.put(timeRange);
 						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue to the queue");

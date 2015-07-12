@@ -184,6 +184,7 @@ public class NERThread implements Runnable{
 	}
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		synchronized(NER.class){
+			this.threadStatus.currentMongoObj = mongoObj;
 			this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
 			this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
 			this.threadStatus.currentTweetId = mongoObj.getLong("id");

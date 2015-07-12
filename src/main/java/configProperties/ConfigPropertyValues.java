@@ -51,9 +51,18 @@ public class ConfigPropertyValues {
 	public String cacheDatabase = null;
 	public String cacheCollection = null;
 	
+	public String nullCacheHost = null;
+	public int nullCachePort = 0;
+	public String nullCacheDatabase = null;
+	public String nullCacheCollection = null;
+	
 	public String statusHttpServerHost = null;
 	public int statusHttpServerPort = 0;
 
+	public String retryCacheHost = null;
+	public int retryCachePort = 0;
+	public String retryCacheDatabase = null;
+	public String retryCacheCollection = null;
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -141,7 +150,17 @@ public class ConfigPropertyValues {
 		cacheDatabase = prop.getProperty("cacheDatabase");
 		cacheCollection = prop.getProperty("cacheCollection");
 		
+		nullCacheHost = prop.getProperty("nullCacheHost");
+		nullCachePort = Integer.valueOf(prop.getProperty("nullCachePort"));
+		nullCacheDatabase = prop.getProperty("nullCacheDatabase");
+		nullCacheCollection = prop.getProperty("nullCacheCollection");
+				
 		statusHttpServerHost = prop.getProperty("statusHttpServerHost");
 		statusHttpServerPort = Integer.valueOf(prop.getProperty("statusHttpServerPort"));
+		
+		retryCacheHost = prop.getProperty("retryCacheHost");
+		retryCachePort = Integer.valueOf(prop.getProperty("retryCachePort"));
+		retryCacheDatabase = prop.getProperty("retryCacheDatabase");
+		retryCacheCollection = prop.getProperty("retryCacheCollection");
 	}
 }

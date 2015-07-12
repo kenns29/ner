@@ -2,6 +2,7 @@ package nerAndGeo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -33,6 +34,13 @@ public class Main {
 	public static AtomicInteger userEntitiesDocCount = new AtomicInteger(0);
 	public static long mainPreTime = System.currentTimeMillis();
 	
+	public static Object lockObjectRetryCache = new Object();
+	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
+	
+	public static Database retryCacheHost = null; 
+	public static DB retryCacheDB = null;
+	public static DBCollection retryCacheColl = null;
+	
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
@@ -44,6 +52,14 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		try {
+			retryCacheHost = new Database(Main.configPropertyValues.retryCacheHost, Main.configPropertyValues.retryCachePort);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		retryCacheDB = retryCacheHost.getDatabase(Main.configPropertyValues.retryCacheDatabase);
+		retryCacheColl = retryCacheDB.getCollection(Main.configPropertyValues.retryCacheCollection);
 	}
 	
 	public static void main(String[] args) throws Exception {		

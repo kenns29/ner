@@ -16,6 +16,7 @@ public class TimeRange implements Comparable{
 				+ "<td>End Timestamp</td>"
 				+ "<td>Start Object ID</td>"
 				+ "<td>End Object ID</td>"
+				+ "<td>Task Type</td>"
 				+ "</tr>";
 		return msg;
 	}
@@ -25,6 +26,7 @@ public class TimeRange implements Comparable{
 	public ObjectId startObjectId = null;
 	public ObjectId endObjectId = null;
 	public ArrayList<DBObject> mongoObjList = new ArrayList<DBObject>();
+	public TaskType taskType = new TaskType();
 	TimeRange(){}
 	public TimeRange(long js_startTime, long js_endTime){
 		this.startTime = js_startTime;
@@ -41,12 +43,16 @@ public class TimeRange implements Comparable{
 		this.mongoObjList = mongoObjList;
 	}
 	
+	public TimeRange(ObjectId startObjectId, ObjectId endObjectId, ArrayList<DBObject> mongoObjList, int type){
+		this(startObjectId, endObjectId, mongoObjList);
+		taskType.setType(type);
+	}
 	public String toString(){
-		return "(" + TimeUtilities.js_timestampToString(startTime) + " To " + TimeUtilities.js_timestampToString(endTime) + ")";
+		return "(" + TimeUtilities.js_timestampToString(startTime) + " To " + TimeUtilities.js_timestampToString(endTime) + ", " + taskType.toString() +  ")";
 	}
 	
 	public String toObjectIdString(){
-		return "(" + this.startObjectId.toHexString() + " To " + this.endObjectId + ")";
+		return "(" + this.startObjectId.toHexString() + " To " + this.endObjectId + ", " + taskType.toString() + ")";
 	}
 	
 	public String toHttpTableRowEntry(){
@@ -57,6 +63,7 @@ public class TimeRange implements Comparable{
 				+ "<td>" + endTime + "</td>"
 				+ "<td>" + this.startObjectId.toHexString() + "</td>"
 				+ "<td>" + this.endObjectId.toHexString() + "</td>"
+				+ "<td>" + this.taskType.toString() + "</td>"
 				+ "</tr>";
 	}
 	
@@ -66,6 +73,7 @@ public class TimeRange implements Comparable{
 		rLm.put("endTime", this.endTime);
 		rLm.put("startObjectId", this.startObjectId.toHexString());
 		rLm.put("endObjectId", this.endObjectId.toHexString());
+		rLm.put("taskType", this.taskType.toString());
 		return rLm;
 	}
 	@Override

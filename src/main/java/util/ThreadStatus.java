@@ -32,7 +32,7 @@ public class ThreadStatus {
 	public boolean isActive = true;
 	public boolean isBlocked = false;
 	
-	public BasicDBObject mongoObj = null;
+	public BasicDBObject currentMongoObj = null;
 	public ThreadStatus(int threadId){
 		this.threadId = threadId;
 	}
