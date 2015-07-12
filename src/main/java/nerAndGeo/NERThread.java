@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -8,6 +9,11 @@ import java.util.concurrent.BlockingQueue;
 
 
 
+
+
+
+
+import util.TaskType;
 import util.ThreadStatus;
 import util.TimeRange;
 import util.TimeUtilities;
@@ -21,11 +27,12 @@ import com.mongodb.DBObject;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import org.apache.log4j.*;
+import org.bson.types.ObjectId;
 
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static final Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
-	private static final int RETRY_LIMIT = 1;
+	private static final int RETRY_LIMIT = 0; // do not want to retry anymore
 //	static{
 //		LOGGER.addHandler(LoggerAttr.fileHandler);
 //	}
@@ -177,11 +184,30 @@ public class NERThread implements Runnable{
 
 	public void insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		this.threadStatus.numDocs = timeRange.mongoObjList.size();
-		for(DBObject obj : timeRange.mongoObjList){
-			BasicDBObject mongoObj = (BasicDBObject) obj;
-			insertOneNerGeo(mongoObj, timeRange, pipeline);
+		if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
+			for(DBObject obj : timeRange.mongoObjList){
+				BasicDBObject mongoObj = (BasicDBObject) obj;
+				try{
+					insertOneNerGeo(mongoObj, timeRange, pipeline);
+				}
+				catch(SocketTimeoutException e){
+					LOGGER.error("Java Error, Encounted a Socket time out error. Inserting the document to retry cache" 
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to SocketTimeoutException", e);
+					Main.retryCacheColl.update(new BasicDBObject("_id", this.threadStatus.currentObjectId), this.threadStatus.currentMongoObj, true, false);
+				}
+			}
 		}
+		else{
+			for(DBObject obj : timeRange.mongoObjList){
+				BasicDBObject mongoObj = (BasicDBObject) obj;
+				insertOneNerGeo(mongoObj, timeRange, pipeline);
+				removeFromRetryCache(mongoObj);
+			}
+		}
+		
 	}
+	
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		synchronized(NER.class){
 			this.threadStatus.currentMongoObj = mongoObj;
@@ -242,7 +268,7 @@ public class NERThread implements Runnable{
 		else if(Main.configPropertyValues.outputOption == 0){
 			BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
 			geojsonList.addFromNerGeonameList(nerGeonameList);
-//			System.out.println(nerGeonameList.toString());
+
 			if(geojsonList.isEmpty()){
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
@@ -276,5 +302,11 @@ public class NERThread implements Runnable{
 		if(documentCount % 1000 == 0){
 			LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
 		}
+	}
+	
+	public void removeFromRetryCache(BasicDBObject mongoObj){
+		ObjectId objectId = mongoObj.getObjectId("_id");
+		BasicDBObject query = new BasicDBObject("_id", objectId);
+		Main.retryCacheColl.remove(query);
 	}
 }

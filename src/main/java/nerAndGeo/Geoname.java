@@ -237,7 +237,7 @@ public class Geoname {
 				LOGGER.error("Java Error, Current Document encountered a Geoname Error, no retry." 
 						+ "\nCurrent Thread Status: " + threadStatus.toString()
 						+ "\nDue to SocketTimeoutException", exception);
-				Main.retryCacheColl.update(new BasicDBObject("_id", threadStatus.currentObjectId), threadStatus.currentMongoObj, true, false);
+				throw exception;
 			}
 			catch(Exception exception){
 				if(unexpectedExceptionCount < GEONAME_RETRY_LIMIT){
