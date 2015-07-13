@@ -25,7 +25,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
 public class Geoname {
-	private static final int GEONAME_RETRY_LIMIT = 3;
+	private static final int GEONAME_RETRY_LIMIT = 0;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	
@@ -84,7 +84,7 @@ public class Geoname {
 	}
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
-		 //WebService.setConnectTimeOut(1);
+		 WebService.setConnectTimeOut(1);
 	 	 WebService.setUserName(accountName); // add your username here
 	 	 //System.out.println("accountName = " + accountName);
 		 //System.out.println("location = " + name);

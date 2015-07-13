@@ -4,6 +4,8 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+
+import util.ErrorStatus;
 //import java.util.logging.Logger;
 import util.ErrorType;
 import util.RetryCacheCollUtilities;
@@ -125,6 +127,11 @@ public class NERThread implements Runnable{
 					insertNerGeo(timeRange, pipeline);
 					long time = System.currentTimeMillis() - start;
 					LOGGER.info("Finished Thread for " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() +". Elapsed Time = " + time);
+					retryFlag = false;
+					
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						Main.retryCacheAvailable = true;
+					}
 				}
 				catch(Exception e){
 					++this.unexpectedExceptionCount;
@@ -132,12 +139,15 @@ public class NERThread implements Runnable{
 					
 					if(this.unexpectedExceptionCount > RETRY_LIMIT){
 						retryFlag = false;
-						String msg = "Time Range " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() + " has not been fully processed."
+						String msg = "Time Range " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() + " was possibly not fully processed."
 									+ "\nPossible document that causes the error is " + this.threadStatus.currentObjectId + "."
 									+ "\nCurrent Thread Status is " + this.threadStatus.toString() + ".";
 						
 						HIGH_PRIORITY_LOGGER.fatal(msg, e);
 						this.unexpectedExceptionCount = 0;
+						if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+							Main.retryCacheAvailable = true;
+						}
 					}
 					else{
 						retryFlag = true;
@@ -178,23 +188,25 @@ public class NERThread implements Runnable{
 
 	public void insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		this.threadStatus.numDocs = timeRange.mongoObjList.size();
-		if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
+		if(timeRange.taskType.getType() == TaskType.NORMAL_TASK){
 			for(DBObject obj : timeRange.mongoObjList){
 				BasicDBObject mongoObj = (BasicDBObject) obj;
 				try{
 					insertOneNerGeo(mongoObj, timeRange, pipeline);
 				}
 				catch(SocketTimeoutException e){
-					LOGGER.error("Java Error, Encounted a Socket time out error. Inserting the document to retry cache" 
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.SOCKET_TIME_OUT), 1));
+					LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
-					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorType(ErrorType.SOCKET_TIME_OUT));
+					
 				}
 				catch(Exception e){
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
 											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
 											+ "\nDue to Unexpected Exception. ", e);
-					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorType(ErrorType.OTHER));
+					
 				}
 			}
 		}
@@ -205,8 +217,38 @@ public class NERThread implements Runnable{
 					insertOneNerGeo(mongoObj, timeRange, pipeline);
 					RetryCacheCollUtilities.remove(Main.retryCacheColl, mongoObj);
 				}
-				catch(Exception e){
+				catch(SocketTimeoutException e){
+					ErrorStatus errorStatus = RetryCacheCollUtilities.getErrorStatus(Main.retryCacheColl, mongoObj);
 					
+					if(errorStatus.errorType.getType() == ErrorType.SOCKET_TIME_OUT){
+						errorStatus.incErrorCount();
+						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
+					}
+					else{
+						errorStatus.errorType = new ErrorType(ErrorType.SOCKET_TIME_OUT);
+						errorStatus.zeroErrorCount();
+						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
+					}
+					LOGGER.error("Java Error, Encounted a SocketTimeoutException while processing document " + this.threadStatus.currentObjectId +" in the retry cache."
+							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to SocketTimeoutException. ", e);
+				}
+				catch(Exception e){
+					ErrorStatus errorStatus = RetryCacheCollUtilities.getErrorStatus(Main.retryCacheColl, mongoObj);
+					if(errorStatus.errorType.getType() == ErrorType.OTHER){
+						errorStatus.incErrorCount();
+						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
+					}
+					else{
+						errorStatus.errorType = new ErrorType(ErrorType.OTHER);
+						errorStatus.zeroErrorCount();
+						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
+					}
+					LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
+							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to Unexpected Exception. ", e);
 				}
 				
 			}

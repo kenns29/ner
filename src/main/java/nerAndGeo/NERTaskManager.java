@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
 import util.CollUtilities;
+import util.ErrorType;
+import util.RetryCacheCollUtilities;
 import util.TaskType;
 import util.TimeRange;
 import util.TimeUtilities;
@@ -141,15 +143,7 @@ public class NERTaskManager implements Runnable{
 	
 	//Split tasks by number of documents
 	private void splitTasksByNumDocuments(){
-		BasicDBObject field = new BasicDBObject("_id", 1)
-		.append("coordinates", 1)
-		.append("created_at", 1)
-		.append("id", 1)
-		.append("text", 1)
-		.append("timestamp", 1)
-		.append("place", 1)
-		.append("location", 1)
-		.append("user.location", 1);
+		
 		
 		ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
 		boolean continueFlag = true;
@@ -157,12 +151,53 @@ public class NERTaskManager implements Runnable{
 		int waitTime = 60000; //1 min
 		while(continueFlag){
 			//Queue Tasks on Retry Cache
-			if(Main.retryCacheColl.count() > 0){
-				BasicDBObject query = new BasicDBObject();
+			boolean startMainData = false;
+			if(Main.retryCacheAvailable){
+				BasicDBObject field = new BasicDBObject("_id", 1)
+				.append("coordinates", 1)
+				.append("created_at", 1)
+				.append("id", 1)
+				.append("text", 1)
+				.append("timestamp", 1)
+				.append("place", 1)
+				.append("location", 1)
+				.append("user.location", 1)
+				.append(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, 1)
+				.append(RetryCacheCollUtilities.ERROR_COUNT_FIELD_NAME, 1);
 				
+				BasicDBObject query = new BasicDBObject(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.SOCKET_TIME_OUT));
+				ArrayList<DBObject> mongoObjList = null;
 				DBCursor cursor = null;
-				cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1));
-				ArrayList<DBObject> mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+				try{
+					cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1));
+					LOGGER.info("Query for retry Cache, there are total of " + cursor.count() + " items");
+				}
+				catch(Exception e){
+					String msg = "Query for retry cache did not succeed."
+							+ "\nDue to Unexpected Error during the query.";
+					
+					LOGGER.fatal(msg, e);
+				}
+				
+				if(cursor != null && cursor.count() > 0){
+					try{
+						mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+						LOGGER.info("Successfully converted Cursor for retry cache to list.");
+					}
+					catch(Exception e){
+						String msg = "Did not succeed in converting the cursor to array for retry cache."
+								+ "\nDue to Unexpected Error during the query.";
+						
+						LOGGER.fatal(msg, e);
+					}
+					finally{
+						cursor.close();
+					}
+				}
+				else{
+					startMainData = true;
+				}
+				
 				if(mongoObjList != null && mongoObjList.size() > 0){
 					BasicDBObject startObject = (BasicDBObject) mongoObjList.get(0);
 					BasicDBObject endObject = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
@@ -173,15 +208,30 @@ public class NERTaskManager implements Runnable{
 					TimeRange timeRange = new TimeRange(startObjectId, endObjectId, mongoObjList, TaskType.RETRY_TASK);
 					
 					try {
+						Main.retryCacheAvailable = false;
 						queue.put(timeRange);
+						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue.");
 					} catch (InterruptedException e) {
 						LOGGER.error("INSERTING Object id range " + timeRange.toObjectIdString() + ", with time range " +  timeRange.toString() + " is INTERRUPTED", e);
 					}
 				}
 				
 			}
-			//Queue Tasks on the main data
 			else{
+				startMainData = true;
+			}
+			//Queue Tasks on the main data
+			if(startMainData){
+				BasicDBObject field = new BasicDBObject("_id", 1)
+				.append("coordinates", 1)
+				.append("created_at", 1)
+				.append("id", 1)
+				.append("text", 1)
+				.append("timestamp", 1)
+				.append("place", 1)
+				.append("location", 1)
+				.append("user.location", 1);
+				
 				waitFlag = false;
 				ObjectId startObjectId = nextStartObjectId;
 				BasicDBObject query = this.constructQuery(nextStartObjectId, this.endObjectId);
@@ -266,7 +316,7 @@ public class NERTaskManager implements Runnable{
 					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList, TaskType.NORMAL_TASK);
 					try {
 						queue.put(timeRange);
-						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue to the queue");
+						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue.");
 					} catch (InterruptedException e) {
 						LOGGER.error("INSERTING Object id range " + timeRange.toObjectIdString() + ", with time range " +  timeRange.toString() + " is INTERRUPTED", e);
 					}

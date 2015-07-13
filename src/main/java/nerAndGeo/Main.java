@@ -22,7 +22,7 @@ import configProperties.ConfigPropertyValues;
 
 public class Main {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
-	
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static BlockingQueue<TimeRange> queue = null;
 	
 	public static VersionControl versionControl = new VersionControl("1.0.0", "07-08-2015");
@@ -36,11 +36,10 @@ public class Main {
 	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
-	
 	public static Database retryCacheHost = null; 
 	public static DB retryCacheDB = null;
 	public static DBCollection retryCacheColl = null;
-	
+	public static boolean retryCacheAvailable = true;
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
@@ -50,13 +49,13 @@ public class Main {
 			props.load(inputStream);
 			PropertyConfigurator.configure(props);
 		} catch (IOException e) {
-			e.printStackTrace();
+			HIGH_PRIORITY_LOGGER.fatal("Start Error", e);
 		}
 		
 		try {
 			retryCacheHost = new Database(Main.configPropertyValues.retryCacheHost, Main.configPropertyValues.retryCachePort);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			HIGH_PRIORITY_LOGGER.fatal("retry cache host error", e);
 		}
 		retryCacheDB = retryCacheHost.getDatabase(Main.configPropertyValues.retryCacheDatabase);
 		retryCacheColl = retryCacheDB.getCollection(Main.configPropertyValues.retryCacheCollection);
