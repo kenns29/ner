@@ -1,5 +1,6 @@
 package nerAndGeo;
 
+import java.io.FileNotFoundException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -22,6 +23,7 @@ import com.mongodb.DBObject;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.*;
 import org.bson.types.ObjectId;
 
@@ -195,14 +197,20 @@ public class NERThread implements Runnable{
 					insertOneNerGeo(mongoObj, timeRange, pipeline);
 				}
 				catch(SocketTimeoutException e){
-					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.SOCKET_TIME_OUT), 1));
-					LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.SOCKET_TIME_OUT), 1, ExceptionUtils.getStackTrace(e)));
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
 					
 				}
+				catch(FileNotFoundException e){
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.FILE_NOT_FOUND), 1, ExceptionUtils.getStackTrace(e)));
+					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
+											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
+											+ "\nDue to FileNotFound Exception. ", e);
+				}
 				catch(Exception e){
-					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1));
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
 											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
 											+ "\nDue to Unexpected Exception. ", e);
@@ -218,34 +226,22 @@ public class NERThread implements Runnable{
 					RetryCacheCollUtilities.remove(Main.retryCacheColl, mongoObj);
 				}
 				catch(SocketTimeoutException e){
-					ErrorStatus errorStatus = RetryCacheCollUtilities.getErrorStatus(Main.retryCacheColl, mongoObj);
-					
-					if(errorStatus.errorType.getType() == ErrorType.SOCKET_TIME_OUT){
-						errorStatus.incErrorCount();
-						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
-					}
-					else{
-						errorStatus.errorType = new ErrorType(ErrorType.SOCKET_TIME_OUT);
-						errorStatus.zeroErrorCount();
-						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
-					}
-					LOGGER.error("Java Error, Encounted a SocketTimeoutException while processing document " + this.threadStatus.currentObjectId +" in the retry cache."
+					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.SOCKET_TIME_OUT, e);
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a SocketTimeoutException while processing document " + this.threadStatus.currentObjectId +" in the retry cache."
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
 				}
-				catch(Exception e){
-					ErrorStatus errorStatus = RetryCacheCollUtilities.getErrorStatus(Main.retryCacheColl, mongoObj);
-					if(errorStatus.errorType.getType() == ErrorType.OTHER){
-						errorStatus.incErrorCount();
-						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
-					}
-					else{
-						errorStatus.errorType = new ErrorType(ErrorType.OTHER);
-						errorStatus.zeroErrorCount();
-						RetryCacheCollUtilities.update(Main.retryCacheColl, mongoObj, errorStatus);
-					}
-					LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
+				catch(FileNotFoundException e){
+					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.FILE_NOT_FOUND, e);
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
+							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to FileNotFoundException Exception. ", e);
+				}
+				catch(Exception e){	
+					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.OTHER, e);
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to Unexpected Exception. ", e);

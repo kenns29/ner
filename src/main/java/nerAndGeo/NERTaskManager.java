@@ -13,6 +13,7 @@ import util.TaskType;
 import util.TimeRange;
 import util.TimeUtilities;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -165,7 +166,11 @@ public class NERTaskManager implements Runnable{
 				.append(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, 1)
 				.append(RetryCacheCollUtilities.ERROR_COUNT_FIELD_NAME, 1);
 				
-				BasicDBObject query = new BasicDBObject(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.SOCKET_TIME_OUT));
+				BasicDBList andList = new BasicDBList();
+				andList.add(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.SOCKET_TIME_OUT));
+				andList.add(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.FILE_NOT_FOUND));
+				BasicDBObject query = new BasicDBObject(new BasicDBObject("$and", andList));
+				
 				ArrayList<DBObject> mongoObjList = null;
 				DBCursor cursor = null;
 				try{

@@ -2,6 +2,7 @@ package util;
 
 import nerAndGeo.Main;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
@@ -14,12 +15,14 @@ public class RetryCacheCollUtilities {
 	
 	public static final String ERROR_TYPE_FIELD_NAME = "errorType";
 	public static final String ERROR_COUNT_FIELD_NAME = "errorCount";
-
+	public static final String ERROR_MESSAGE_FIELD_NAME = "exceptionStackTrace";
+	
 	public static void insert(DBCollection coll, BasicDBObject mongoObj, ErrorStatus errorStatus){
 		ObjectId objectId = mongoObj.getObjectId("_id");
 		BasicDBObject setObj = copyObj(mongoObj);
 		setObj.append(ERROR_TYPE_FIELD_NAME, errorStatus.errorType.getType());
 		setObj.append(ERROR_COUNT_FIELD_NAME, errorStatus.getErrorCount());
+		setObj.append(ERROR_MESSAGE_FIELD_NAME, errorStatus.errorMsg);
 		coll.update(new BasicDBObject("_id", objectId), new BasicDBObject("$set", setObj), true, false);
 	}
 	public static void remove(DBCollection coll, ObjectId objectId){
@@ -37,7 +40,24 @@ public class RetryCacheCollUtilities {
 		BasicDBObject setObj = copyObj(mongoObj);
 		setObj.append(ERROR_TYPE_FIELD_NAME, errorStatus.errorType.getType());
 		setObj.append(ERROR_COUNT_FIELD_NAME, errorStatus.getErrorCount());
+		setObj.append(ERROR_MESSAGE_FIELD_NAME, errorStatus.errorMsg);
 		coll.update(new BasicDBObject("_id", objectId), new BasicDBObject("$set", setObj));
+	}
+	
+	public static ErrorStatus updateErrorTypeOrCount(DBCollection coll, BasicDBObject mongoObj, int errorType, Exception e){
+		ErrorStatus errorStatus = RetryCacheCollUtilities.getErrorStatus(coll, mongoObj);
+		if(errorStatus.errorType.getType() == errorType){
+			errorStatus.incErrorCount();
+			errorStatus.errorMsg = ExceptionUtils.getStackTrace(e);
+			RetryCacheCollUtilities.update(coll, mongoObj, errorStatus);
+		}
+		else{
+			errorStatus.errorType = new ErrorType(errorType);
+			errorStatus.zeroErrorCount();
+			errorStatus.errorMsg = ExceptionUtils.getStackTrace(e);
+			RetryCacheCollUtilities.update(coll, mongoObj, errorStatus);
+		}
+		return errorStatus;
 	}
 	
 	public static ErrorStatus getErrorStatus(DBCollection coll, BasicDBObject mongoObj){

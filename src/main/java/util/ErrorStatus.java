@@ -3,6 +3,7 @@ package util;
 public class ErrorStatus {
 	public ErrorType errorType = new ErrorType();
 	private int errorCount = 0;
+	public String errorMsg = null;
 	public ErrorStatus(){}
 	public ErrorStatus(ErrorType errorType){
 		this.errorType = errorType;
@@ -11,7 +12,10 @@ public class ErrorStatus {
 		this(errorType);
 		this.errorCount = errorCount;
 	}
-	
+	public ErrorStatus(ErrorType errorType, int errorCount, String errorMsg){
+		this(errorType, errorCount);
+		this.errorMsg = errorMsg;
+	}
 	public void incErrorCount(){
 		++this.errorCount;
 	}
