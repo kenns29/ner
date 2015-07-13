@@ -249,7 +249,7 @@ public class NERTaskManager implements Runnable{
 							long systime = System.currentTimeMillis();
 							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 							long newSystime = System.currentTimeMillis();
-							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", there are total of " + cursor.count() + " items, query took " + (newSystime - systime) + " milliseconds.");
+							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", query took " + (newSystime - systime) + " milliseconds.");
 						}
 						catch(Exception e){
 							++unexpectedExceptionCount1;

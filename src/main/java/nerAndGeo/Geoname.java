@@ -84,7 +84,7 @@ public class Geoname {
 	}
 	 public static BasicDBObject geocode(String name) throws Exception{
 		 BasicDBObject rObj = null;
-		 WebService.setConnectTimeOut(1);
+		 //WebService.setConnectTimeOut(1);
 	 	 WebService.setUserName(accountName); // add your username here
 	 	 //System.out.println("accountName = " + accountName);
 		 //System.out.println("location = " + name);
@@ -280,6 +280,22 @@ public class Geoname {
 		return geonameObj;
 	}
 	
+	public static void cacheNullName(String name){
+		BasicDBObject query = new BasicDBObject("name", name);
+		if(nullCacheColl.findOne(query) == null){
+			BasicDBObject cacheObj = new BasicDBObject("name", name);
+			nullCacheColl.update(query, new BasicDBObject("$set", cacheObj), true, false);
+		}
+	}
+	public static boolean isNameInNullCache(String name){
+		Object obj = nullCacheColl.findOne(new BasicDBObject("name", name));
+		if(obj != null){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{
 		boolean cacheHit = false;
 		boolean geonameHit = false;
@@ -287,17 +303,20 @@ public class Geoname {
 		if(Main.configPropertyValues.useGeonameCache){
 			geonameObj = getGeonameObjFromCache(name);
 		}
-		
-		if(geonameObj == null){
-			geonameObj = getGeonameWithAccountRotate(name, threadStatus);
-			if(geonameObj != null){
-				geonameHit = true;
+		if(!isNameInNullCache(name)){
+			if(geonameObj == null){
+				geonameObj = getGeonameWithAccountRotate(name, threadStatus);
+				if(geonameObj != null){
+					geonameHit = true;
+				}
+				else{
+					cacheNullName(name);
+				}
+			}
+			else{
+				cacheHit = true;
 			}
 		}
-		else{
-			cacheHit = true;
-		}
-		
 		synchronized(Geoname.class){
 			int nCount = Geoname.nameCount.incrementAndGet();
 			int gCount = Geoname.geonameCount.intValue();
