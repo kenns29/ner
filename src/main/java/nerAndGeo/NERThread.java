@@ -5,14 +5,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 //import java.util.logging.Logger;
-
-
-
-
-
-
-
-
+import util.ErrorType;
+import util.RetryCacheCollUtilities;
 import util.TaskType;
 import util.ThreadStatus;
 import util.TimeRange;
@@ -193,16 +187,28 @@ public class NERThread implements Runnable{
 				catch(SocketTimeoutException e){
 					LOGGER.error("Java Error, Encounted a Socket time out error. Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
-							+ "\nDue to SocketTimeoutException", e);
-					Main.retryCacheColl.update(new BasicDBObject("_id", this.threadStatus.currentObjectId), this.threadStatus.currentMongoObj, true, false);
+							+ "\nDue to SocketTimeoutException. ", e);
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorType(ErrorType.SOCKET_TIME_OUT));
+				}
+				catch(Exception e){
+					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
+											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
+											+ "\nDue to Unexpected Exception. ", e);
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorType(ErrorType.OTHER));
 				}
 			}
 		}
 		else{
 			for(DBObject obj : timeRange.mongoObjList){
 				BasicDBObject mongoObj = (BasicDBObject) obj;
-				insertOneNerGeo(mongoObj, timeRange, pipeline);
-				removeFromRetryCache(mongoObj);
+				try{
+					insertOneNerGeo(mongoObj, timeRange, pipeline);
+					RetryCacheCollUtilities.remove(Main.retryCacheColl, mongoObj);
+				}
+				catch(Exception e){
+					
+				}
+				
 			}
 		}
 		
@@ -304,9 +310,4 @@ public class NERThread implements Runnable{
 		}
 	}
 	
-	public void removeFromRetryCache(BasicDBObject mongoObj){
-		ObjectId objectId = mongoObj.getObjectId("_id");
-		BasicDBObject query = new BasicDBObject("_id", objectId);
-		Main.retryCacheColl.remove(query);
-	}
 }
