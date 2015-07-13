@@ -18,6 +18,7 @@ public class ThreadStatus {
 				+ "<td>Current Insertion Timestamp</td>"
 				+ "<td>Current Insertion Time</td>"
 				+ "<td>Current Tweet ID</td>"
+				+ "<td>Current Task Type</td>"
 				+ "<td>Cuurent Status</td>"
 				+ "</tr>";
 		return msg;
@@ -57,13 +58,14 @@ public class ThreadStatus {
 		String msg = "<tr>"
 				+ "<td>" + this.threadId + "</td>"
 				+ "<td>" + this.systemThreadId + "</td>"
-				+ "<td>" + ((this.timeRange != null) ? this.timeRange.toString() : null) + "</td>"
+				+ "<td>" + ((this.timeRange != null) ? this.timeRange.toTimeSting() : null) + "</td>"
 				+ "<td>" + this.timeRange.toObjectIdString() + "</td>"
 				+ "<td>" + this.numDocs + "</td>"
 				+ "<td>" + this.currentObjectId + "</td>"
 				+ "<td>" + this.currentInsertionTime + "</td>"
 				+ "<td>" + TimeUtilities.js_timestampToString(this.currentInsertionTime) + "</td>"
 				+ "<td>" + this.currentTweetId + "</td>"
+				+ "<td>" + this.timeRange.taskType.toString() + "</td>"
 				+ "<td>" + currentStatus() + "</td>"
 				+ "</tr>";
 		

@@ -51,6 +51,9 @@ public class TimeRange implements Comparable{
 		return "(" + TimeUtilities.js_timestampToString(startTime) + " To " + TimeUtilities.js_timestampToString(endTime) + ", " + taskType.toString() +  ")";
 	}
 	
+	public String toTimeSting(){
+		return "(" + TimeUtilities.js_timestampToString(startTime) + " To " + TimeUtilities.js_timestampToString(endTime) + ")";
+	}
 	public String toObjectIdString(){
 		return "(" + this.startObjectId.toHexString() + " To " + this.endObjectId + ", " + taskType.toString() + ")";
 	}
