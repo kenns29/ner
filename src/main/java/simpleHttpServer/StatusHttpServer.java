@@ -13,6 +13,7 @@ public class StatusHttpServer {
         server.createContext("/status", new HttpServerHandler());
         server.createContext("/json", new HttpServerHandlerJSON());
         server.createContext("/test", new HttpServerHandlerTest());
+        server.createContext("/progress", new HttpServerHandlerProgress());
         server.setExecutor(null); // creates a default executor
         server.start();
 	}

@@ -28,10 +28,14 @@ public class Main {
 	public static VersionControl versionControl = new VersionControl("1.0.0", "07-08-2015");
 	public static ConfigPropertyValues configPropertyValues = null;
 	
+	public static long totalDocuments = -1;
 	public static AtomicInteger documentCount = new AtomicInteger(0);
 	public static AtomicInteger timelyDocCount = new AtomicInteger(0);
+	public static AtomicInteger lastTimelyDocCount = new AtomicInteger(0);
 	public static AtomicInteger textEntitiesDocCount = new AtomicInteger(0);
 	public static AtomicInteger userEntitiesDocCount = new AtomicInteger(0);
+	
+	public static long mainStartTime = System.currentTimeMillis();
 	public static long mainPreTime = System.currentTimeMillis();
 	
 	public static Object lockObjectRetryCache = new Object();
@@ -78,6 +82,7 @@ public class Main {
 		Database database = new Database(configPropertyValues.host, configPropertyValues.port);
 		DB db = database.getDatabase(configPropertyValues.db);
 		DBCollection coll = db.getCollection(configPropertyValues.coll);
+		Main.totalDocuments = coll.count();
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.useTimeLimit){

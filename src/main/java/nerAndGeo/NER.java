@@ -288,7 +288,8 @@ public class NER {
 					ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
 					LOGGER.info(msg
 							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + Main.timelyDocCount.intValue() + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
-							+ "\nThe Safe Object Id is " + safeObjectId.toString());
+							+ "\nThe Safe Object Id is " + safeObjectId);
+					Main.lastTimelyDocCount.set(Main.timelyDocCount.intValue());
 					Main.timelyDocCount.set(0);
 					Main.mainPreTime = time;
 					
