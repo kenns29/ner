@@ -50,8 +50,8 @@ public class GeojsonList {
 			double lng = coord.getDouble("lng");
 			
 			BasicDBList coordinate = new BasicDBList();
-			coordinate.add(lat);
 			coordinate.add(lng);
+			coordinate.add(lat);
 			rObj = new BasicDBObject("type", "Point")
 						.append("coordinates", coordinate);
 		}
@@ -78,13 +78,13 @@ public class GeojsonList {
 	public BasicDBObject makeGeojsonObjFromCoordinates(BasicDBObject coordinates){
 		String type = coordinates.getString("type");
 		BasicDBList point = (BasicDBList) coordinates.get("coordinates");
-		double lat = getDoubleFromCoordinatesItem(point.get(1));
 		double lng = getDoubleFromCoordinatesItem(point.get(0));
+		double lat = getDoubleFromCoordinatesItem(point.get(1));
 		
 		if(lat != INVALID_DOUBLE && lng != INVALID_DOUBLE){
 			BasicDBList newPoint = new BasicDBList();
-			newPoint.add(lat);
 			newPoint.add(lng);
+			newPoint.add(lat);
 			return new BasicDBObject("type", type)
 						.append("coordinates", newPoint);
 		}
@@ -97,8 +97,8 @@ public class GeojsonList {
 		double lat = location.getDouble("lat");
 		double lng = location.getDouble("lng");
 		BasicDBList coordinates = new BasicDBList();
-		coordinates.add(lat);
 		coordinates.add(lng);
+		coordinates.add(lat);
 		return new BasicDBObject("type", "Point")
 				.append("coordinates", coordinates);
 	}
@@ -136,10 +136,10 @@ public class GeojsonList {
 	}
 	
 	private boolean comparePoints(BasicDBList firstPoint, BasicDBList secondPoint){
-		double firstLat = getDoubleFromCoordinatesItem(firstPoint.get(0));
-		double firstLng = getDoubleFromCoordinatesItem(firstPoint.get(1));
-		double secondLat = getDoubleFromCoordinatesItem(secondPoint.get(0));
-		double secondLng = getDoubleFromCoordinatesItem(secondPoint.get(1));
+		double firstLng = getDoubleFromCoordinatesItem(firstPoint.get(0));
+		double firstLat = getDoubleFromCoordinatesItem(firstPoint.get(1));
+		double secondLng = getDoubleFromCoordinatesItem(secondPoint.get(0));
+		double secondLat = getDoubleFromCoordinatesItem(secondPoint.get(1));
 		
 		if(firstLat == secondLat && firstLng == secondLng){
 			return true;
@@ -151,8 +151,8 @@ public class GeojsonList {
 	
 	private boolean compareCoordinatesWithLocation(BasicDBObject coordinates, BasicDBObject location){
 		BasicDBList coordPoint = (BasicDBList) coordinates.get("coordinates");
-		double coordLat = (double) coordPoint.get(1);
-		double coordLng = (double) coordPoint.get(0);
+		double coordLng = getDoubleFromCoordinatesItem(coordPoint.get(0));
+		double coordLat = getDoubleFromCoordinatesItem(coordPoint.get(1));
 		
 		double locationLat = location.getDouble("lat");
 		double locationLng = location.getDouble("lng");
