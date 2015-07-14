@@ -189,7 +189,7 @@ public class NERThread implements Runnable{
 		}
 	}
 
-	public void insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
+	public boolean insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		this.threadStatus.numDocs = timeRange.mongoObjList.size();
 		if(timeRange.taskType.getType() == TaskType.NORMAL_TASK){
 			for(DBObject obj : timeRange.mongoObjList){
@@ -202,6 +202,9 @@ public class NERThread implements Runnable{
 					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 					
 				}
 				catch(ConnectException e){
@@ -209,12 +212,18 @@ public class NERThread implements Runnable{
 					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to ConnectException. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 				}
 				catch(FileNotFoundException e){
 					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.FILE_NOT_FOUND), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
 											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
 											+ "\nDue to FileNotFound Exception. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 				}
 				catch(Exception e){
 					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1, ExceptionUtils.getStackTrace(e)));
@@ -238,6 +247,9 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 				}
 				catch(ConnectException e){
 					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.CONNECT_EXCEPTION, e);
@@ -245,6 +257,9 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to ConnectException. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 				}
 				catch(FileNotFoundException e){
 					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.FILE_NOT_FOUND, e);
@@ -252,6 +267,9 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to FileNotFoundException Exception. ", e);
+					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						return false;
+					}
 				}
 				catch(Exception e){	
 					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.OTHER, e);
@@ -263,7 +281,7 @@ public class NERThread implements Runnable{
 				
 			}
 		}
-		
+		return true;
 	}
 	
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{

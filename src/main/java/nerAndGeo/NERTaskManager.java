@@ -175,7 +175,7 @@ public class NERTaskManager implements Runnable{
 				ArrayList<DBObject> mongoObjList = null;
 				DBCursor cursor = null;
 				try{
-					cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1));
+					cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 					LOGGER.info("Query for retry Cache, there are total of " + cursor.count() + " items");
 				}
 				catch(Exception e){
