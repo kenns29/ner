@@ -13,6 +13,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import util.CollUtilities;
 import util.TimeRange;
 import version.VersionControl;
 
@@ -45,6 +46,8 @@ public class Main {
 	public static DB retryCacheDB = null;
 	public static DBCollection retryCacheColl = null;
 	public static boolean retryCacheAvailable = true;
+	
+	public static DBCollection mainColl = null;
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
@@ -83,7 +86,12 @@ public class Main {
 		Database database = new Database(configPropertyValues.host, configPropertyValues.port);
 		DB db = database.getDatabase(configPropertyValues.db);
 		DBCollection coll = db.getCollection(configPropertyValues.coll);
-		Main.totalDocuments = coll.count();
+		configPropertyValues.initStartEnd(coll);
+		
+		Main.mainColl = coll;
+		if(Main.configPropertyValues.stopAtEnd){
+			Main.totalDocuments = CollUtilities.getTotalDocumentCountWithStopAtEnd(coll);
+		}
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.useTimeLimit){

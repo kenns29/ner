@@ -8,6 +8,10 @@ import java.util.Properties;
 
 import org.bson.types.ObjectId;
 
+import util.CollUtilities;
+
+import com.mongodb.DBCollection;
+
 public class ConfigPropertyValues {
 	public String host = null;
 	public int port = 0;
@@ -162,5 +166,33 @@ public class ConfigPropertyValues {
 		retryCachePort = Integer.valueOf(prop.getProperty("retryCachePort"));
 		retryCacheDatabase = prop.getProperty("retryCacheDatabase");
 		retryCacheCollection = prop.getProperty("retryCacheCollection");
+	}
+	
+	public void initStartEnd(DBCollection coll){
+		if(this.startTime < 0){
+			if(this.useInsertionOrCreationTime == 0){
+				this.startTime = CollUtilities.minInsertionTime(coll);
+			}
+			else{
+				this.startTime = CollUtilities.minTime(coll);
+			}
+		}
+		
+		if(this.endTime < 0){
+			if(this.useInsertionOrCreationTime == 0){
+				this.endTime = CollUtilities.maxInsertionTime(coll);
+			}
+			else{
+				this.endTime = CollUtilities.maxTime(coll);
+			}
+		}
+		
+		if(this.startObjectId == null){
+			this.startObjectId = CollUtilities.minObjectId(coll);
+		}
+		
+		if(this.endObjectId == null){
+			this.endObjectId = CollUtilities.maxObjectId(coll);
+		}
 	}
 }

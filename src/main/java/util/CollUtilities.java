@@ -1,5 +1,7 @@
 package util;
 
+import nerAndGeo.Main;
+
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -65,5 +67,101 @@ public class CollUtilities {
 	
 	public static long maxJsInsertionTime(DBCollection coll){
 		return maxInsertionTime(coll) * 1000;
+	}
+	
+	public static int getTotalDocumentCount(DBCollection coll){
+		if(Main.configPropertyValues.useTimeLimit){
+			if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+				BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.startTime)));
+				BasicDBObject field = new BasicDBObject("_id", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+			else{
+				BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject("$gte", Main.configPropertyValues.startTime));
+				BasicDBObject field = new BasicDBObject("timestamp", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+		}
+		else if(Main.configPropertyValues.useObjectIdLimit){
+			BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", Main.configPropertyValues.startObjectId));
+			BasicDBObject field = new BasicDBObject("_id", 1);
+			DBCursor cursor = coll.find(query, field);
+			return cursor.count();
+		}
+		else{
+			if(Main.configPropertyValues.splitOption == 0){
+				if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+					BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.startTime)));
+					BasicDBObject field = new BasicDBObject("_id", 1);
+					DBCursor cursor = coll.find(query, field);
+					return cursor.count();
+				}
+				else{
+					BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject("$gte", Main.configPropertyValues.startTime));
+					BasicDBObject field = new BasicDBObject("timestamp", 1);
+					DBCursor cursor = coll.find(query, field);
+					return cursor.count();
+				}
+			}
+			else{
+				BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", Main.configPropertyValues.startObjectId));
+				BasicDBObject field = new BasicDBObject("_id", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+		}
+	}
+	
+	public static int getTotalDocumentCountWithStopAtEnd(DBCollection coll){
+		if(Main.configPropertyValues.useTimeLimit){
+			if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+				BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.startTime))
+				.append("$lte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.endTime)));
+				BasicDBObject field = new BasicDBObject("_id", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+			else{
+				BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject("$gte", Main.configPropertyValues.startTime)
+				.append("$lte", Main.configPropertyValues.endTime));
+				BasicDBObject field = new BasicDBObject("timestamp", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+		}
+		else if(Main.configPropertyValues.useObjectIdLimit){
+			BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", Main.configPropertyValues.startObjectId)
+			.append("$lte", Main.configPropertyValues.endObjectId));
+			BasicDBObject field = new BasicDBObject("_id", 1);
+			DBCursor cursor = coll.find(query, field);
+			return cursor.count();
+		}
+		else{
+			if(Main.configPropertyValues.splitOption == 0){
+				if(Main.configPropertyValues.useInsertionOrCreationTime == 0){
+					BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.startTime))
+					.append("$lte", TimeUtilities.getObjectIdFromTimestamp(Main.configPropertyValues.endTime)));
+					BasicDBObject field = new BasicDBObject("_id", 1);
+					DBCursor cursor = coll.find(query, field);
+					return cursor.count();
+				}
+				else{
+					BasicDBObject query = new BasicDBObject("timestamp", new BasicDBObject("$gte", Main.configPropertyValues.startTime)
+					.append("$lte", Main.configPropertyValues.endTime));
+					BasicDBObject field = new BasicDBObject("timestamp", 1);
+					DBCursor cursor = coll.find(query, field);
+					return cursor.count();
+				}
+			}
+			else{
+				BasicDBObject query = new BasicDBObject("_id", new BasicDBObject("$gte", Main.configPropertyValues.startObjectId)
+				.append("$lte", Main.configPropertyValues.endObjectId));
+				BasicDBObject field = new BasicDBObject("_id", 1);
+				DBCursor cursor = coll.find(query, field);
+				return cursor.count();
+			}
+		}
 	}
 }

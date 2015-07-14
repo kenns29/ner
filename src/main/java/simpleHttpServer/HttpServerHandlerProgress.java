@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 
+import util.CollUtilities;
 import nerAndGeo.Main;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -13,14 +14,20 @@ public class HttpServerHandlerProgress implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = "";
-		
+		long totalDocumentCount = -1;
+		if(Main.configPropertyValues.stopAtEnd){
+			totalDocumentCount = Main.totalDocuments;
+		}
+		else{
+			totalDocumentCount = CollUtilities.getTotalDocumentCount(Main.mainColl);
+		}
 		int mainDocumentCount = Main.documentCount.intValue();
 		int mainLastTimelyDocCount = Main.lastTimelyDocCount.intValue();
 		long elapsedTimeInMillis = System.currentTimeMillis() - Main.mainStartTime;
 		double elapsedTimeInMinutes = ((double)elapsedTimeInMillis) / 60000;
 		int avgDocsPerMinutes = (int) (mainDocumentCount / elapsedTimeInMinutes);
-		double percentComplete = (double)(mainDocumentCount) / Main.totalDocuments;
-		int estimateTimeInMinutes = (int) ((Main.totalDocuments - mainDocumentCount) / avgDocsPerMinutes);
+		double percentComplete = (double)(mainDocumentCount) / totalDocumentCount;
+		int estimateTimeInMinutes = (int) ((totalDocumentCount - mainDocumentCount) / avgDocsPerMinutes);
 		
 		DecimalFormat df = new DecimalFormat("#.00");
 		
