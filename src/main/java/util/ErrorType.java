@@ -4,6 +4,7 @@ public class ErrorType {
 	public static final int OTHER = 0;
 	public static final int SOCKET_TIME_OUT = 1;
 	public static final int FILE_NOT_FOUND = 2;
+	public static final int CONNECT_EXCEPTION = 3;
 	private int type = 0;
 	
 	public ErrorType(){}
@@ -27,6 +28,8 @@ public class ErrorType {
 			return "SocketTimeoutException";
 		case FILE_NOT_FOUND:
 			return "FileNotFoundException";
+		case CONNECT_EXCEPTION:
+			return "ConnectException";
 		default:
 			return "Other";
 		}

@@ -1,6 +1,7 @@
 package nerAndGeo;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
@@ -285,10 +286,26 @@ public class NER {
 					for(int i = 0; i < Main.configPropertyValues.core; i++){
 						msg += NERThreadList.list.get(i).threadStatus.toString() + "\n";
 					}
+					
+					Runtime runtime = Runtime.getRuntime();
+
+					NumberFormat format = NumberFormat.getInstance();
+
+					StringBuilder sb = new StringBuilder();
+					long maxMemory = runtime.maxMemory();
+					long allocatedMemory = runtime.totalMemory();
+					long freeMemory = runtime.freeMemory();
+
+					sb.append("free memory: " + format.format(freeMemory) + "\n");
+					sb.append("allocated memory: " + format.format(allocatedMemory) + "\n");
+					sb.append("max memory: " + format.format(maxMemory) + "\n");
+					sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory))) + "\n");
 					ObjectId safeObjectId = NERThreadList.getSafeObjectId(NERThreadList.list);
 					LOGGER.info(msg
 							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + Main.timelyDocCount.intValue() + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
-							+ "\nThe Safe Object Id is " + safeObjectId);
+							+ "\nThe Safe Object Id is " + safeObjectId
+							+ "\n" + sb.toString());
+					
 					Main.lastTimelyDocCount.set(Main.timelyDocCount.intValue());
 					Main.timelyDocCount.set(0);
 					Main.mainPreTime = time;

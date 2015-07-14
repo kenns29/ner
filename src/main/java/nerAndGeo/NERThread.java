@@ -1,6 +1,7 @@
 package nerAndGeo;
 
 import java.io.FileNotFoundException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -203,6 +204,12 @@ public class NERThread implements Runnable{
 							+ "\nDue to SocketTimeoutException. ", e);
 					
 				}
+				catch(ConnectException e){
+					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.CONNECT_EXCEPTION), 1, ExceptionUtils.getStackTrace(e)));
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to ConnectException. ", e);
+				}
 				catch(FileNotFoundException e){
 					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.FILE_NOT_FOUND), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
@@ -231,6 +238,13 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
+				}
+				catch(ConnectException e){
+					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.CONNECT_EXCEPTION, e);
+					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a ConnectException while processing document " + this.threadStatus.currentObjectId +" in the retry cache."
+							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
+							+ "\nCurrent Thread Status: " + threadStatus.toString()
+							+ "\nDue to ConnectException. ", e);
 				}
 				catch(FileNotFoundException e){
 					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.FILE_NOT_FOUND, e);
