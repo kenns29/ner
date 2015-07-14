@@ -170,7 +170,7 @@ public class NERTaskManager implements Runnable{
 				orList.add(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.SOCKET_TIME_OUT));
 				orList.add(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.FILE_NOT_FOUND));
 				orList.add(new BasicDBObject(RetryCacheCollUtilities.ERROR_TYPE_FIELD_NAME, ErrorType.CONNECT_EXCEPTION));
-				BasicDBObject query = new BasicDBObject(new BasicDBObject("$and", orList));
+				BasicDBObject query = new BasicDBObject(new BasicDBObject("$or", orList));
 				
 				ArrayList<DBObject> mongoObjList = null;
 				DBCursor cursor = null;
