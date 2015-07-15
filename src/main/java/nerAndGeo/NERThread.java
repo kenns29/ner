@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
+import util.CollUtilities;
 import util.ErrorStatus;
 //import java.util.logging.Logger;
 import util.ErrorType;
@@ -341,6 +342,7 @@ public class NERThread implements Runnable{
 			this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
 			this.threadStatus.currentTweetId = mongoObj.getLong("id");
 		}
+		CollUtilities.unsetLocationCollection(coll, mongoObj);
 		int documentCount = Main.documentCount.incrementAndGet();
 		String text = mongoObj.getString(inputField);
 		String userText = null;

@@ -164,4 +164,8 @@ public class CollUtilities {
 			}
 		}
 	}
+	
+	public static void unsetLocationCollection(DBCollection coll, BasicDBObject mongoObj){
+		coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")), new BasicDBObject("$unset", new BasicDBObject("locationCollection", "")));
+	}
 }
