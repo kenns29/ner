@@ -47,7 +47,22 @@ public class HttpServerHandler implements HttpHandler {
 			response += "<p> Current Tasks Queued </p>";
 			response += queueTable;
 			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
+			
+			if(Main.geonameServiceCheckerThread.isAlive()){
+				String geonameServiceChecker = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
+				geonameServiceChecker += "<tr>"
+									  +	 "<td>System Thread ID</td>"
+									  +  "<td>Status</td>"
+									  +  "</tr><tr>"
+									  +  "<td>" + Main.geonameServiceCheckerThread.getId() + "</td>"
+									  +  "</tr>";
+				response += "<p> Geoname Service Check Running </p>";
+				response += geonameServiceChecker;
+			}
+			
 			response += "</body></html>";
+			
+			
 		}
 		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
