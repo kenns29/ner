@@ -55,6 +55,7 @@ public class HttpServerHandler implements HttpHandler {
 									  +  "<td>Status</td>"
 									  +  "</tr><tr>"
 									  +  "<td>" + Main.geonameServiceCheckerThread.getId() + "</td>"
+									  +  "<td>Alive</td>"
 									  +  "</tr>";
 				response += "<p> Geoname Service Check Running </p>";
 				response += geonameServiceChecker;
