@@ -191,6 +191,7 @@ public class NERThread implements Runnable{
 
 	public boolean insertNerGeoFromArray(TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
 		this.threadStatus.numDocs = timeRange.mongoObjList.size();
+		//Normal Task
 		if(timeRange.taskType.getType() == TaskType.NORMAL_TASK){
 			for(DBObject obj : timeRange.mongoObjList){
 				BasicDBObject mongoObj = (BasicDBObject) obj;
@@ -249,6 +250,7 @@ public class NERThread implements Runnable{
 				}
 			}
 		}
+		//Retry Task
 		else{
 			for(DBObject obj : timeRange.mongoObjList){
 				BasicDBObject mongoObj = (BasicDBObject) obj;
@@ -318,6 +320,9 @@ public class NERThread implements Runnable{
 				}
 				catch(Exception e){	
 					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.errorCacheColl, mongoObj, ErrorType.OTHER, e);
+					if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
+						RetryCacheCollUtilities.remove(Main.retryCacheColl, mongoObj);
+					}
 					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()

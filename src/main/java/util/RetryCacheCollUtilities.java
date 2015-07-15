@@ -41,7 +41,7 @@ public class RetryCacheCollUtilities {
 		setObj.append(ERROR_TYPE_FIELD_NAME, errorStatus.errorType.getType());
 		setObj.append(ERROR_COUNT_FIELD_NAME, errorStatus.getErrorCount());
 		setObj.append(ERROR_MESSAGE_FIELD_NAME, errorStatus.errorMsg);
-		coll.update(new BasicDBObject("_id", objectId), new BasicDBObject("$set", setObj));
+		coll.update(new BasicDBObject("_id", objectId), new BasicDBObject("$set", setObj), true, false);
 	}
 	
 	public static ErrorStatus updateErrorTypeOrCount(DBCollection coll, BasicDBObject mongoObj, int errorType, Exception e){
