@@ -351,7 +351,11 @@ public class NERThread implements Runnable{
 		BasicDBList textEntities = null;
 		
 		if(Main.configPropertyValues.userNer){
-			BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
+			Object tUserObj = mongoObj.get("user");
+			BasicDBObject userObj = null;
+			if(tUserObj != null){
+				userObj = (BasicDBObject) tUserObj;
+			}
 			if(userObj != null){
 				userText = userObj.getString("location");
 			}
