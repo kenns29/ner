@@ -352,8 +352,9 @@ public class NERThread implements Runnable{
 		
 		if(Main.configPropertyValues.userNer){
 			BasicDBObject userObj = (BasicDBObject) mongoObj.get("user");
-			userText = userObj.getString("location");
-			
+			if(userObj != null){
+				userText = userObj.getString("location");
+			}
 			if(userText != null){
 				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
 				userEntities = NER.insertFromFlag(userEntities, "user.location");
