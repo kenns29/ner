@@ -67,6 +67,12 @@ public class ConfigPropertyValues {
 	public int retryCachePort = 0;
 	public String retryCacheDatabase = null;
 	public String retryCacheCollection = null;
+	
+	public String errorCacheHost = null;
+	public int errorCachePort = 0;
+	public String errorCacheDatabase = null;
+	public String errorCacheCollection = null;
+	
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -166,6 +172,11 @@ public class ConfigPropertyValues {
 		retryCachePort = Integer.valueOf(prop.getProperty("retryCachePort"));
 		retryCacheDatabase = prop.getProperty("retryCacheDatabase");
 		retryCacheCollection = prop.getProperty("retryCacheCollection");
+		
+		errorCacheHost = prop.getProperty("errorCacheHost");
+		errorCachePort = Integer.valueOf(prop.getProperty("errorCachePort")).intValue();
+		errorCacheDatabase = prop.getProperty("errorCacheDatabase");
+		errorCacheCollection = prop.getProperty("errorCacheCollection");
 	}
 	
 	public void initStartEnd(DBCollection coll){

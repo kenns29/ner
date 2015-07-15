@@ -217,7 +217,7 @@ public class NERThread implements Runnable{
 											+ "\nDue to FileNotFound Exception. ", e);
 				}
 				catch(Exception e){
-					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1, ExceptionUtils.getStackTrace(e)));
+					RetryCacheCollUtilities.insert(Main.errorCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
 											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
 											+ "\nDue to Unexpected Exception. ", e);
@@ -266,7 +266,7 @@ public class NERThread implements Runnable{
 					}
 				}
 				catch(Exception e){	
-					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.retryCacheColl, mongoObj, ErrorType.OTHER, e);
+					ErrorStatus errorStatus = RetryCacheCollUtilities.updateErrorTypeOrCount(Main.errorCacheColl, mongoObj, ErrorType.OTHER, e);
 					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted an error while processing document " + this.threadStatus.currentObjectId +" in the retry cache." 
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()

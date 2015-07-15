@@ -47,6 +47,10 @@ public class Main {
 	public static DBCollection retryCacheColl = null;
 	public static boolean retryCacheAvailable = true;
 	
+	public static Database errorCacheHost = null;
+	public static DB errorCacheDB = null;
+	public static DBCollection errorCacheColl = null;
+	
 	public static DBCollection mainColl = null;
 	static{
 		try {
@@ -67,6 +71,14 @@ public class Main {
 		}
 		retryCacheDB = retryCacheHost.getDatabase(Main.configPropertyValues.retryCacheDatabase);
 		retryCacheColl = retryCacheDB.getCollection(Main.configPropertyValues.retryCacheCollection);
+		
+		try {
+			errorCacheHost = new Database(Main.configPropertyValues.errorCacheHost, Main.configPropertyValues.errorCachePort);
+		} catch (UnknownHostException e) {
+			HIGH_PRIORITY_LOGGER.fatal("error cache host error", e);
+		}
+		errorCacheDB = errorCacheHost.getDatabase(Main.configPropertyValues.errorCacheDatabase);
+		errorCacheColl = errorCacheDB.getCollection(Main.configPropertyValues.errorCacheCollection);
 	}
 	
 	public static void main(String[] args) throws Exception {		
