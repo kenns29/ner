@@ -47,10 +47,14 @@ public class Main {
 	public static DBCollection retryCacheColl = null;
 	public static boolean retryCacheAvailable = true;
 	
+	public static Object lockObjectGeonameServiceChecker = new Object();
+	public static boolean geonameServiceAvailable = true;
+	
 	public static Database errorCacheHost = null;
 	public static DB errorCacheDB = null;
 	public static DBCollection errorCacheColl = null;
 	
+	public static Thread geonameServiceCheckerThread = new Thread(new GeonameServiceChecker("UK"));
 	public static DBCollection mainColl = null;
 	static{
 		try {

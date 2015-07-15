@@ -153,7 +153,7 @@ public class NERTaskManager implements Runnable{
 		while(continueFlag){
 			//Queue Tasks on Retry Cache
 			boolean startMainData = false;
-			if(Main.retryCacheAvailable){
+			if(Main.retryCacheAvailable && Main.geonameServiceAvailable){
 				BasicDBObject field = new BasicDBObject("_id", 1)
 				.append("coordinates", 1)
 				.append("created_at", 1)

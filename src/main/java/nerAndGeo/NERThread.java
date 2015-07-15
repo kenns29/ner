@@ -203,18 +203,42 @@ public class NERThread implements Runnable{
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
 					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
+					
 				}
 				catch(ConnectException e){
 					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.CONNECT_EXCEPTION), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Java Error, Encounted a Socket time out error while processing document " + this.threadStatus.currentObjectId +". Inserting the document to retry cache" 
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to ConnectException. ", e);
+					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
 				}
 				catch(FileNotFoundException e){
 					RetryCacheCollUtilities.insert(Main.retryCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.FILE_NOT_FOUND), 1, ExceptionUtils.getStackTrace(e)));
 					HIGH_PRIORITY_LOGGER.error("Encounted an error while processing document " + this.threadStatus.currentObjectId 
 											+ "\nCurrent Thread Status: " + this.threadStatus.toString()
 											+ "\nDue to FileNotFound Exception. ", e);
+					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
 				}
 				catch(Exception e){
 					RetryCacheCollUtilities.insert(Main.errorCacheColl, mongoObj, new ErrorStatus(new ErrorType(ErrorType.OTHER), 1, ExceptionUtils.getStackTrace(e)));
@@ -238,6 +262,15 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to SocketTimeoutException. ", e);
+					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
+					
 					if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
 						HIGH_PRIORITY_LOGGER.error("exit the Retry Task");
 						return false;
@@ -249,6 +282,15 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to ConnectException. ", e);
+					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
+					
 					if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
 						HIGH_PRIORITY_LOGGER.error("exit the Retry Task");
 						return false;
@@ -260,6 +302,15 @@ public class NERThread implements Runnable{
 							+ "\nThere have been total of " + errorStatus.getErrorCount() + " such errors."
 							+ "\nCurrent Thread Status: " + threadStatus.toString()
 							+ "\nDue to FileNotFoundException Exception. ", e);
+					
+					synchronized(Main.lockObjectGeonameServiceChecker){
+						if(Main.geonameServiceAvailable){
+							Main.geonameServiceAvailable = false;
+							Main.geonameServiceCheckerThread = new Thread(new GeonameServiceChecker());
+							Main.geonameServiceCheckerThread.start();
+						}
+					}
+					
 					if(timeRange.taskType.getType() == TaskType.RETRY_TASK){
 						HIGH_PRIORITY_LOGGER.error("exit the Retry Task");
 						return false;
