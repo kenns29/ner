@@ -44,9 +44,13 @@ public class HttpServerHandler implements HttpHandler {
 			response += "<p> Current Thread Status </p>";
 			response += threadTable;
 			response += "<p> The Current Safest Object Id is " + safeObjectId.toString() + "</p>";
-			response += "<p> Current Tasks Queued </p>";
-			response += queueTable;
-			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
+			
+			if(Main.geonameServiceAvailable){
+				response += "<p> The geoname service is available</p>";
+			}
+			else{
+				response += "<p> The geoname service is not available</p>";
+			}
 			
 			if(Main.geonameServiceCheckerThread.isAlive()){
 				String geonameServiceChecker = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
@@ -60,6 +64,12 @@ public class HttpServerHandler implements HttpHandler {
 				response += "<p> Geoname Service Check Running </p>";
 				response += geonameServiceChecker;
 			}
+			
+			response += "<p> Current Tasks Queued </p>";
+			response += queueTable;
+			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
+			
+			
 			
 			response += "</body></html>";
 			
