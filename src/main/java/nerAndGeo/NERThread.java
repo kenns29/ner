@@ -99,6 +99,7 @@ public class NERThread implements Runnable{
 	
 	@Override
 	public void run() {
+		long threadStartTime = System.currentTimeMillis();
 		synchronized(NER.class){
 			this.threadStatus.systemThreadId = Thread.currentThread().getId();
 		}
@@ -132,10 +133,6 @@ public class NERThread implements Runnable{
 					long time = System.currentTimeMillis() - start;
 					LOGGER.info("Finished Thread for " + timeRange.toString() + " with Object Id Range " + timeRange.toObjectIdString() +". Elapsed Time = " + time);
 					retryFlag = false;
-					
-					if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
-						Main.retryCacheAvailable = true;
-					}
 				}
 				catch(Exception e){
 					++this.unexpectedExceptionCount;
@@ -160,6 +157,16 @@ public class NERThread implements Runnable{
 				}
 			}
 			while(retryFlag);
+			
+			long threadEndTime = System.currentTimeMillis();
+			synchronized(Main.lockObjectThreadFinishCount){
+				Main.totalThreadFinishedTime += (threadEndTime - threadStartTime);
+				Main.threadFinishCount.incrementAndGet();
+			}
+			
+			if(this.threadStatus.timeRange.taskType.getType() == TaskType.RETRY_TASK){
+				Main.retryCacheAvailable = true;
+			}
 		}
 	}
 	

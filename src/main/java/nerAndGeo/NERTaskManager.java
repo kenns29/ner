@@ -144,7 +144,7 @@ public class NERTaskManager implements Runnable{
 	
 	//Split tasks by number of documents
 	private void splitTasksByNumDocuments(){
-		
+		long taskManagerStartTime = System.currentTimeMillis();
 		
 		ObjectId nextStartObjectId = TimeUtilities.decrementObjectId(this.startObjectId);
 		boolean continueFlag = true;
@@ -337,6 +337,16 @@ public class NERTaskManager implements Runnable{
 					HIGH_PRIORITY_LOGGER.fatal(msg);
 				}
 				
+				
+				long taskManagerEndTime = System.currentTimeMillis();
+				
+				synchronized(this){
+					Main.taskMangerFinishCount.incrementAndGet();
+					Main.totalTaskManagerFinishedTime += (taskManagerStartTime - taskManagerEndTime);
+				}
+				
+				LOGGER.info("Task Manager Successfuly inserted a task into the queue, it took " + (taskManagerStartTime - taskManagerEndTime) + " milliseconds.");
+			
 				if(waitFlag){
 					LOGGER.info("The query for " + startObjectId.toHexString() 
 							+" has almost reached the end, waiting for " + waitTime + " milliseconds."

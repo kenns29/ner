@@ -2,6 +2,7 @@ package simpleHttpServer;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 
 import org.bson.types.ObjectId;
@@ -21,6 +22,7 @@ public class HttpServerHandler implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = "";
+		DecimalFormat df = new DecimalFormat("#.00");
 		synchronized(NER.class){
 			String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			threadTable += ThreadStatus.makeHttpTableHeader();
@@ -65,11 +67,11 @@ public class HttpServerHandler implements HttpHandler {
 				response += geonameServiceChecker;
 			}
 			
+			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
+			response += "<p> Average Time For A Thread to Finish is " + df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) + ".</p>";
+			response += "<p> Average Time for Task Manager to Insert a Task is " + df.format(Main.totalTaskManagerFinishedTime / Main.taskMangerFinishCount.intValue()) + ".</p>";
 			response += "<p> Current Tasks Queued </p>";
 			response += queueTable;
-			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
-			
-			
 			
 			response += "</body></html>";
 			

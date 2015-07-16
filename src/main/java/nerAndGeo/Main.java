@@ -46,6 +46,12 @@ public class Main {
 	public static long mainStartTime = System.currentTimeMillis();
 	public static long mainPreTime = System.currentTimeMillis();
 	
+	public static Object lockObjectThreadFinishCount = new Object();
+	public static AtomicInteger threadFinishCount = new AtomicInteger(0);
+	public static AtomicInteger taskMangerFinishCount = new AtomicInteger(0);
+	public static long totalThreadFinishedTime = 0;
+	public static long totalTaskManagerFinishedTime = 0;
+	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
 	public static Database retryCacheHost = null; 
