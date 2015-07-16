@@ -68,8 +68,8 @@ public class HttpServerHandler implements HttpHandler {
 			}
 			
 			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
-			response += "<p> Average Time For A Thread to Finish is " + df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) + ".</p>";
-			response += "<p> Average Time for Task Manager to Insert a Task is " + df.format(Main.totalTaskManagerFinishedTime / Main.taskMangerFinishCount.intValue()) + ".</p>";
+			response += "<p> Average Time For A Thread to Finish is " + df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) + " milliseconds .</p>";
+			response += "<p> Average Time for Task Manager to Insert a Task is " + df.format(Main.totalTaskManagerFinishedTime / Main.taskMangerFinishCount.intValue()) + " milliseconds.</p>";
 			response += "<p> Current Tasks Queued </p>";
 			response += queueTable;
 			

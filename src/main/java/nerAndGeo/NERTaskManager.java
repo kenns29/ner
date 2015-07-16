@@ -345,7 +345,7 @@ public class NERTaskManager implements Runnable{
 					Main.totalTaskManagerFinishedTime += (taskManagerStartTime - taskManagerEndTime);
 				}
 				
-				LOGGER.info("Task Manager Successfuly inserted a task into the queue, it took " + (taskManagerStartTime - taskManagerEndTime) + " milliseconds.");
+				LOGGER.info("Task Manager Successfuly inserted a task into the queue, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
 			
 				if(waitFlag){
 					LOGGER.info("The query for " + startObjectId.toHexString() 
