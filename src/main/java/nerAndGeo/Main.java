@@ -23,11 +23,17 @@ import com.mongodb.DBCollection;
 import configProperties.ConfigPropertyValues;
 
 public class Main {
+	public static final int VERSION_MAJOR = 1;
+	public static final int VERSION_MINOR = 0;
+	public static final int BUILD_ID = 2;
+
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	public static BlockingQueue<TimeRange> queue = null;
 	
-	public static VersionControl versionControl = new VersionControl("1.0.0", "07-08-2015");
+	public static VersionControl versionControl =
+		new VersionControl(VERSION_MAJOR + "." + VERSION_MINOR + "." + BUILD_ID,
+			"07-08-2015");
 	public static ConfigPropertyValues configPropertyValues = null;
 	
 	public static long totalDocuments = -1;

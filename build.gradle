@@ -8,7 +8,14 @@ apply plugin: 'application'
 
 mainClassName = "nerAndGeo.Main"
 archivesBaseName = 'nerExtractor'
-version = '1.0.0'
+
+version = {->
+    def lines = file('src/main/java/nerAndGeo/Main.java').readLines();
+    def extract = {name ->
+        lines.grep {it =~ /public static final int $name =/}[0].replaceFirst(/.*=\s*(\d+);.*/, '$1')
+    }
+    extract('VERSION_MAJOR') + '.' + extract('VERSION_MINOR') + '.' + extract('BUILD_ID')
+}()
 
 dependencies {
 	compile 'jdom:jdom:1.0'
