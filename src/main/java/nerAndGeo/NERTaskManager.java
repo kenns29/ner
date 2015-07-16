@@ -320,6 +320,16 @@ public class NERTaskManager implements Runnable{
 					
 					ObjectId nextEndObjectId = nextStartObj.getObjectId("_id");
 					TimeRange timeRange = new TimeRange(nextStartObjectId, nextEndObjectId, mongoObjList, TaskType.NORMAL_TASK);
+					
+					long taskManagerEndTime = System.currentTimeMillis();
+					
+					synchronized(this){
+						Main.taskMangerFinishCount.incrementAndGet();
+						Main.totalTaskManagerFinishedTime += (taskManagerEndTime - taskManagerStartTime);
+					}
+					
+					LOGGER.info("Task Manager Successfully prepared the task, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
+					
 					try {
 						queue.put(timeRange);
 						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue.");
@@ -338,14 +348,7 @@ public class NERTaskManager implements Runnable{
 				}
 				
 				
-				long taskManagerEndTime = System.currentTimeMillis();
 				
-				synchronized(this){
-					Main.taskMangerFinishCount.incrementAndGet();
-					Main.totalTaskManagerFinishedTime += (taskManagerStartTime - taskManagerEndTime);
-				}
-				
-				LOGGER.info("Task Manager Successfuly inserted a task into the queue, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
 			
 				if(waitFlag){
 					LOGGER.info("The query for " + startObjectId.toHexString() 
