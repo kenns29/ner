@@ -297,30 +297,62 @@ public class Geoname {
 		}
 	}
 	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{
+		long geonameCacheGetTime = 0;
+		long geonameCachePutTime = 0;
+		long nullCacheCheckTime = 0;
+		long nullCachePutTime = 0;
+		long geonameTime = 0;
+		long totalGeonameTime = 0;
+		
+		long totalGeonameStartTime = System.currentTimeMillis();
 		boolean cacheHit = false;
 		boolean geonameHit = false;
 		BasicDBObject geonameObj = null;
 		if(Main.configPropertyValues.useGeonameCache){
-			//long geonameCacheGetStartTime = 0;
+			long geonameCacheGetStartTime = System.currentTimeMillis();
 			geonameObj = getGeonameObjFromCache(name);
-			//long geonameCacheGetEndTime = 0;
-			
+			long geonameCacheGetEndTime = System.currentTimeMillis();
+			geonameCacheGetTime = geonameCacheGetEndTime - geonameCacheGetStartTime;
 		}
-		if(!isNameInNullCache(name)){
+		long nullCacheCheckStartTime = System.currentTimeMillis();
+		boolean nameIsInNullCache = isNameInNullCache(name);
+		long nullCacheCheckEndTime = System.currentTimeMillis();
+		nullCacheCheckTime = nullCacheCheckEndTime - nullCacheCheckStartTime;
+		
+		if(!nameIsInNullCache){
 			if(geonameObj == null){
+				long geonameStartTime = System.currentTimeMillis();
 				geonameObj = getGeonameWithAccountRotate(name, threadStatus);
+				long geonameEndTime = System.currentTimeMillis();
+				geonameTime = geonameEndTime - geonameStartTime;
+				
 				if(geonameObj != null){
 					geonameHit = true;
 				}
 				else{
+					long nullCachePutStartTime = System.currentTimeMillis();
 					cacheNullName(name);
+					long nullCachePutEndTime = System.currentTimeMillis();
+					nullCachePutTime = nullCachePutEndTime - nullCachePutStartTime;
 				}
 			}
 			else{
 				cacheHit = true;
 			}
 		}
-		//synchronized(Geoname.class){
+		long totalGeonameEndTime = System.currentTimeMillis();
+		totalGeonameTime = totalGeonameEndTime - totalGeonameStartTime;
+		
+		synchronized(Main.lockObjectGeonameTime){
+			Main.geonameCacheGetTime += geonameCacheGetTime;
+			Main.geonameCachePutTime += geonameCachePutTime;
+			Main.geonameTime += geonameTime;
+			Main.nullCacheCheckTime += nullCacheCheckTime;
+			Main.nullCachePutTime += nullCachePutTime;
+			Main.totalGeonameTime = totalGeonameTime;
+		}
+		
+		synchronized(Geoname.class){
 			int nCount = Geoname.nameCount.incrementAndGet();
 			int gCount = Geoname.geonameCount.intValue();
 			int cCount = Geoname.cacheHitCount.intValue();
@@ -343,7 +375,7 @@ public class Geoname {
 				Geoname.perGeonameCount.set(0);
 				Geoname.perCacheHitCount.set(0);
 			}
-		//}
+		}
 		return geonameObj;
 	}
 	public static BasicDBList makeGeonameList(BasicDBList ner, ThreadStatus threadStatus) throws Exception{
