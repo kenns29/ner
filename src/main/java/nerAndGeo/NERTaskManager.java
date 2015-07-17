@@ -293,24 +293,35 @@ public class NERTaskManager implements Runnable{
 					if(cursor != null){
 						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
 			
-						long countStartTime = System.currentTimeMillis();
-						int cCount = cursor.count();
-						long countEndTime = System.currentTimeMillis();
-						LOGGER.info("Counted Cursor for the normal task, it took " + (countEndTime - countStartTime) + " milliseconds.");
-						//If the cursor has fewer documents than numDocsInThread + 1
-						if(cCount < Main.configPropertyValues.numDocsInThread){
-							if(Main.configPropertyValues.stopAtEnd){
-								continueFlag = false;
-							}
-							else{
-								waitFlag = true;
-							}
-						}
+//						long countStartTime = System.currentTimeMillis();
+//						int cCount = cursor.count();
+//						long countEndTime = System.currentTimeMillis();
+//						LOGGER.info("Counted Cursor for the normal task, it took " + (countEndTime - countStartTime) + " milliseconds.");
+//						//If the cursor has fewer documents than numDocsInThread + 1
+//						if(cCount < Main.configPropertyValues.numDocsInThread){
+//							if(Main.configPropertyValues.stopAtEnd){
+//								continueFlag = false;
+//							}
+//							else{
+//								waitFlag = true;
+//							}
+//						}
 						
 						try{
 							long systime = System.currentTimeMillis();
 							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
 							long newSystime = System.currentTimeMillis();
+							
+							int cCount = mongoObjList.size();
+							
+							if(cCount < Main.configPropertyValues.numDocsInThread){
+								if(Main.configPropertyValues.stopAtEnd){
+									continueFlag = false;
+								}
+								else{
+									waitFlag = true;
+								}
+							}
 							retryFlag = false;
 							LOGGER.info("Converted cursor to array for " + nextStartObjectId.toHexString() + ", it took " + (newSystime - systime) + " milliseconds.");
 						}
@@ -329,10 +340,7 @@ public class NERTaskManager implements Runnable{
 							}
 						}
 						finally{
-							long closeStartTime = System.currentTimeMillis();
 							cursor.close();
-							long closeEndTime = System.currentTimeMillis();
-							LOGGER.info("Time take on close cursor = " + (closeEndTime - closeStartTime));
 						}
 					}
 				}
