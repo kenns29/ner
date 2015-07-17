@@ -66,7 +66,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 			documentTimeTable += "<tr>"
 					           + "<td>Geojson</td>"
 					           + "<td>" + Main.totalGeojsonTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalGeojsonTime / Main.totalDocumentProcessTime * 100)+ "</td>"
+					           + "<td>" + df.format((double)Main.totalGeojsonTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "</table>";

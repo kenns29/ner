@@ -301,7 +301,10 @@ public class Geoname {
 		boolean geonameHit = false;
 		BasicDBObject geonameObj = null;
 		if(Main.configPropertyValues.useGeonameCache){
+			//long geonameCacheGetStartTime = 0;
 			geonameObj = getGeonameObjFromCache(name);
+			//long geonameCacheGetEndTime = 0;
+			
 		}
 		if(!isNameInNullCache(name)){
 			if(geonameObj == null){
@@ -317,7 +320,7 @@ public class Geoname {
 				cacheHit = true;
 			}
 		}
-		synchronized(Geoname.class){
+		//synchronized(Geoname.class){
 			int nCount = Geoname.nameCount.incrementAndGet();
 			int gCount = Geoname.geonameCount.intValue();
 			int cCount = Geoname.cacheHitCount.intValue();
@@ -340,7 +343,7 @@ public class Geoname {
 				Geoname.perGeonameCount.set(0);
 				Geoname.perCacheHitCount.set(0);
 			}
-		}
+		//}
 		return geonameObj;
 	}
 	public static BasicDBList makeGeonameList(BasicDBList ner, ThreadStatus threadStatus) throws Exception{

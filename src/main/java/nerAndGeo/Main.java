@@ -60,6 +60,13 @@ public class Main {
 	public static long totalNerGeonameTime = 0;
 	public static long totalGeojsonTime = 0;
 	
+	public static Object lockObjectGeonameTime = new Object();
+	public static long geonameCacheGetTime = 0;
+	public static long geonameCachePutTime = 0;
+	public static long nullCacheGetTime = 0;
+	public static long nullCachePutTime = 0;
+	public static long geonameTime = 0;
+	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
 	public static Database retryCacheHost = null; 
