@@ -81,6 +81,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
+        os.flush();
         os.close();
 	}
 }

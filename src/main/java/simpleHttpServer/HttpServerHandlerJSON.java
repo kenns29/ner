@@ -26,6 +26,7 @@ public class HttpServerHandlerJSON implements HttpHandler {
         String jsonString = out.toString();
         response += jsonString;
         os.write(response.getBytes());
+        os.flush();
         os.close();
 	}
 	
