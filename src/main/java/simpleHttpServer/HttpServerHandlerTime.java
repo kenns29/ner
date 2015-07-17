@@ -13,7 +13,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = " ";
-		synchronized(Main.lockObjectDocumentProcessTime){
+		//synchronized(Main.lockObjectDocumentProcessTime){
 			DecimalFormat df = new DecimalFormat("#.00");
 			String overallTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			overallTable += "<tr>"
@@ -77,7 +77,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 			response += "<p>Overall Document Process Time</p>";
 			response += documentTimeTable;
 			response += "</body></html>";
-		}
+		//}
 		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());

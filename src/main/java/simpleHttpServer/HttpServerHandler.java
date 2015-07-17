@@ -23,7 +23,7 @@ public class HttpServerHandler implements HttpHandler {
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = "";
 		DecimalFormat df = new DecimalFormat("#.00");
-		synchronized(NER.class){
+		//synchronized(NER.class){
 			String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			threadTable += ThreadStatus.makeHttpTableHeader();
 			for(int i = 0; i < NERThreadList.list.size(); i++){
@@ -76,7 +76,7 @@ public class HttpServerHandler implements HttpHandler {
 			response += "</body></html>";
 			
 			
-		}
+		//}
 		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
