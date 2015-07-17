@@ -205,6 +205,9 @@ public class NERTaskManager implements Runnable{
 							cursor.close();
 						}
 					}
+					else{
+						startMainData = true;
+					}
 				}
 				else{
 					startMainData = true;
