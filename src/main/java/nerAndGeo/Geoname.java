@@ -349,7 +349,7 @@ public class Geoname {
 			Main.geonameTime += geonameTime;
 			Main.nullCacheCheckTime += nullCacheCheckTime;
 			Main.nullCachePutTime += nullCachePutTime;
-			Main.totalGeonameTime = totalGeonameTime;
+			Main.totalGeonameTime += totalGeonameTime;
 		}
 		
 		synchronized(Geoname.class){
