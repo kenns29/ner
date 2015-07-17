@@ -36,6 +36,14 @@ public class NERThread implements Runnable{
 //	static{
 //		LOGGER.addHandler(LoggerAttr.fileHandler);
 //	}
+	private long threadFinishedTime = 0;
+	
+	private long documentProcessTime = 0;
+	private long mongoUpdateTime = 0;
+	private long nerTime = 0;
+	private long userNerTime = 0;
+	private long nerGeonameTime = 0;
+	private long geojsonTime = 0;
 	
 	private DBCollection coll = null;
 	private String inputField = null;
@@ -343,6 +351,7 @@ public class NERThread implements Runnable{
 	}
 	
 	public void insertOneNerGeo(BasicDBObject mongoObj, TimeRange timeRange, StanfordCoreNLP pipeline) throws Exception{
+		long docStartTime = System.currentTimeMillis();
 		synchronized(NER.class){
 			this.threadStatus.currentMongoObj = mongoObj;
 			this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
@@ -367,14 +376,22 @@ public class NERThread implements Runnable{
 				userText = userObj.getString("location");
 			}
 			if(userText != null){
+				long userNerStartTime = System.currentTimeMillis();
 				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
+				long userNerEndTime = System.currentTimeMillis();
+				this.userNerTime = userNerEndTime - userNerStartTime;
+				
 				userEntities = NER.insertFromFlag(userEntities, "user.location");
 			}
 		}
 		
 		if(text != null && text.length() < 1000){
 			text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
+			long nerStartTime = System.currentTimeMillis();
 			textEntities = NER.annotateDBObject(text, pipeline, timeRange);
+			long nerEndTime = System.currentTimeMillis();
+			this.nerTime = nerEndTime - nerStartTime;
+			
 			textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
 		}
 		
@@ -402,41 +419,84 @@ public class NERThread implements Runnable{
 		
 		geojsonList.addFromMongoCoord(coordinates, place, location);
 		if(!Main.configPropertyValues.geoname){
+			long updateStartTime = System.currentTimeMillis();
 			coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 					new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
+			long updateEndTime = System.currentTimeMillis();
+			this.mongoUpdateTime = updateEndTime - updateStartTime;
 		}
 		else if(Main.configPropertyValues.outputOption == 0){
+			long nerGeonameStartTime = System.currentTimeMillis();
 			BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
+			long nerGeonameEndTime = System.currentTimeMillis();
+			this.nerGeonameTime = nerGeonameEndTime - nerGeonameStartTime;
+			
+			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromNerGeonameList(nerGeonameList);
+			long geojsonEndTime = System.currentTimeMillis();
+			this.geojsonTime = geojsonEndTime - geojsonStartTime;
 
 			if(geojsonList.isEmpty()){
+				long updateStartTime = System.currentTimeMillis();
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
+				long updateEndTime = System.currentTimeMillis();
+				
+				this.mongoUpdateTime = updateEndTime - updateStartTime;
+				
 			}
 			else{
+				long updateStartTime = System.currentTimeMillis();
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
 														.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+				long updateEndTime = System.currentTimeMillis();
+				this.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			
 		}
 		else if(Main.configPropertyValues.outputOption == 1){
+			long geonameStartTime = System.currentTimeMillis();
 			BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
+			long geonameEndTime = System.currentTimeMillis();
+			this.nerGeonameTime = geonameEndTime - geonameStartTime;
+			
+			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromGeonameList(geonameList);
+			long geojsonEndTime = System.currentTimeMillis();
+			this.geojsonTime = geojsonEndTime - geojsonStartTime;
+			
 			if(geojsonList.isEmpty()){
+				long updateStartTime = System.currentTimeMillis();
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)));
+				long updateEndTime = System.currentTimeMillis();
+				this.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			else{
+				long updateStartTime = System.currentTimeMillis();
 				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)
 													.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
+				long updateEndTime = System.currentTimeMillis();
+				this.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			
 		}
 		
+		long docEndTime = System.currentTimeMillis();
+		this.documentProcessTime = docEndTime - docStartTime;
+		
+		synchronized(Main.lockObjectDocumentProcessTime){
+			Main.totalDocumentProcessTime += this.documentProcessTime;
+			Main.totalUserNerTime += this.userNerTime;
+			Main.totalNerTime += this.nerTime;
+			Main.totalNerGeonameTime += this.nerGeonameTime;
+			Main.totalGeojsonTime += this.geojsonTime;
+			Main.totalMongoUpdateTime += this.mongoUpdateTime;
+		}
 		
 		Main.timelyDocCount.incrementAndGet();
 		if(documentCount % 1000 == 0){

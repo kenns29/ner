@@ -52,6 +52,14 @@ public class Main {
 	public static long totalThreadFinishedTime = 0;
 	public static long totalTaskManagerFinishedTime = 0;
 	
+	public static Object lockObjectDocumentProcessTime = new Object();
+	public static long totalDocumentProcessTime = 0;
+	public static long totalMongoUpdateTime = 0;
+	public static long totalNerTime = 0;
+	public static long totalUserNerTime = 0;
+	public static long totalNerGeonameTime = 0;
+	public static long totalGeojsonTime = 0;
+	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
 	public static Database retryCacheHost = null; 

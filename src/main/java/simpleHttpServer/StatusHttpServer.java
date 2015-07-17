@@ -14,6 +14,7 @@ public class StatusHttpServer {
         server.createContext("/json", new HttpServerHandlerJSON());
         server.createContext("/test", new HttpServerHandlerTest());
         server.createContext("/progress", new HttpServerHandlerProgress());
+        server.createContext("/time", new HttpServerHandlerTime());
         server.setExecutor(null); // creates a default executor
         server.start();
 	}
