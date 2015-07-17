@@ -176,7 +176,6 @@ public class NERTaskManager implements Runnable{
 				DBCursor cursor = null;
 				try{
 					cursor = Main.retryCacheColl.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
-					LOGGER.info("Query for retry Cache, there are total of " + cursor.count() + " items");
 				}
 				catch(Exception e){
 					String msg = "Query for retry cache did not succeed."
@@ -185,19 +184,26 @@ public class NERTaskManager implements Runnable{
 					LOGGER.fatal(msg, e);
 				}
 				
-				if(cursor != null && cursor.count() > 0){
-					try{
-						mongoObjList = (ArrayList<DBObject>) cursor.toArray();
-						LOGGER.info("Successfully converted Cursor for retry cache to list.");
-					}
-					catch(Exception e){
-						String msg = "Did not succeed in converting the cursor to array for retry cache."
-								+ "\nDue to Unexpected Error during the query.";
-						
-						LOGGER.fatal(msg, e);
-					}
-					finally{
-						cursor.close();
+				if(cursor != null){
+					long countStartTime = System.currentTimeMillis();
+					int cCount = cursor.count();
+					long countEndTime = System.currentTimeMillis();
+					LOGGER.info("Counted Cursor for the retry task, it took " + (countEndTime - countStartTime) + " milliseconds.");
+					if(cCount > 0){
+						LOGGER.info("Query for retry Cache, there are total of " + cCount + " items");
+						try{
+							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
+							LOGGER.info("Successfully converted Cursor for retry cache to list.");
+						}
+						catch(Exception e){
+							String msg = "Did not succeed in converting the cursor to array for retry cache."
+									+ "\nDue to Unexpected Error during the query.";
+							
+							LOGGER.fatal(msg, e);
+						}
+						finally{
+							cursor.close();
+						}
 					}
 				}
 				else{
@@ -255,6 +261,7 @@ public class NERTaskManager implements Runnable{
 							long systime = System.currentTimeMillis();
 							cursor = coll.find(query, field).sort(new BasicDBObject("_id", 1)).limit(Main.configPropertyValues.numDocsInThread);
 							long newSystime = System.currentTimeMillis();
+							retryFlag1 = false;
 							LOGGER.info("Query for "+ nextStartObjectId.toHexString() + ", query took " + (newSystime - systime) + " milliseconds.");
 						}
 						catch(Exception e){
@@ -277,8 +284,12 @@ public class NERTaskManager implements Runnable{
 					//Converting the cursor to array
 					if(cursor != null){
 						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+						long countStartTime = System.currentTimeMillis();
+						int cCount = cursor.count();
+						long countEndTime = System.currentTimeMillis();
+						LOGGER.info("Counted Cursor for the normal task, it took " + (countEndTime - countStartTime) + " milliseconds.");
 						//If the cursor has fewer documents than numDocsInThread + 1
-						if(cursor.count() < Main.configPropertyValues.numDocsInThread){
+						if(cCount < Main.configPropertyValues.numDocsInThread){
 							if(Main.configPropertyValues.stopAtEnd){
 								continueFlag = false;
 							}
@@ -347,9 +358,6 @@ public class NERTaskManager implements Runnable{
 					HIGH_PRIORITY_LOGGER.fatal(msg);
 				}
 				
-				
-				
-			
 				if(waitFlag){
 					LOGGER.info("The query for " + startObjectId.toHexString() 
 							+" has almost reached the end, waiting for " + waitTime + " milliseconds."
