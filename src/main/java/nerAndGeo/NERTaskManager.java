@@ -346,7 +346,7 @@ public class NERTaskManager implements Runnable{
 				}
 				while(retryFlag);
 				long loopTime4 = System.currentTimeMillis();
-				LOGGER.info("LoopTime3 main = " + (loopTime4 - loopTime0) + ", sub = " + (loopTime4 - loopTime3));
+				LOGGER.info("LoopTime4 main = " + (loopTime4 - loopTime0) + ", sub = " + (loopTime4 - loopTime3));
 				long subTime2 = System.currentTimeMillis();
 				LOGGER.info("Time taken on subTime = " + (subTime2 - subTime1) + " milliseconds.");
 				
@@ -369,7 +369,7 @@ public class NERTaskManager implements Runnable{
 					LOGGER.info("Time taken on subTime1 = " + (subTime1End - subTime1Start) + " milliseconds.");
 					LOGGER.info("Task Manager Successfully prepared the task, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
 					long loopTime5 = System.currentTimeMillis();
-					LOGGER.info("LoopTime3 main = " + (loopTime5 - loopTime0) + ", sub = " + (loopTime5 - loopTime4));
+					LOGGER.info("LoopTime5 main = " + (loopTime5 - loopTime0) + ", sub = " + (loopTime5 - loopTime4));
 					try {
 						queue.put(timeRange);
 						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue.");
