@@ -152,6 +152,7 @@ public class NERTaskManager implements Runnable{
 		int waitTime = 60000; //1 min
 		while(continueFlag){
 			
+			long loopTime0 = System.currentTimeMillis();
 			long retryCacheStartTime = System.currentTimeMillis();
 			//Queue Tasks on Retry Cache
 			boolean startMainData = false;
@@ -239,7 +240,8 @@ public class NERTaskManager implements Runnable{
 			}
 			long retryCacheEndTime = System.currentTimeMillis();
 			LOGGER.info("The Time taken for the retry cache is " + (retryCacheEndTime - retryCacheStartTime) + " milliseconds.");
-			
+			long loopTime1 = System.currentTimeMillis();
+			LOGGER.info("LoopTime1 main = " + (loopTime1 - loopTime0) + ", sub = " + (loopTime1 - loopTime0));
 			//Queue Tasks on the main data
 			if(startMainData){
 				BasicDBObject field = new BasicDBObject("_id", 1)
@@ -260,6 +262,7 @@ public class NERTaskManager implements Runnable{
 				int unexpectedExceptionCount = 0;
 				ArrayList<DBObject> mongoObjList = null;
 				long subTime1 = System.currentTimeMillis();
+				long loopTime3 = loopTime1;
 				do{
 					//Query the documents
 					DBCursor cursor = null;
@@ -289,10 +292,15 @@ public class NERTaskManager implements Runnable{
 						}
 					}
 					while(retryFlag1);
+					long loopTime2 = System.currentTimeMillis();
+					LOGGER.info("LoopTime2 main = " + (loopTime2 - loopTime0) + ", sub = " + (loopTime2 - loopTime1));
 					
 					//Converting the cursor to array
 					if(cursor != null){
 						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
+						loopTime3 = System.currentTimeMillis();
+						LOGGER.info("LoopTime3 main = " + (loopTime3 - loopTime0) + ", sub = " + (loopTime3 - loopTime2));
+						
 						long countStartTime = System.currentTimeMillis();
 						int cCount = cursor.count();
 						long countEndTime = System.currentTimeMillis();
@@ -337,7 +345,8 @@ public class NERTaskManager implements Runnable{
 					}
 				}
 				while(retryFlag);
-				
+				long loopTime4 = System.currentTimeMillis();
+				LOGGER.info("LoopTime3 main = " + (loopTime4 - loopTime0) + ", sub = " + (loopTime4 - loopTime3));
 				long subTime2 = System.currentTimeMillis();
 				LOGGER.info("Time taken on subTime = " + (subTime2 - subTime1) + " milliseconds.");
 				
@@ -359,7 +368,8 @@ public class NERTaskManager implements Runnable{
 					long subTime1End = System.currentTimeMillis();
 					LOGGER.info("Time taken on subTime1 = " + (subTime1End - subTime1Start) + " milliseconds.");
 					LOGGER.info("Task Manager Successfully prepared the task, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
-					
+					long loopTime5 = System.currentTimeMillis();
+					LOGGER.info("LoopTime3 main = " + (loopTime5 - loopTime0) + ", sub = " + (loopTime5 - loopTime4));
 					try {
 						queue.put(timeRange);
 						LOGGER.info("Object id range " + timeRange.toObjectIdString() + ", with time range " + timeRange.toString() + " is inserted to the queue.");
