@@ -151,6 +151,8 @@ public class NERTaskManager implements Runnable{
 		boolean waitFlag = false;
 		int waitTime = 60000; //1 min
 		while(continueFlag){
+			
+			long retryCacheStartTime = System.currentTimeMillis();
 			//Queue Tasks on Retry Cache
 			boolean startMainData = false;
 			if(Main.retryCacheAvailable && Main.geonameServiceAvailable){
@@ -235,6 +237,9 @@ public class NERTaskManager implements Runnable{
 			else{
 				startMainData = true;
 			}
+			long retryCacheEndTime = System.currentTimeMillis();
+			LOGGER.info("The Time taken for the retry cache is " + (retryCacheEndTime - retryCacheStartTime) + " milliseconds.");
+			
 			//Queue Tasks on the main data
 			if(startMainData){
 				BasicDBObject field = new BasicDBObject("_id", 1)
@@ -324,15 +329,19 @@ public class NERTaskManager implements Runnable{
 							}
 						}
 						finally{
+							long closeStartTime = System.currentTimeMillis();
 							cursor.close();
+							long closeEndTime = System.currentTimeMillis();
+							LOGGER.info("Time take on close cursor = " + (closeEndTime - closeStartTime));
 						}
 					}
 				}
 				while(retryFlag);
 				
 				long subTime2 = System.currentTimeMillis();
-				LOGGER.info("Time take on subTime = " + (subTime2 - subTime1) + " milliseconds.");
+				LOGGER.info("Time taken on subTime = " + (subTime2 - subTime1) + " milliseconds.");
 				
+				long subTime1Start = System.currentTimeMillis();
 				//put the task into the queue
 				if(mongoObjList != null && mongoObjList.size() > 0){ 
 					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
@@ -347,6 +356,8 @@ public class NERTaskManager implements Runnable{
 						Main.totalTaskManagerFinishedTime += (taskManagerEndTime - taskManagerStartTime);
 					}
 					
+					long subTime1End = System.currentTimeMillis();
+					LOGGER.info("Time taken on subTime1 = " + (subTime1End - subTime1Start) + " milliseconds.");
 					LOGGER.info("Task Manager Successfully prepared the task, it took " + (taskManagerEndTime - taskManagerStartTime) + " milliseconds.");
 					
 					try {
