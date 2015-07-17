@@ -302,6 +302,7 @@ public class NERTaskManager implements Runnable{
 							long systime = System.currentTimeMillis();
 							mongoObjList = (ArrayList<DBObject>) cursor.toArray();
 							long newSystime = System.currentTimeMillis();
+							retryFlag = false;
 							LOGGER.info("Converted cursor to array for " + nextStartObjectId.toHexString() + ", it took " + (newSystime - systime) + " milliseconds.");
 						}
 						catch(Exception e){
