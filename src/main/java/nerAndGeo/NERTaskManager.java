@@ -254,6 +254,7 @@ public class NERTaskManager implements Runnable{
 				boolean retryFlag = false;
 				int unexpectedExceptionCount = 0;
 				ArrayList<DBObject> mongoObjList = null;
+				long subTime1 = System.currentTimeMillis();
 				do{
 					//Query the documents
 					DBCursor cursor = null;
@@ -328,6 +329,9 @@ public class NERTaskManager implements Runnable{
 					}
 				}
 				while(retryFlag);
+				
+				long subTime2 = System.currentTimeMillis();
+				LOGGER.info("Time take on subTime = " + (subTime2 - subTime1) + " milliseconds.");
 				
 				//put the task into the queue
 				if(mongoObjList != null && mongoObjList.size() > 0){ 
