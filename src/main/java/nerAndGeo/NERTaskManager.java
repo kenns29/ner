@@ -292,20 +292,6 @@ public class NERTaskManager implements Runnable{
 					//Converting the cursor to array
 					if(cursor != null){
 						cursor.addOption(com.mongodb.Bytes.QUERYOPTION_NOTIMEOUT);
-			
-//						long countStartTime = System.currentTimeMillis();
-//						int cCount = cursor.count();
-//						long countEndTime = System.currentTimeMillis();
-//						LOGGER.info("Counted Cursor for the normal task, it took " + (countEndTime - countStartTime) + " milliseconds.");
-//						//If the cursor has fewer documents than numDocsInThread + 1
-//						if(cCount < Main.configPropertyValues.numDocsInThread){
-//							if(Main.configPropertyValues.stopAtEnd){
-//								continueFlag = false;
-//							}
-//							else{
-//								waitFlag = true;
-//							}
-//						}
 						
 						try{
 							long systime = System.currentTimeMillis();
@@ -356,6 +342,10 @@ public class NERTaskManager implements Runnable{
 					long taskManagerEndTime = System.currentTimeMillis();
 					
 					synchronized(this){
+						if(Main.totalTaskManagerFinishedTime >= Long.MAX_VALUE - (taskManagerEndTime - taskManagerStartTime) - 5000){
+							Main.taskMangerFinishCount.set(0);
+							Main.totalTaskManagerFinishedTime = 0;
+						}
 						Main.taskMangerFinishCount.incrementAndGet();
 						Main.totalTaskManagerFinishedTime += (taskManagerEndTime - taskManagerStartTime);
 					}	

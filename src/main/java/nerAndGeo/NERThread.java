@@ -168,6 +168,10 @@ public class NERThread implements Runnable{
 			
 			long threadEndTime = System.currentTimeMillis();
 			synchronized(Main.lockObjectThreadFinishCount){
+				if(Main.totalThreadFinishedTime >= Long.MAX_VALUE - (threadEndTime - threadStartTime) - 5000){
+					Main.totalThreadFinishedTime = 0;
+					Main.threadFinishCount.set(0);
+				}
 				Main.totalThreadFinishedTime += (threadEndTime - threadStartTime);
 				Main.threadFinishCount.incrementAndGet();
 			}
@@ -490,6 +494,14 @@ public class NERThread implements Runnable{
 		this.documentProcessTime = docEndTime - docStartTime;
 		
 		synchronized(Main.lockObjectDocumentProcessTime){
+			if(Main.totalDocumentProcessTime >= Long.MAX_VALUE - this.documentProcessTime - 5000){
+				Main.totalDocumentProcessTime = 0;
+				Main.totalUserNerTime = 0;
+				Main.totalNerTime = 0;
+				Main.totalNerGeonameTime = 0;
+				Main.totalGeojsonTime = 0;
+				Main.totalMongoUpdateTime = 0;
+			}
 			Main.totalDocumentProcessTime += this.documentProcessTime;
 			Main.totalUserNerTime += this.userNerTime;
 			Main.totalNerTime += this.nerTime;

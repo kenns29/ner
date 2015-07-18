@@ -344,6 +344,14 @@ public class Geoname {
 		totalGeonameTime = totalGeonameEndTime - totalGeonameStartTime;
 		
 		synchronized(Main.lockObjectGeonameTime){
+			if(Main.totalGeonameTime >= Long.MAX_VALUE - totalGeonameTime - 5000){
+				Main.geonameCacheGetTime = 0;
+				Main.geonameCachePutTime = 0;
+				Main.geonameTime = 0;
+				Main.nullCacheCheckTime = 0;
+				Main.nullCachePutTime = 0;
+				Main.totalGeonameTime = 0;
+			}
 			Main.geonameCacheGetTime += geonameCacheGetTime;
 			Main.geonameCachePutTime += geonameCachePutTime;
 			Main.geonameTime += geonameTime;
