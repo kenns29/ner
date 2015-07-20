@@ -84,6 +84,7 @@ public class Main {
 	
 	public static Thread geonameServiceCheckerThread = new Thread(new GeonameServiceChecker("UK"));
 	public static DBCollection mainColl = null;
+	public static DBCollection outputColl = null;
 	static{
 		try {
 			configPropertyValues = new ConfigPropertyValues("config.properties");
@@ -131,11 +132,14 @@ public class Main {
 		DB db = database.getDatabase(configPropertyValues.db);
 		DBCollection coll = db.getCollection(configPropertyValues.coll);
 		configPropertyValues.initStartEnd(coll);
-		
 		Main.mainColl = coll;
 		if(Main.configPropertyValues.stopAtEnd){
 			Main.totalDocuments = CollUtilities.getTotalDocumentCountWithStopAtEnd(coll);
 		}
+		
+		Database outputDatabase = new Database(Main.configPropertyValues.outputHost, Main.configPropertyValues.outputPort);
+		DB outputDB = outputDatabase.getDatabase(Main.configPropertyValues.outputDatabase);
+		Main.outputColl = outputDB.getCollection(Main.configPropertyValues.outputCollection);
 		
 		if(configPropertyValues.parallel){
 			if(configPropertyValues.useTimeLimit){

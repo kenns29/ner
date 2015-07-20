@@ -424,7 +424,7 @@ public class NERThread implements Runnable{
 		geojsonList.addFromMongoCoord(coordinates, place, location);
 		if(!Main.configPropertyValues.geoname){
 			long updateStartTime = System.currentTimeMillis();
-			coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+			Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 					new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 			long updateEndTime = System.currentTimeMillis();
 			this.mongoUpdateTime = updateEndTime - updateStartTime;
@@ -442,7 +442,7 @@ public class NERThread implements Runnable{
 
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+				Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
 				long updateEndTime = System.currentTimeMillis();
 				
@@ -451,7 +451,7 @@ public class NERThread implements Runnable{
 			}
 			else{
 				long updateStartTime = System.currentTimeMillis();
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+				Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
 														.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
 				long updateEndTime = System.currentTimeMillis();
@@ -472,7 +472,7 @@ public class NERThread implements Runnable{
 			
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+				Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)));
 				long updateEndTime = System.currentTimeMillis();
@@ -480,7 +480,7 @@ public class NERThread implements Runnable{
 			}
 			else{
 				long updateStartTime = System.currentTimeMillis();
-				coll.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
+				Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)
 													.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));

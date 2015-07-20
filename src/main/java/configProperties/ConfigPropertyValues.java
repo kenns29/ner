@@ -17,13 +17,19 @@ public class ConfigPropertyValues {
 	public int port = 0;
 	public String db = null;
 	public String coll = null;
-	public int outputOption = 0;
+	
 	public String nerInputField = null;
+	public int catID = 0;
+
+	public String outputHost = null;
+	public int outputPort = 0;
+	public String outputDatabase = null;
+	public String outputCollection = null;
+	
+	public int outputOption = 0;
 	public String nerOutputField = null;
 	public String geojsonListOutputField = null;
 	public String geonameOutputField = null;
-	
-	public int catID = 0;
 	
 	public boolean userNer = true;
 	public String userNerOutputField = null;
@@ -101,12 +107,19 @@ public class ConfigPropertyValues {
 		db = prop.getProperty("db");
 		coll = prop.getProperty("coll");
 		
-		outputOption = Integer.valueOf(prop.getProperty("outputOption"));
 		nerInputField = prop.getProperty("nerInputField");
+		
+		catID = Integer.valueOf(prop.getProperty("catID"));
+		
+		outputHost = prop.getProperty("outputHost");
+		outputPort = Integer.valueOf(prop.getProperty("outputPort"));
+		outputDatabase = prop.getProperty("outputDatabase");
+		outputCollection = prop.getProperty("outputCollection");
+		
+		outputOption = Integer.valueOf(prop.getProperty("outputOption"));
 		nerOutputField = prop.getProperty("nerOutputField");
 		geojsonListOutputField = prop.getProperty("geojsonListOutputField");
 		geonameOutputField = prop.getProperty("geonameOutputField");
-		catID = Integer.valueOf(prop.getProperty("catID"));
 		
 		userNer = Boolean.parseBoolean(prop.getProperty("userNer"));
 		userNerOutputField = prop.getProperty("userNerOutputField");
