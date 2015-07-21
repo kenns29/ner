@@ -37,14 +37,7 @@ public class NERThread implements Runnable{
 //		LOGGER.addHandler(LoggerAttr.fileHandler);
 //	}
 	private long threadFinishedTime = 0;
-	
-	private long documentProcessTime = 0;
-	private long mongoUpdateTime = 0;
-	private long nerTime = 0;
-	private long userNerTime = 0;
-	private long nerGeonameTime = 0;
-	private long geojsonTime = 0;
-	
+		
 	private DBCollection coll = null;
 	private String inputField = null;
 	private int unexpectedExceptionCount = 0;
@@ -383,7 +376,7 @@ public class NERThread implements Runnable{
 				long userNerStartTime = System.currentTimeMillis();
 				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
 				long userNerEndTime = System.currentTimeMillis();
-				this.userNerTime = userNerEndTime - userNerStartTime;
+				Main.documentProcessTimeHandler.userNerTime = userNerEndTime - userNerStartTime;
 				
 				userEntities = NER.insertFromFlag(userEntities, "user.location");
 			}
@@ -394,7 +387,7 @@ public class NERThread implements Runnable{
 			long nerStartTime = System.currentTimeMillis();
 			textEntities = NER.annotateDBObject(text, pipeline, timeRange);
 			long nerEndTime = System.currentTimeMillis();
-			this.nerTime = nerEndTime - nerStartTime;
+			Main.documentProcessTimeHandler.nerTime = nerEndTime - nerStartTime;
 			
 			textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
 		}
@@ -427,18 +420,18 @@ public class NERThread implements Runnable{
 			Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 					new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 			long updateEndTime = System.currentTimeMillis();
-			this.mongoUpdateTime = updateEndTime - updateStartTime;
+			Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
 		}
 		else if(Main.configPropertyValues.outputOption == 0){
 			long nerGeonameStartTime = System.currentTimeMillis();
 			BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
 			long nerGeonameEndTime = System.currentTimeMillis();
-			this.nerGeonameTime = nerGeonameEndTime - nerGeonameStartTime;
+			Main.documentProcessTimeHandler.nerGeonameTime = nerGeonameEndTime - nerGeonameStartTime;
 			
 			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromNerGeonameList(nerGeonameList);
 			long geojsonEndTime = System.currentTimeMillis();
-			this.geojsonTime = geojsonEndTime - geojsonStartTime;
+			Main.documentProcessTimeHandler.geojsonTime = geojsonEndTime - geojsonStartTime;
 
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
@@ -446,7 +439,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
 				long updateEndTime = System.currentTimeMillis();
 				
-				this.mongoUpdateTime = updateEndTime - updateStartTime;
+				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
 				
 			}
 			else{
@@ -455,7 +448,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
 														.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
 				long updateEndTime = System.currentTimeMillis();
-				this.mongoUpdateTime = updateEndTime - updateStartTime;
+				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			
 		}
@@ -463,12 +456,12 @@ public class NERThread implements Runnable{
 			long geonameStartTime = System.currentTimeMillis();
 			BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
 			long geonameEndTime = System.currentTimeMillis();
-			this.nerGeonameTime = geonameEndTime - geonameStartTime;
+			Main.documentProcessTimeHandler.nerGeonameTime = geonameEndTime - geonameStartTime;
 			
 			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromGeonameList(geonameList);
 			long geojsonEndTime = System.currentTimeMillis();
-			this.geojsonTime = geojsonEndTime - geojsonStartTime;
+			Main.documentProcessTimeHandler.geojsonTime = geojsonEndTime - geojsonStartTime;
 			
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
@@ -476,7 +469,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)));
 				long updateEndTime = System.currentTimeMillis();
-				this.mongoUpdateTime = updateEndTime - updateStartTime;
+				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			else{
 				long updateStartTime = System.currentTimeMillis();
@@ -485,55 +478,22 @@ public class NERThread implements Runnable{
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)
 													.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
 				long updateEndTime = System.currentTimeMillis();
-				this.mongoUpdateTime = updateEndTime - updateStartTime;
+				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
 			}
 			
 		}
 		
 		long docEndTime = System.currentTimeMillis();
-		this.documentProcessTime = docEndTime - docStartTime;
+		Main.documentProcessTimeHandler.documentProcessTime = docEndTime - docStartTime;
 		
-		synchronized(Main.lockObjectDocumentProcessTime){
-			long currentTime = System.currentTimeMillis();
-			if(currentTime - Main.documentProcessPreviousStartTime >= Main.documentProcessTimerInterval){
-				Main.documentProcessPreviousStartTime = currentTime;
-				Main.periodicDocumentProcessTime = 0;
-				Main.periodicUserNerTime = 0;
-				Main.periodicNerTime = 0;
-				Main.periodicNerGeonameTime = 0;
-				Main.periodicGeojsonTime = 0;
-				Main.periodicMongoUpdateTime = 0;
-			}
-			else{
-				Main.periodicDocumentProcessTime += this.documentProcessTime;
-				Main.periodicUserNerTime += this.userNerTime;
-				Main.periodicNerTime += this.nerTime;
-				Main.periodicNerGeonameTime += this.nerGeonameTime;
-				Main.periodicGeojsonTime += this.geojsonTime;
-				Main.periodicMongoUpdateTime += this.mongoUpdateTime;
-			}
-			
-			if(Main.totalDocumentProcessTime >= Long.MAX_VALUE - this.documentProcessTime - 5000){
-				Main.totalDocumentProcessTime = 0;
-				Main.totalUserNerTime = 0;
-				Main.totalNerTime = 0;
-				Main.totalNerGeonameTime = 0;
-				Main.totalGeojsonTime = 0;
-				Main.totalMongoUpdateTime = 0;
-			}
-			Main.totalDocumentProcessTime += this.documentProcessTime;
-			Main.totalUserNerTime += this.userNerTime;
-			Main.totalNerTime += this.nerTime;
-			Main.totalNerGeonameTime += this.nerGeonameTime;
-			Main.totalGeojsonTime += this.geojsonTime;
-			Main.totalMongoUpdateTime += this.mongoUpdateTime;
-			
-			
-		}
+		Main.documentProcessTimeHandler.updateTotalTime();
+		Main.documentProcessTimeHandler.incPeriodicTime();
 		
 		Main.timelyDocCount.incrementAndGet();
 		if(documentCount % 1000 == 0){
 			LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
+			Main.documentProcessTimeHandler.updateMongoForPeriodicDocumentProcessTime();
+			Main.documentProcessTimeHandler.resetPeriodicTime();
 		}
 	}
 	

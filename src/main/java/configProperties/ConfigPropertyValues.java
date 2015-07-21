@@ -79,10 +79,10 @@ public class ConfigPropertyValues {
 	public String errorCacheDatabase = null;
 	public String errorCacheCollection = null;
 	
-	public String documentProcessTimeHost = null;
-	public int documentProcessTimePort = 0;
-	public String documentProcessTimeDatabase = null;
-	public String documentProcessTimeCollection = null;
+	public String periodicDocumentProcessTimeHost = null;
+	public int periodicDocumentProcessTimePort = 0;
+	public String periodicDocumentProcessTimeDatabase = null;
+	public String periodicDocumentProcessTimeCollection = null;
 	
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
@@ -196,10 +196,10 @@ public class ConfigPropertyValues {
 		errorCacheDatabase = prop.getProperty("errorCacheDatabase");
 		errorCacheCollection = prop.getProperty("errorCacheCollection");
 		
-		documentProcessTimeHost = prop.getProperty("documentProcessTimeHost");
-		documentProcessTimePort = Integer.valueOf(prop.getProperty("documentProcessTimePort")).intValue();
-		documentProcessTimeDatabase = prop.getProperty("documentProcessTimeDatabase");
-		documentProcessTimeCollection = prop.getProperty("documentProcessTimeCollection");
+		periodicDocumentProcessTimeHost = prop.getProperty("periodicDocumentProcessTimeHost");
+		periodicDocumentProcessTimePort = Integer.valueOf(prop.getProperty("periodicDocumentProcessTimePort")).intValue();
+		periodicDocumentProcessTimeDatabase = prop.getProperty("periodicDocumentProcessTimeDatabase");
+		periodicDocumentProcessTimeCollection = prop.getProperty("periodicDocumentProcessTimeCollection");
 	}
 	
 	public void initStartEnd(DBCollection coll){

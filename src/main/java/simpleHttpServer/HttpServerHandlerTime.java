@@ -13,7 +13,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = " ";
-		//synchronized(Main.lockObjectDocumentProcessTime){
+		//synchronized(Main.documentProcessTimeHandler.lockObjectDocumentProcessTime){
 			DecimalFormat df = new DecimalFormat("#.00");
 			String overallTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			overallTable += "<tr>"
@@ -35,38 +35,38 @@ public class HttpServerHandlerTime implements HttpHandler {
 			
 			documentTimeTable += "<tr>"
 					           + "<td>Process Document</td>"
-					           + "<td>" + Main.totalDocumentProcessTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalDocumentProcessTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalDocumentProcessTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalDocumentProcessTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "<tr>"
 					           + "<td>Update Mongo</td>"
-					           + "<td>" + Main.totalMongoUpdateTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalMongoUpdateTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalMongoUpdateTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalMongoUpdateTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "<tr>"
 					           + "<td>NER</td>"
-					           + "<td>" + Main.totalNerTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalNerTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalNerTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalNerTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "<tr>"
 					           + "<td>User NER</td>"
-					           + "<td>" + Main.totalUserNerTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalUserNerTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalUserNerTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalUserNerTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "<tr>"
 					           + "<td>Geoname List</td>"
-					           + "<td>" + Main.totalNerGeonameTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalNerGeonameTime / Main.totalDocumentProcessTime * 100) + "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalNerGeonameTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalNerGeonameTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100) + "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "<tr>"
 					           + "<td>Geojson</td>"
-					           + "<td>" + Main.totalGeojsonTime + "</td>"
-					           + "<td>" + df.format((double)Main.totalGeojsonTime / Main.totalDocumentProcessTime * 100)+ "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getTotalGeojsonTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalGeojsonTime() / Main.documentProcessTimeHandler.getTotalDocumentProcessTime() * 100)+ "%</td>"
 					           + "</tr>";
 			
 			documentTimeTable += "</table>";
@@ -80,38 +80,38 @@ public class HttpServerHandlerTime implements HttpHandler {
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>Total Geoname Time</td>"
-					          + "<td>" + Main.totalGeonameTime + "</td>"
-					          + "<td>" + df.format((double)Main.totalGeonameTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getTotalGeonameTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getTotalGeonameTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>Geoname Cache Get Time</td>"
-					          + "<td>" + Main.geonameCacheGetTime + "</td>"
-					          + "<td>" + df.format((double)Main.geonameCacheGetTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getGeonameCacheGetTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getGeonameCacheGetTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>Geoname Cache Put Time</td>"
-					          + "<td>" + Main.geonameCachePutTime + "</td>"
-					          + "<td>" + df.format((double)Main.geonameCachePutTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getGeonameCachePutTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getGeonameCachePutTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>Null Cache Check Time</td>"
-					          + "<td>" + Main.nullCacheCheckTime + "</td>"
-					          + "<td>" + df.format((double)Main.nullCacheCheckTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getNullCacheCheckTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getNullCacheCheckTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>null Cache Put Time</td>"
-					          + "<td>" + Main.nullCachePutTime + "</td>"
-					          + "<td>" + df.format((double)Main.nullCachePutTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getNullCachePutTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getNullCachePutTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "<tr>"
 					          + "<td>Geoname Process Time</td>"
-					          + "<td>" + Main.geonameTime + "</td>"
-					          + "<td>" + df.format((double)Main.geonameTime / Main.totalGeonameTime * 100) + "%</td>"
+					          + "<td>" + Main.documentProcessTimeHandler.getGeonameTime() + "</td>"
+					          + "<td>" + df.format((double)Main.documentProcessTimeHandler.getGeonameTime() / Main.documentProcessTimeHandler.getTotalGeonameTime() * 100) + "%</td>"
 					          + "</tr>";
 			
 			geonameTimeTable += "</table>";

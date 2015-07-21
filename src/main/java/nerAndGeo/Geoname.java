@@ -296,14 +296,7 @@ public class Geoname {
 			return false;
 		}
 	}
-	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{
-		long geonameCacheGetTime = 0;
-		long geonameCachePutTime = 0;
-		long nullCacheCheckTime = 0;
-		long nullCachePutTime = 0;
-		long geonameTime = 0;
-		long totalGeonameTime = 0;
-		
+	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{		
 		long totalGeonameStartTime = System.currentTimeMillis();
 		boolean cacheHit = false;
 		boolean geonameHit = false;
@@ -312,19 +305,19 @@ public class Geoname {
 			long geonameCacheGetStartTime = System.currentTimeMillis();
 			geonameObj = getGeonameObjFromCache(name);
 			long geonameCacheGetEndTime = System.currentTimeMillis();
-			geonameCacheGetTime = geonameCacheGetEndTime - geonameCacheGetStartTime;
+			Main.documentProcessTimeHandler.tempGeonameCacheGetTime = geonameCacheGetEndTime - geonameCacheGetStartTime;
 		}
 		long nullCacheCheckStartTime = System.currentTimeMillis();
 		boolean nameIsInNullCache = isNameInNullCache(name);
 		long nullCacheCheckEndTime = System.currentTimeMillis();
-		nullCacheCheckTime = nullCacheCheckEndTime - nullCacheCheckStartTime;
+		Main.documentProcessTimeHandler.tempNullCacheCheckTime = nullCacheCheckEndTime - nullCacheCheckStartTime;
 		
 		if(!nameIsInNullCache){
 			if(geonameObj == null){
 				long geonameStartTime = System.currentTimeMillis();
 				geonameObj = getGeonameWithAccountRotate(name, threadStatus);
 				long geonameEndTime = System.currentTimeMillis();
-				geonameTime = geonameEndTime - geonameStartTime;
+				Main.documentProcessTimeHandler.tempGeonameTime = geonameEndTime - geonameStartTime;
 				
 				if(geonameObj != null){
 					geonameHit = true;
@@ -333,7 +326,7 @@ public class Geoname {
 					long nullCachePutStartTime = System.currentTimeMillis();
 					cacheNullName(name);
 					long nullCachePutEndTime = System.currentTimeMillis();
-					nullCachePutTime = nullCachePutEndTime - nullCachePutStartTime;
+					Main.documentProcessTimeHandler.tempNullCachePutTime = nullCachePutEndTime - nullCachePutStartTime;
 				}
 			}
 			else{
@@ -341,24 +334,9 @@ public class Geoname {
 			}
 		}
 		long totalGeonameEndTime = System.currentTimeMillis();
-		totalGeonameTime = totalGeonameEndTime - totalGeonameStartTime;
+		Main.documentProcessTimeHandler.tempTotalGeonameTime = totalGeonameEndTime - totalGeonameStartTime;
 		
-		synchronized(Main.lockObjectGeonameTime){
-			if(Main.totalGeonameTime >= Long.MAX_VALUE - totalGeonameTime - 5000){
-				Main.geonameCacheGetTime = 0;
-				Main.geonameCachePutTime = 0;
-				Main.geonameTime = 0;
-				Main.nullCacheCheckTime = 0;
-				Main.nullCachePutTime = 0;
-				Main.totalGeonameTime = 0;
-			}
-			Main.geonameCacheGetTime += geonameCacheGetTime;
-			Main.geonameCachePutTime += geonameCachePutTime;
-			Main.geonameTime += geonameTime;
-			Main.nullCacheCheckTime += nullCacheCheckTime;
-			Main.nullCachePutTime += nullCachePutTime;
-			Main.totalGeonameTime += totalGeonameTime;
-		}
+		Main.documentProcessTimeHandler.updateGeonameTotalTime();
 		
 		synchronized(Geoname.class){
 			int nCount = Geoname.nameCount.incrementAndGet();

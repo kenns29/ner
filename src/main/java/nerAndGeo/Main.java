@@ -21,6 +21,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 
 import configProperties.ConfigPropertyValues;
+import timer.DocumentProcessTimeHandler;
 
 public class Main {
 	public static final int VERSION_MAJOR = 1;
@@ -52,30 +53,7 @@ public class Main {
 	public static long totalThreadFinishedTime = 0;
 	public static long totalTaskManagerFinishedTime = 0;
 	
-	public static Object lockObjectDocumentProcessTime = new Object();
-	public static long totalDocumentProcessTime = 0;
-	public static long totalMongoUpdateTime = 0;
-	public static long totalNerTime = 0;
-	public static long totalUserNerTime = 0;
-	public static long totalNerGeonameTime = 0;
-	public static long totalGeojsonTime = 0;
-	
-	public static long documentProcessPreviousStartTime = 0;
-	public static int documentProcessTimerInterval = 60000;
-	public static long periodicDocumentProcessTime = 0;
-	public static long periodicMongoUpdateTime = 0;
-	public static long periodicNerTime = 0;
-	public static long periodicUserNerTime = 0;
-	public static long periodicNerGeonameTime = 0;
-	public static long periodicGeojsonTime = 0;
-	
-	public static Object lockObjectGeonameTime = new Object();
-	public static long geonameCacheGetTime = 0;
-	public static long geonameCachePutTime = 0;
-	public static long nullCacheCheckTime = 0;
-	public static long nullCachePutTime = 0;
-	public static long geonameTime = 0;
-	public static long totalGeonameTime = 0;
+	public static DocumentProcessTimeHandler documentProcessTimeHandler = new DocumentProcessTimeHandler();
 	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
