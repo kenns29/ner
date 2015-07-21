@@ -65,6 +65,7 @@ public class DocumentProcessTimeHandler {
 		}
 		this.periodicDocumentProcessTimeDB = this.periodicDocumentProcessTimeHost.getDatabase(Main.configPropertyValues.periodicDocumentProcessTimeDatabase);
 		this.periodicDocumentProcessTimeColl = this.periodicDocumentProcessTimeDB.getCollection(Main.configPropertyValues.periodicDocumentProcessTimeCollection);
+		this.periodicDocumentProcessTimeColl.remove(new BasicDBObject());
 	}
 	
 	public void updateTotalTime(){
