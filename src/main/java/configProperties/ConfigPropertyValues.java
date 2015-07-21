@@ -79,6 +79,11 @@ public class ConfigPropertyValues {
 	public String errorCacheDatabase = null;
 	public String errorCacheCollection = null;
 	
+	public String documentProcessTimeHost = null;
+	public int documentProcessTimePort = 0;
+	public String documentProcessTimeDatabase = null;
+	public String documentProcessTimeCollection = null;
+	
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -190,6 +195,11 @@ public class ConfigPropertyValues {
 		errorCachePort = Integer.valueOf(prop.getProperty("errorCachePort")).intValue();
 		errorCacheDatabase = prop.getProperty("errorCacheDatabase");
 		errorCacheCollection = prop.getProperty("errorCacheCollection");
+		
+		documentProcessTimeHost = prop.getProperty("documentProcessTimeHost");
+		documentProcessTimePort = Integer.valueOf(prop.getProperty("documentProcessTimePort")).intValue();
+		documentProcessTimeDatabase = prop.getProperty("documentProcessTimeDatabase");
+		documentProcessTimeCollection = prop.getProperty("documentProcessTimeCollection");
 	}
 	
 	public void initStartEnd(DBCollection coll){

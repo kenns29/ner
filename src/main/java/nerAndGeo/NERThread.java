@@ -494,6 +494,25 @@ public class NERThread implements Runnable{
 		this.documentProcessTime = docEndTime - docStartTime;
 		
 		synchronized(Main.lockObjectDocumentProcessTime){
+			long currentTime = System.currentTimeMillis();
+			if(currentTime - Main.documentProcessPreviousStartTime >= Main.documentProcessTimerInterval){
+				Main.documentProcessPreviousStartTime = currentTime;
+				Main.periodicDocumentProcessTime = 0;
+				Main.periodicUserNerTime = 0;
+				Main.periodicNerTime = 0;
+				Main.periodicNerGeonameTime = 0;
+				Main.periodicGeojsonTime = 0;
+				Main.periodicMongoUpdateTime = 0;
+			}
+			else{
+				Main.periodicDocumentProcessTime += this.documentProcessTime;
+				Main.periodicUserNerTime += this.userNerTime;
+				Main.periodicNerTime += this.nerTime;
+				Main.periodicNerGeonameTime += this.nerGeonameTime;
+				Main.periodicGeojsonTime += this.geojsonTime;
+				Main.periodicMongoUpdateTime += this.mongoUpdateTime;
+			}
+			
 			if(Main.totalDocumentProcessTime >= Long.MAX_VALUE - this.documentProcessTime - 5000){
 				Main.totalDocumentProcessTime = 0;
 				Main.totalUserNerTime = 0;
@@ -508,6 +527,8 @@ public class NERThread implements Runnable{
 			Main.totalNerGeonameTime += this.nerGeonameTime;
 			Main.totalGeojsonTime += this.geojsonTime;
 			Main.totalMongoUpdateTime += this.mongoUpdateTime;
+			
+			
 		}
 		
 		Main.timelyDocCount.incrementAndGet();

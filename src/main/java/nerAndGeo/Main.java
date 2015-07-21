@@ -60,6 +60,15 @@ public class Main {
 	public static long totalNerGeonameTime = 0;
 	public static long totalGeojsonTime = 0;
 	
+	public static long documentProcessPreviousStartTime = 0;
+	public static int documentProcessTimerInterval = 60000;
+	public static long periodicDocumentProcessTime = 0;
+	public static long periodicMongoUpdateTime = 0;
+	public static long periodicNerTime = 0;
+	public static long periodicUserNerTime = 0;
+	public static long periodicNerGeonameTime = 0;
+	public static long periodicGeojsonTime = 0;
+	
 	public static Object lockObjectGeonameTime = new Object();
 	public static long geonameCacheGetTime = 0;
 	public static long geonameCachePutTime = 0;

@@ -195,6 +195,7 @@ public class NER {
 			NERThreadList.threadList.add(new Thread(NERThreadList.list.get(i)));
 		}
 		
+		Main.documentProcessTimer = System.currentTimeMillis();
 		new Thread(nerTaskManager).start();
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			NERThreadList.threadList.get(i).start();
@@ -246,6 +247,7 @@ public class NER {
 			NERThreadList.threadList.add(new Thread(NERThreadList.list.get(i)));
 		}
 		
+		Main.documentProcessTimer = System.currentTimeMillis();
 		new Thread(nerTaskManager).start();
 		for(int i = 0; i < Main.configPropertyValues.core; i++){
 			NERThreadList.threadList.get(i).start();

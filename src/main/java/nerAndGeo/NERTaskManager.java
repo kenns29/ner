@@ -1,6 +1,8 @@
 package nerAndGeo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -143,6 +145,7 @@ public class NERTaskManager implements Runnable{
 	}
 	
 	//Split tasks by number of documents
+	@SuppressWarnings("unchecked")
 	private void splitTasksByNumDocuments(){
 		
 		
@@ -333,7 +336,17 @@ public class NERTaskManager implements Runnable{
 				while(retryFlag);
 				
 				//put the task into the queue
-				if(mongoObjList != null && mongoObjList.size() > 0){ 
+				if(mongoObjList != null && mongoObjList.size() > 0){
+//					Collections.sort(mongoObjList, new Comparator<Object>(){
+//						@Override
+//						public int compare(Object obj0, Object obj1) {
+//							BasicDBObject mongoObj0 = (BasicDBObject)obj0;
+//							BasicDBObject mongoObj1 = (BasicDBObject)obj1;
+//							ObjectId oid0 = mongoObj0.getObjectId("_id");
+//							ObjectId oid1 = mongoObj1.getObjectId("_id");
+//							return oid0.compareTo(oid1);
+//						}
+//					});
 					BasicDBObject nextStartObj = (BasicDBObject) mongoObjList.get(mongoObjList.size() - 1);
 					
 					ObjectId nextEndObjectId = nextStartObj.getObjectId("_id");
