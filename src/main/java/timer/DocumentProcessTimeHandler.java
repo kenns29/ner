@@ -15,7 +15,7 @@ public class DocumentProcessTimeHandler {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	
-	public static int documentCountInterval = 1000;
+	public static int documentCountInterval = 50;
 	public Database periodicDocumentProcessTimeHost = null;
 	public DB periodicDocumentProcessTimeDB = null;
 	public DBCollection periodicDocumentProcessTimeColl = null;
@@ -123,10 +123,10 @@ public class DocumentProcessTimeHandler {
 	}
 
 	
-	public void updateMongoForPeriodicDocumentProcessTime(){
-		BasicDBObject query = new BasicDBObject("docCount", Main.documentCount);
+	public void updateMongoForPeriodicDocumentProcessTime(int documentCount){
+		BasicDBObject query = new BasicDBObject("docCount", documentCount);
 		
-		BasicDBObject update = new BasicDBObject("docCount", Main.documentCount)
+		BasicDBObject update = new BasicDBObject("docCount", documentCount)
 				.append("documentProcessTime", this.periodicDocumentProcessTime)
 				.append("userNerTime", this.periodicUserNerTime)
 				.append("nerTime", this.periodicNerTime)

@@ -53,7 +53,7 @@ public class Main {
 	public static long totalThreadFinishedTime = 0;
 	public static long totalTaskManagerFinishedTime = 0;
 	
-	public static DocumentProcessTimeHandler documentProcessTimeHandler = new DocumentProcessTimeHandler();
+	public static DocumentProcessTimeHandler documentProcessTimeHandler = null;
 	
 	public static Object lockObjectRetryCache = new Object();
 	public static AtomicInteger retryCacheCount = new AtomicInteger(0);
@@ -99,6 +99,7 @@ public class Main {
 		}
 		errorCacheDB = errorCacheHost.getDatabase(Main.configPropertyValues.errorCacheDatabase);
 		errorCacheColl = errorCacheDB.getCollection(Main.configPropertyValues.errorCacheCollection);
+		documentProcessTimeHandler = new DocumentProcessTimeHandler();
 	}
 	
 	public static void main(String[] args) throws Exception {		

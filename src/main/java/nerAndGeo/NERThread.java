@@ -24,6 +24,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import timer.DocumentProcessTimeHandler;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.*;
@@ -490,9 +491,9 @@ public class NERThread implements Runnable{
 		Main.documentProcessTimeHandler.incPeriodicTime();
 		
 		Main.timelyDocCount.incrementAndGet();
-		if(documentCount % 1000 == 0){
+		if(documentCount % DocumentProcessTimeHandler.documentCountInterval == 0){
 			LOGGER.info(documentCount + " documents has been processed. " + textEntitiesDocCount + " documents has entities from text. " + userEntitiesDocCount + " documents has entities from user profile location.");
-			Main.documentProcessTimeHandler.updateMongoForPeriodicDocumentProcessTime();
+			Main.documentProcessTimeHandler.updateMongoForPeriodicDocumentProcessTime(documentCount);
 			Main.documentProcessTimeHandler.resetPeriodicTime();
 		}
 	}
