@@ -13,7 +13,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 	@Override
 	public void handle(HttpExchange httpExchange) throws IOException {
 		String response = " ";
-		//synchronized(Main.documentProcessTimeHandler.lockObjectDocumentProcessTime){
+		synchronized(Main.documentProcessTimeHandler.lockObjectDocumentProcessTime){
 			DecimalFormat df = new DecimalFormat("#.00");
 			String overallTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			overallTable += "<tr>"
@@ -105,8 +105,8 @@ public class HttpServerHandlerTime implements HttpHandler {
 			
 			periodicDocumentTimeTable += "<tr>"
 					           + "<td>Geoname List</td>"
-					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicUserNerTime() + "</td>"
-					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicUserNerTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100) + "%</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicNerGeonameTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicNerGeonameTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100) + "%</td>"
 					           + "</tr>";
 			
 			periodicDocumentTimeTable += "<tr>"
@@ -171,7 +171,7 @@ public class HttpServerHandlerTime implements HttpHandler {
 			response += "<p>Geoname Time Break Down</p>";
 			response += geonameTimeTable;
 			response += "</body></html>";
-		//}
+		}
 		httpExchange.sendResponseHeaders(200, response.length());
         OutputStream os = httpExchange.getResponseBody();
         os.write(response.getBytes());
