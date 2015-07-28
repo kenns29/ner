@@ -25,8 +25,8 @@ import timer.DocumentProcessTimeHandler;
 
 public class Main {
 	public static final int VERSION_MAJOR = 1;
-	public static final int VERSION_MINOR = 0;
-	public static final int BUILD_ID = 2;
+	public static final int VERSION_MINOR = 1;
+	public static final int BUILD_ID = 1;
 
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
