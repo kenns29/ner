@@ -59,7 +59,7 @@ public class ThreadStatus {
 				+ "<td>" + this.threadId + "</td>"
 				+ "<td>" + this.systemThreadId + "</td>"
 				+ "<td>" + ((this.timeRange != null) ? this.timeRange.toTimeSting() : null) + "</td>"
-				+ "<td>" + this.timeRange.toObjectIdString() + "</td>"
+				+ "<td>" + ((this.timeRange != null) ?this.timeRange.toObjectIdString() : null) + "</td>"
 				+ "<td>" + this.numDocs + "</td>"
 				+ "<td>" + this.currentObjectId + "</td>"
 				+ "<td>" + this.currentInsertionTime + "</td>"
