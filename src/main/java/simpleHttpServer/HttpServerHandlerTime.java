@@ -70,7 +70,52 @@ public class HttpServerHandlerTime implements HttpHandler {
 					           + "</tr>";
 			
 			documentTimeTable += "</table>";
-					
+			
+			String periodicDocumentTimeTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
+
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>Type</td>"
+					           + "<td>Periodic Total Time</td>"
+					           + "<td>Percentage over Total Peiodic Document Process Time</td>"
+					           + "</tr>";
+
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>Process Document</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100)+ "%</td>"
+					           + "</tr>";
+
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>Update Mongo</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicMongoUpdateTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicMongoUpdateTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100)+ "%</td>"
+					           + "</tr>";
+			
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>NER</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicNerTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicNerTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100)+ "%</td>"
+					           + "</tr>";
+			
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>User NER</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicUserNerTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicUserNerTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100)+ "%</td>"
+					           + "</tr>";
+			
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>Geoname List</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicUserNerTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicUserNerTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100) + "%</td>"
+					           + "</tr>";
+			
+			periodicDocumentTimeTable += "<tr>"
+					           + "<td>Geojson</td>"
+					           + "<td>" + Main.documentProcessTimeHandler.getPeriodicGeojsonTime() + "</td>"
+					           + "<td>" + df.format((double)Main.documentProcessTimeHandler.getPeriodicGeojsonTime() / Main.documentProcessTimeHandler.getPeriodicDocumentProcessTime() * 100)+ "%</td>"
+					           + "</tr>";
+			
+			periodicDocumentTimeTable += "</table>";
 			String geonameTimeTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			geonameTimeTable += "<tr>"
 					          + "<td>Type</td>"
@@ -121,6 +166,8 @@ public class HttpServerHandlerTime implements HttpHandler {
 			response += overallTable;
 			response += "<p>Overall Document Process Time</p>";
 			response += documentTimeTable;
+			response += "<p>Periodic Document Process Time</p>";
+			response += periodicDocumentTimeTable;
 			response += "<p>Geoname Time Break Down</p>";
 			response += geonameTimeTable;
 			response += "</body></html>";
