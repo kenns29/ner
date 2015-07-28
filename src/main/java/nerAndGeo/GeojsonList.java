@@ -1,11 +1,13 @@
 package nerAndGeo;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
 public class GeojsonList {
 	private static final double INVALID_DOUBLE = -1000.0;
-	
+	public static AtomicInteger geojsonDuplicatePointsPolygonCount = new AtomicInteger(0);
 	public BasicDBList geometryList = new BasicDBList();
 	public BasicDBObject geometryCollection = new BasicDBObject();
 	public GeojsonList(){
@@ -114,6 +116,7 @@ public class GeojsonList {
 				for(int j = i+1; j < polygon.size(); j++){
 					BasicDBList point2 = (BasicDBList) polygon.get(j);
 					if(comparePoints(point1, point2) && !(i == 0 && j == (polygon.size() - 1))){
+						geojsonDuplicatePointsPolygonCount.incrementAndGet();
 						BasicDBList rPoint = getMiddleOfPolygon(polygon);
 						rObj = new BasicDBObject("type", "Point")
 							.append("coordinates", rPoint);

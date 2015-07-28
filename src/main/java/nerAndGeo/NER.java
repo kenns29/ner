@@ -332,7 +332,8 @@ public class NER {
 							+ "\nFrom " + new TimeRange(Main.mainPreTime, time).toString() + ", " + Main.timelyDocCount.intValue() + " are processed. The time range is " + (time - Main.mainPreTime) + " milliseconds."
 							+ "\nThe Safe Object Id is " + safeObjectId
 							+ "\n" + sb.toString()
-							+ "\n" + threadMsg);
+							+ "\n" + threadMsg
+							+ "\nThere are " + GeojsonList.geojsonDuplicatePointsPolygonCount.intValue() + " place bounding box polygon that have duplicate points.");
 					
 					Main.lastTimelyDocCount.set(Main.timelyDocCount.intValue());
 					Main.timelyDocCount.set(0);
