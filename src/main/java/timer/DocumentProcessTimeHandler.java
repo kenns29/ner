@@ -10,6 +10,8 @@ import com.mongodb.DBCollection;
 
 import nerAndGeo.Database;
 import nerAndGeo.Main;
+import timer.timeObj.DocumentProcessTime;
+import timer.timeObj.GeonameTime;
 
 public class DocumentProcessTimeHandler {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
@@ -35,13 +37,6 @@ public class DocumentProcessTimeHandler {
 	private long periodicNerGeonameTime = 0;
 	private long periodicGeojsonTime = 0;
 	
-	public long documentProcessTime = 0;
-	public long mongoUpdateTime = 0;
-	public long nerTime = 0;
-	public long userNerTime = 0;
-	public long nerGeonameTime = 0;
-	public long geojsonTime = 0;
-	
 	public Object lockObjectGeonameTime = new Object();
 	private long geonameCacheGetTime = 0;
 	private long geonameCachePutTime = 0;
@@ -50,12 +45,7 @@ public class DocumentProcessTimeHandler {
 	private long geonameTime = 0;
 	private long totalGeonameTime = 0;
 	
-	public long tempGeonameCacheGetTime = 0;
-	public long tempGeonameCachePutTime = 0;
-	public long tempNullCacheCheckTime = 0;
-	public long tempNullCachePutTime = 0;
-	public long tempGeonameTime = 0;
-	public long tempTotalGeonameTime = 0;
+
 	
 	public DocumentProcessTimeHandler(){
 		try {
@@ -68,8 +58,8 @@ public class DocumentProcessTimeHandler {
 		this.periodicDocumentProcessTimeColl.remove(new BasicDBObject());
 	}
 	
-	public void updateTotalTime(){
-		if(this.totalDocumentProcessTime >= Long.MAX_VALUE - this.documentProcessTime - 5000){
+	public void updateTotalTime(DocumentProcessTime documentProcessTime){
+		if(this.totalDocumentProcessTime >= Long.MAX_VALUE - documentProcessTime.getDocumentProcessTime() - 5000){
 			this.totalDocumentProcessTime = 0;
 			this.totalUserNerTime = 0;
 			this.totalNerTime = 0;
@@ -77,21 +67,21 @@ public class DocumentProcessTimeHandler {
 			this.totalGeojsonTime = 0;
 			this.totalMongoUpdateTime = 0;
 		}
-		this.totalDocumentProcessTime += this.documentProcessTime;
-		this.totalUserNerTime += this.userNerTime;
-		this.totalNerTime += this.nerTime;
-		this.totalNerGeonameTime += this.nerGeonameTime;
-		this.totalGeojsonTime += this.geojsonTime;
-		this.totalMongoUpdateTime += this.mongoUpdateTime;
+		this.totalDocumentProcessTime += documentProcessTime.getDocumentProcessTime();
+		this.totalUserNerTime += documentProcessTime.getUserNerTime();
+		this.totalNerTime += documentProcessTime.getNerTime();
+		this.totalNerGeonameTime += documentProcessTime.getNerGeonameTime();
+		this.totalGeojsonTime += documentProcessTime.getGeojsonTime();
+		this.totalMongoUpdateTime += documentProcessTime.getMongoUpdateTime();
 	}
 	
-	public void incPeriodicTime(){
-		this.periodicDocumentProcessTime += this.documentProcessTime;
-		this.setPeriodicUserNerTime(this.getPeriodicUserNerTime() + this.userNerTime);
-		this.periodicNerTime += this.nerTime;
-		this.periodicNerGeonameTime += this.nerGeonameTime;
-		this.periodicGeojsonTime += this.geojsonTime;
-		this.periodicMongoUpdateTime += this.mongoUpdateTime;
+	public void incPeriodicTime(DocumentProcessTime documentProcessTime){
+		this.periodicDocumentProcessTime += documentProcessTime.getDocumentProcessTime();
+		this.setPeriodicUserNerTime(this.getPeriodicUserNerTime() + documentProcessTime.getUserNerTime());
+		this.periodicNerTime += documentProcessTime.getNerTime();
+		this.periodicNerGeonameTime += documentProcessTime.getNerGeonameTime();
+		this.periodicGeojsonTime += documentProcessTime.getGeojsonTime();
+		this.periodicMongoUpdateTime += documentProcessTime.getMongoUpdateTime();
 	}
 	
 	public void resetPeriodicTime(){
@@ -103,9 +93,9 @@ public class DocumentProcessTimeHandler {
 		this.periodicMongoUpdateTime = 0;
 	}
 	
-	public void updateGeonameTotalTime(){
+	public void updateGeonameTotalTime(GeonameTime geonameTime){
 		synchronized(this.lockObjectGeonameTime){
-			if(this.totalGeonameTime >= Long.MAX_VALUE - tempTotalGeonameTime - 5000){
+			if(this.totalGeonameTime >= Long.MAX_VALUE - geonameTime.getTotalGeonameTime() - 5000){
 				this.geonameCacheGetTime = 0;
 				this.geonameCachePutTime = 0;
 				this.geonameTime = 0;
@@ -113,12 +103,12 @@ public class DocumentProcessTimeHandler {
 				this.nullCachePutTime = 0;
 				this.totalGeonameTime = 0;
 			}
-			this.geonameCacheGetTime += tempGeonameCacheGetTime;
-			this.geonameCachePutTime += tempGeonameCachePutTime;
-			this.geonameTime += tempGeonameTime;
-			this.nullCacheCheckTime += tempNullCacheCheckTime;
-			this.nullCachePutTime += tempNullCachePutTime;
-			this.totalGeonameTime += tempTotalGeonameTime;
+			this.geonameCacheGetTime += geonameTime.getGeonameCacheGetTime();
+			this.geonameCachePutTime += geonameTime.getGeonameCachePutTime();
+			this.geonameTime += geonameTime.getGeonameTime();
+			this.nullCacheCheckTime += geonameTime.getNullCacheCheckTime();
+			this.nullCachePutTime += geonameTime.getNullCachePutTime();
+			this.totalGeonameTime += geonameTime.getTotalGeonameTime();
 		}
 	}
 

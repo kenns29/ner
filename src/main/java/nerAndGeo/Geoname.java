@@ -24,6 +24,8 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 
+import timer.timeObj.GeonameTime;
+
 public class Geoname {
 	private static final int GEONAME_RETRY_LIMIT = 0;
 	private static Logger LOGGER = Logger.getLogger("reportsLog");
@@ -297,6 +299,7 @@ public class Geoname {
 		}
 	}
 	public static BasicDBObject getGeonameMongoObj(String name, ThreadStatus threadStatus) throws Exception{		
+		GeonameTime geonameTime = new GeonameTime();
 		long totalGeonameStartTime = System.currentTimeMillis();
 		boolean cacheHit = false;
 		boolean geonameHit = false;
@@ -305,19 +308,19 @@ public class Geoname {
 			long geonameCacheGetStartTime = System.currentTimeMillis();
 			geonameObj = getGeonameObjFromCache(name);
 			long geonameCacheGetEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.tempGeonameCacheGetTime = geonameCacheGetEndTime - geonameCacheGetStartTime;
+			geonameTime.setGeonameCacheGetTime(geonameCacheGetEndTime - geonameCacheGetStartTime);
 		}
 		long nullCacheCheckStartTime = System.currentTimeMillis();
 		boolean nameIsInNullCache = isNameInNullCache(name);
 		long nullCacheCheckEndTime = System.currentTimeMillis();
-		Main.documentProcessTimeHandler.tempNullCacheCheckTime = nullCacheCheckEndTime - nullCacheCheckStartTime;
+		geonameTime.setNullCacheCheckTime(nullCacheCheckEndTime - nullCacheCheckStartTime);
 		
 		if(!nameIsInNullCache){
 			if(geonameObj == null){
 				long geonameStartTime = System.currentTimeMillis();
 				geonameObj = getGeonameWithAccountRotate(name, threadStatus);
 				long geonameEndTime = System.currentTimeMillis();
-				Main.documentProcessTimeHandler.tempGeonameTime = geonameEndTime - geonameStartTime;
+				geonameTime.setGeonameTime(geonameEndTime - geonameStartTime);
 				
 				if(geonameObj != null){
 					geonameHit = true;
@@ -326,7 +329,7 @@ public class Geoname {
 					long nullCachePutStartTime = System.currentTimeMillis();
 					cacheNullName(name);
 					long nullCachePutEndTime = System.currentTimeMillis();
-					Main.documentProcessTimeHandler.tempNullCachePutTime = nullCachePutEndTime - nullCachePutStartTime;
+					geonameTime.setNullCachePutTime(nullCachePutEndTime - nullCachePutStartTime);
 				}
 			}
 			else{
@@ -334,9 +337,9 @@ public class Geoname {
 			}
 		}
 		long totalGeonameEndTime = System.currentTimeMillis();
-		Main.documentProcessTimeHandler.tempTotalGeonameTime = totalGeonameEndTime - totalGeonameStartTime;
+		geonameTime.setTotalGeonameTime(totalGeonameEndTime - totalGeonameStartTime);
 		
-		Main.documentProcessTimeHandler.updateGeonameTotalTime();
+		Main.documentProcessTimeHandler.updateGeonameTotalTime(geonameTime);
 		
 		synchronized(Geoname.class){
 			int nCount = Geoname.nameCount.incrementAndGet();

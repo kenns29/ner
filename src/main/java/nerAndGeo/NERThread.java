@@ -26,6 +26,7 @@ import com.mongodb.DBObject;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import timer.DocumentProcessTimeHandler;
+import timer.timeObj.DocumentProcessTime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.*;
@@ -362,6 +363,7 @@ public class NERThread implements Runnable{
 		}
 		CollUtilities.unsetLocationCollection(coll, mongoObj);
 		int documentCount = Main.documentCount.incrementAndGet();
+		DocumentProcessTime documentProcessTime = new DocumentProcessTime();
 		String text = mongoObj.getString(inputField);
 		String userText = null;
 		
@@ -380,10 +382,9 @@ public class NERThread implements Runnable{
 			if(userText != null){
 				long userNerStartTime = System.currentTimeMillis();
 				userEntities = NER.annotateDBObject(userText, pipeline, timeRange);
-				long userNerEndTime = System.currentTimeMillis();
-				Main.documentProcessTimeHandler.userNerTime = userNerEndTime - userNerStartTime;
-				
 				userEntities = NER.insertFromFlag(userEntities, "user.location");
+				long userNerEndTime = System.currentTimeMillis();
+				documentProcessTime.setUserNerTime(userNerEndTime - userNerStartTime);
 			}
 		}
 		
@@ -391,10 +392,9 @@ public class NERThread implements Runnable{
 			text = text.replaceAll("http:/[/\\S+]+|@|#|", "");
 			long nerStartTime = System.currentTimeMillis();
 			textEntities = NER.annotateDBObject(text, pipeline, timeRange);
-			long nerEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.nerTime = nerEndTime - nerStartTime;
-			
 			textEntities = NER.insertFromFlag(textEntities, Main.configPropertyValues.nerInputField);
+			long nerEndTime = System.currentTimeMillis();
+			documentProcessTime.setNerTime(nerEndTime - nerStartTime);
 		}
 		
 		BasicDBList entities = new BasicDBList();
@@ -425,18 +425,18 @@ public class NERThread implements Runnable{
 			Main.outputColl.update(new BasicDBObject("_id", mongoObj.getObjectId("_id")),
 					new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)));
 			long updateEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
+			documentProcessTime.setMongoUpdateTime(updateEndTime - updateStartTime);
 		}
 		else if(Main.configPropertyValues.outputOption == 0){
 			long nerGeonameStartTime = System.currentTimeMillis();
 			BasicDBList nerGeonameList = Geoname.makeNerGeonameList(entities, this.threadStatus);
 			long nerGeonameEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.nerGeonameTime = nerGeonameEndTime - nerGeonameStartTime;
+			documentProcessTime.setNerGeonameTime(nerGeonameEndTime - nerGeonameStartTime);
 			
 			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromNerGeonameList(nerGeonameList);
 			long geojsonEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.geojsonTime = geojsonEndTime - geojsonStartTime;
+			documentProcessTime.setGeojsonTime(geojsonEndTime - geojsonStartTime);
 
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
@@ -444,7 +444,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)));
 				long updateEndTime = System.currentTimeMillis();
 				
-				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
+				documentProcessTime.setMongoUpdateTime(updateEndTime - updateStartTime);
 				
 			}
 			else{
@@ -453,7 +453,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, nerGeonameList)
 														.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
 				long updateEndTime = System.currentTimeMillis();
-				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
+				documentProcessTime.setMongoUpdateTime(updateEndTime - updateStartTime);
 			}
 			
 		}
@@ -461,12 +461,12 @@ public class NERThread implements Runnable{
 			long geonameStartTime = System.currentTimeMillis();
 			BasicDBList geonameList = Geoname.makeGeonameList(entities, this.threadStatus);
 			long geonameEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.nerGeonameTime = geonameEndTime - geonameStartTime;
+			documentProcessTime.setNerGeonameTime(geonameEndTime - geonameStartTime);
 			
 			long geojsonStartTime = System.currentTimeMillis();
 			geojsonList.addFromGeonameList(geonameList);
 			long geojsonEndTime = System.currentTimeMillis();
-			Main.documentProcessTimeHandler.geojsonTime = geojsonEndTime - geojsonStartTime;
+			documentProcessTime.setGeojsonTime(geojsonEndTime - geojsonStartTime);
 			
 			if(geojsonList.isEmpty()){
 				long updateStartTime = System.currentTimeMillis();
@@ -474,7 +474,7 @@ public class NERThread implements Runnable{
 						new BasicDBObject("$set", new BasicDBObject(Main.configPropertyValues.nerOutputField, entities)
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)));
 				long updateEndTime = System.currentTimeMillis();
-				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
+				documentProcessTime.setMongoUpdateTime(updateEndTime - updateStartTime);
 			}
 			else{
 				long updateStartTime = System.currentTimeMillis();
@@ -483,16 +483,16 @@ public class NERThread implements Runnable{
 													.append(Main.configPropertyValues.geonameOutputField, geonameList)
 													.append(Main.configPropertyValues.geojsonListOutputField, geojsonList.geometryCollection)));
 				long updateEndTime = System.currentTimeMillis();
-				Main.documentProcessTimeHandler.mongoUpdateTime = updateEndTime - updateStartTime;
+				documentProcessTime.setMongoUpdateTime(updateEndTime - updateStartTime);
 			}
 			
 		}
 		
 		long docEndTime = System.currentTimeMillis();
-		Main.documentProcessTimeHandler.documentProcessTime = docEndTime - docStartTime;
+		documentProcessTime.setDocumentProcessTime(docEndTime - docStartTime);
 		
-		Main.documentProcessTimeHandler.updateTotalTime();
-		Main.documentProcessTimeHandler.incPeriodicTime();
+		Main.documentProcessTimeHandler.updateTotalTime(documentProcessTime);
+		Main.documentProcessTimeHandler.incPeriodicTime(documentProcessTime);
 		
 		Main.timelyDocCount.incrementAndGet();
 		if(documentCount % DocumentProcessTimeHandler.documentCountInterval == 0){
