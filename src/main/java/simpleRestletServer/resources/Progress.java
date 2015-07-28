@@ -1,19 +1,24 @@
-package simpleHttpServer;
+package simpleRestletServer.resources;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 
-import util.CollUtilities;
+import org.restlet.data.MediaType;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.representation.Variant;
+import org.restlet.resource.Get;
+import org.restlet.resource.ServerResource;
+
 import nerAndGeo.Main;
+import util.CollUtilities;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
-public class HttpServerHandlerProgress implements HttpHandler {
-	@Override
-	public void handle(HttpExchange httpExchange) throws IOException {
-		String response = "";
+public class Progress extends ServerResource{   
+    @Get ("html")
+    public String represent(){
+	    return this.getResonseString();
+    }
+    private String getResonseString(){
+    	String response = "";
 		long totalDocumentCount = -1;
 		if(Main.configPropertyValues.stopAtEnd){
 			totalDocumentCount = Main.totalDocuments;
@@ -25,9 +30,10 @@ public class HttpServerHandlerProgress implements HttpHandler {
 		int mainLastTimelyDocCount = Main.lastTimelyDocCount.intValue();
 		long elapsedTimeInMillis = System.currentTimeMillis() - Main.mainStartTime;
 		double elapsedTimeInMinutes = ((double)elapsedTimeInMillis) / 60000;
-		int avgDocsPerMinutes = (int) (mainDocumentCount / elapsedTimeInMinutes);
-		double percentComplete = (double)(mainDocumentCount) / totalDocumentCount;
-		int estimateTimeInMinutes = (int) ((totalDocumentCount - mainDocumentCount) / avgDocsPerMinutes);
+		int avgDocsPerMinutes = (elapsedTimeInMinutes != 0) ? (int) (mainDocumentCount / elapsedTimeInMinutes) : 0;
+		double percentComplete = (totalDocumentCount != 0) ? (double)(mainDocumentCount) / totalDocumentCount : 0;
+		
+		int estimateTimeInMinutes = (avgDocsPerMinutes != 0) ? (int) ((totalDocumentCount - mainDocumentCount) / avgDocsPerMinutes) : 0;
 		
 		DecimalFormat df = new DecimalFormat("#.00");
 		
@@ -49,7 +55,7 @@ public class HttpServerHandlerProgress implements HttpHandler {
 				+ "</tr>";
 		
 		progressTable += "<tr>"
-				+ "<td>Percentable Complete</td>"
+				+ "<td>Percentage Complete</td>"
 				+ "<td>" + df.format(percentComplete * 100) + "%</td>"
 				+ "</tr>";
 		
@@ -64,14 +70,7 @@ public class HttpServerHandlerProgress implements HttpHandler {
 				+ "</tr>";
 		
 		progressTable += "</table>";
-		
-		//Building Page
 		response += "<html><body>" + progressTable + "</table></html>";
-		httpExchange.sendResponseHeaders(200, response.length());
-        OutputStream os = httpExchange.getResponseBody();
-        os.write(response.getBytes());
-        os.flush();
-        os.close();
-		
-	}
+		return response;
+    }
 }

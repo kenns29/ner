@@ -1,8 +1,6 @@
 package nerAndGeo;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -145,7 +143,6 @@ public class NERTaskManager implements Runnable{
 	}
 	
 	//Split tasks by number of documents
-	@SuppressWarnings("unchecked")
 	private void splitTasksByNumDocuments(){
 		
 		

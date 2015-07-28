@@ -1,24 +1,23 @@
-package simpleHttpServer;
+package simpleRestletServer.resources;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import org.restlet.resource.Get;
+import org.restlet.resource.ServerResource;
 
 import nerAndGeo.Main;
 
-public class HttpServerHandlerTime implements HttpHandler {
-	@Override
-	public void handle(HttpExchange httpExchange) throws IOException {
+public class Time extends ServerResource{
+	@Get ("html")
+    public String represent(){
 		String response = " ";
 		synchronized(Main.documentProcessTimeHandler.lockObjectDocumentProcessTime){
 			DecimalFormat df = new DecimalFormat("#.00");
 			String overallTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			overallTable += "<tr>"
 						  + "<td>Average Time For A Thread to Finish</td>"
-						  + "<td>" + df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) + "milliseconds</td>"
+						  + "<td>" + ((Main.threadFinishCount.intValue() != 0)? df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) : "N/A ") + "milliseconds</td>"
 			              + "</tr><tr>"
 						  + "<td>Average Time for Task Manager to Insert a Task</td>"
 			              + "<td>" + df.format(Main.totalTaskManagerFinishedTime / Main.taskMangerFinishCount.intValue()) + " milliseconds</td>"
@@ -172,10 +171,6 @@ public class HttpServerHandlerTime implements HttpHandler {
 			response += geonameTimeTable;
 			response += "</body></html>";
 		}
-		httpExchange.sendResponseHeaders(200, response.length());
-        OutputStream os = httpExchange.getResponseBody();
-        os.write(response.getBytes());
-        os.flush();
-        os.close();
+		return response;
 	}
 }

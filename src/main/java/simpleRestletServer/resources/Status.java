@@ -1,29 +1,25 @@
-package simpleHttpServer;
+package simpleRestletServer.resources;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 
 import org.bson.types.ObjectId;
+import org.restlet.resource.Get;
+import org.restlet.resource.ServerResource;
 
-import util.ThreadStatus;
-import util.TimeRange;
 import nerAndGeo.Geoname;
 import nerAndGeo.Main;
 import nerAndGeo.NER;
 import nerAndGeo.NERThreadList;
+import util.ThreadStatus;
+import util.TimeRange;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
-public class HttpServerHandler implements HttpHandler {
-
-	@Override
-	public void handle(HttpExchange httpExchange) throws IOException {
+public class Status extends ServerResource{
+	@Get ("html")
+    public String represent(){
 		String response = "";
 		DecimalFormat df = new DecimalFormat("#.00");
-		//synchronized(NER.class){
+		synchronized(NER.class){
 			String threadTable = "<table border=\"1\" style=\"border:1px solid black;width:100%\">";
 			threadTable += ThreadStatus.makeHttpTableHeader();
 			for(int i = 0; i < NERThreadList.list.size(); i++){
@@ -45,7 +41,7 @@ public class HttpServerHandler implements HttpHandler {
 			response = "<html><body>";
 			response += "<p> Current Thread Status </p>";
 			response += threadTable;
-			response += "<p> The Current Safest Object Id is " + safeObjectId.toString() + "</p>";
+			response += "<p> The Current Safest Object Id is " + ((safeObjectId != null) ? safeObjectId.toString() : " NONE ") + "</p>";
 			
 			if(Main.geonameServiceAvailable){
 				response += "<p> The geoname service is available</p>";
@@ -68,21 +64,13 @@ public class HttpServerHandler implements HttpHandler {
 			}
 			
 			response += "<p> Current Geoname Account used for the service is " + Geoname.accountName + "</p>";
-			response += "<p> Average Time For A Thread to Finish is " + df.format(Main.totalThreadFinishedTime / Main.threadFinishCount.intValue()) + " milliseconds .</p>";
-			response += "<p> Average Time for Task Manager to Insert a Task is " + df.format(Main.totalTaskManagerFinishedTime / Main.taskMangerFinishCount.intValue()) + " milliseconds.</p>";
 			response += "<p> Current Tasks Queued </p>";
 			response += queueTable;
 			
 			response += "</body></html>";
 			
 			
-		//}
-		httpExchange.sendResponseHeaders(200, response.length());
-        OutputStream os = httpExchange.getResponseBody();
-        os.write(response.getBytes());
-        os.flush();
-        os.close();
-		
-	}
-
+		}
+	    return response;
+    }
 }

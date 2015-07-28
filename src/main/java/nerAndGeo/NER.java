@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 
-import simpleHttpServer.StatusHttpServer;
 import util.CollUtilities;
 import util.ThreadStatus;
 import util.TimeRange;
@@ -32,6 +31,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
+import simpleRestletServer.EmbeddedServerComponent;
 
 
 
@@ -201,12 +201,12 @@ public class NER {
 		}
 		
 		try {
-			@SuppressWarnings("unused")
-			StatusHttpServer statusHttpServer = new StatusHttpServer();
-		} catch (IOException e) {
+			EmbeddedServerComponent server = new EmbeddedServerComponent(Main.configPropertyValues.statusHttpServerPort);
+			server.start();
+		} catch (Exception e) {
 			HIGH_PRIORITY_LOGGER.fatal("Did not successfully start the server", e);;
 		}
-		
+        		
 		checkStatus();
 	}
 	
@@ -252,9 +252,9 @@ public class NER {
 		}
 		
 		try {
-			@SuppressWarnings("unused")
-			StatusHttpServer statusHttpServer = new StatusHttpServer();
-		} catch (IOException e) {
+			EmbeddedServerComponent server = new EmbeddedServerComponent(Main.configPropertyValues.statusHttpServerPort);
+			server.start();
+		} catch (Exception e) {
 			HIGH_PRIORITY_LOGGER.fatal("Did not successfully start the server", e);;
 		}
 		

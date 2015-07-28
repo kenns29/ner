@@ -3,7 +3,6 @@ package nerAndGeo;
 import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,7 +29,6 @@ import timer.timeObj.DocumentProcessTime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.*;
-import org.bson.types.ObjectId;
 
 public class NERThread implements Runnable{
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");

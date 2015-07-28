@@ -1,4 +1,5 @@
 repositories {
+  maven { url 'http://maven.restlet.com' }
   mavenCentral()
 }
 
@@ -18,6 +19,8 @@ version = {->
 }()
 
 dependencies {
+    compile 'org.restlet.jse:org.restlet:2.3.+'
+    compile 'org.restlet.jse:org.restlet.ext.slf4j:2.3.+'
 	compile 'jdom:jdom:1.0'
 	compile 'edu.stanford.nlp:stanford-corenlp:3.5.2'
 	compile 'org.mongodb:mongo-java-driver:3.0.2'
