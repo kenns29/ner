@@ -84,6 +84,11 @@ public class ConfigPropertyValues {
 	public String periodicDocumentProcessTimeDatabase = null;
 	public String periodicDocumentProcessTimeCollection = null;
 	
+	public String periodicThreadProgressHost = null;
+	public int periodicThreadProgressPort = 0;
+	public String periodicThreadProgressDatabase = null;
+	public String periodicThreadProgressCollection = null;
+	
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -200,6 +205,11 @@ public class ConfigPropertyValues {
 		periodicDocumentProcessTimePort = Integer.valueOf(prop.getProperty("periodicDocumentProcessTimePort")).intValue();
 		periodicDocumentProcessTimeDatabase = prop.getProperty("periodicDocumentProcessTimeDatabase");
 		periodicDocumentProcessTimeCollection = prop.getProperty("periodicDocumentProcessTimeCollection");
+		
+		periodicThreadProgressHost = prop.getProperty("periodicThreadProgressHost");
+		periodicThreadProgressPort = Integer.valueOf(prop.getProperty("periodicThreadProgressPort"));
+		periodicThreadProgressDatabase = prop.getProperty("periodicThreadProgressDatabase");
+		periodicThreadProgressCollection = prop.getProperty("periodicThreadProgressCollection");
 	}
 	
 	public void initStartEnd(DBCollection coll){

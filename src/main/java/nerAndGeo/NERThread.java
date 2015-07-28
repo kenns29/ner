@@ -6,6 +6,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import util.CollUtilities;
 import util.ErrorStatus;
@@ -46,6 +47,7 @@ public class NERThread implements Runnable{
 	public ThreadStatus threadStatus = null;
 	protected final BlockingQueue<TimeRange> queue;
 	
+	public AtomicInteger docCount = new AtomicInteger(0);
 	/////////////////////////////////
 	/////////Private Methods/////////
 	/////////////////////////////////	
@@ -262,6 +264,8 @@ public class NERThread implements Runnable{
 											+ "\nDue to Unexpected Exception. ", e);
 					
 				}
+				
+				docCount.incrementAndGet();
 			}
 		}
 		//Retry Task
