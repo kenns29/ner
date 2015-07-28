@@ -15,7 +15,7 @@ public class DocumentProcessTimeHandler {
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 	
-	public static int documentCountInterval = 50;
+	public static int documentCountInterval = Main.configPropertyValues.documentCountInterval;
 	public Database periodicDocumentProcessTimeHost = null;
 	public DB periodicDocumentProcessTimeDB = null;
 	public DBCollection periodicDocumentProcessTimeColl = null;

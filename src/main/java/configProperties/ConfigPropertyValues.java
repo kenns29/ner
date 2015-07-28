@@ -89,6 +89,7 @@ public class ConfigPropertyValues {
 	public String periodicThreadProgressDatabase = null;
 	public String periodicThreadProgressCollection = null;
 	
+	public int documentCountInterval = 0;
 	public ConfigPropertyValues() throws IOException{
 		this("config.properties");
 	}
@@ -210,6 +211,8 @@ public class ConfigPropertyValues {
 		periodicThreadProgressPort = Integer.valueOf(prop.getProperty("periodicThreadProgressPort"));
 		periodicThreadProgressDatabase = prop.getProperty("periodicThreadProgressDatabase");
 		periodicThreadProgressCollection = prop.getProperty("periodicThreadProgressCollection");
+		
+		documentCountInterval = Integer.valueOf(prop.getProperty("documentCountInterval"));
 	}
 	
 	public void initStartEnd(DBCollection coll){
