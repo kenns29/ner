@@ -109,6 +109,19 @@ public class GeojsonList {
 		if(bounding_box != null){
 			BasicDBList coordinates = (BasicDBList) bounding_box.get("coordinates");
 			BasicDBList polygon = (BasicDBList) coordinates.get(0);
+			for(int i = 0; i < polygon.size(); i++){
+				BasicDBList point1 = (BasicDBList) polygon.get(i);
+				for(int j = i+1; j < polygon.size(); j++){
+					BasicDBList point2 = (BasicDBList) polygon.get(j);
+					if(comparePoints(point1, point2) && !(i == 0 && j == (polygon.size() - 1))){
+						BasicDBList rPoint = getMiddleOfPolygon(polygon);
+						rObj = new BasicDBObject("type", "Point")
+							.append("coordinates", rPoint);
+						return rObj;
+					}
+				}
+			}
+			
 			BasicDBList firstPoint = (BasicDBList) polygon.get(0);
 			BasicDBList lastPoint = (BasicDBList) polygon.get(polygon.size() - 1);
 			
@@ -186,5 +199,20 @@ public class GeojsonList {
 		else{
 			return INVALID_DOUBLE;
 		}
+	}
+	
+	private BasicDBList getMiddleOfPolygon(BasicDBList polygon){
+		BasicDBList rList = new BasicDBList();
+		double lngSum = 0;
+		double latSum = 0;
+		for(int i = 0; i < polygon.size(); i++){
+			BasicDBList point = (BasicDBList) polygon.get(i);
+			lngSum += getDoubleFromCoordinatesItem(point.get(0));
+			latSum += getDoubleFromCoordinatesItem(point.get(1));
+		}
+		
+		rList.add(lngSum / polygon.size());
+		rList.add(latSum / polygon.size());
+		return rList;
 	}
 }
