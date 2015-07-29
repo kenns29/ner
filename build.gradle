@@ -32,9 +32,22 @@ dependencies {
 	compile files('local_jars/stanford-corenlp-3.5.2-javadoc.jar')
 }
 
-task copyConfig(type : Copy){
-	from 'config.properties'
-    into '$buildDir/bin'
+//task copyConfig(type : Copy){
+//	from 'config.properties'
+//    into '$buildDir/bin'
+//}
+
+distZip {
+    into(project.name + '-' + version) {
+        from '.'
+        include 'config.properties'
+    }
+}
+distTar {
+    into(project.name + '-' + version) {
+        from '.'
+        include 'config.properties'
+    }
 }
 
 jar {
