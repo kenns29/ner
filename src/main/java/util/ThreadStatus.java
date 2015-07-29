@@ -65,7 +65,7 @@ public class ThreadStatus {
 				+ "<td>" + this.currentInsertionTime + "</td>"
 				+ "<td>" + TimeUtilities.js_timestampToString(this.currentInsertionTime) + "</td>"
 				+ "<td>" + this.currentTweetId + "</td>"
-				+ "<td>" + this.timeRange.taskType.toString() + "</td>"
+				+ "<td>" + ((this.timeRange != null) ? this.timeRange.taskType.toString() : null) + "</td>"
 				+ "<td>" + currentStatus() + "</td>"
 				+ "</tr>";
 		
@@ -77,7 +77,7 @@ public class ThreadStatus {
 		rLm.put("systemThreadId", this.systemThreadId);
 		rLm.put("timeRange", (this.timeRange != null) ? this.timeRange.toLinkedHashMap() : null);
 		rLm.put("numDocs", this.numDocs);
-		rLm.put("currentObjectId", this.currentObjectId.toHexString());
+		rLm.put("currentObjectId", this.currentObjectId);
 		rLm.put("currentInsertionTime", this.currentInsertionTime);
 		rLm.put("currentTweetId", this.currentTweetId);
 		rLm.put("currentStatus", currentStatus());
