@@ -1,8 +1,7 @@
 package simpleRestletServer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import org.apache.log4j.Logger;
 import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.resource.Directory;
@@ -17,7 +16,8 @@ import simpleRestletServer.resources.Time;
  */
 public class EmbeddedServerApplication extends Application {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmbeddedServerApplication.class);
+	private static final Logger LOGGER = Logger.getLogger("reportsLog");
+	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
 
     /**
      * Constructor.
@@ -39,7 +39,7 @@ public class EmbeddedServerApplication extends Application {
             + System.getProperty("user.dir")
             + System.getProperty("file.separator")
             + "web"; 
-        logger.info("rootUri for file: {}", rootUri);
+        LOGGER.info("rootUri for file: {" + rootUri + "}");
         Directory directory = new Directory(getContext(), rootUri);
         directory.setListingAllowed(true);
 
