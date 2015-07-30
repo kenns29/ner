@@ -6,6 +6,8 @@ import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.resource.Directory;
 import org.restlet.routing.Router;
+
+import simpleRestletServer.resources.JsonSafestObjectId;
 import simpleRestletServer.resources.JsonStatus;
 import simpleRestletServer.resources.Progress;
 import simpleRestletServer.resources.Time;
@@ -53,6 +55,7 @@ public class EmbeddedServerApplication extends Application {
         router.attach("/jsonstatus", JsonStatus.class);
         router.attach("/progress", Progress.class);
         router.attach("/time", Time.class);
+        router.attach("/jsonsafestobjectid", JsonSafestObjectId.class);
         // The following will allow all files in the jvm user's default
         // home directory to be read and browsed.
         // It is important that this is the last entry, otherwise it
