@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import util.CollUtilities;
+import util.CountRunnable;
 import util.TimeRange;
 import version.VersionControl;
 
@@ -25,7 +26,7 @@ import timer.DocumentProcessTimeHandler;
 
 public class Main {
 	public static final int VERSION_MAJOR = 1;
-	public static final int VERSION_MINOR = 1;
+	public static final int VERSION_MINOR = 2;
 	public static final int BUILD_ID = 1;
 
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
@@ -122,7 +123,7 @@ public class Main {
 		configPropertyValues.initStartEnd(coll);
 		Main.mainColl = coll;
 		if(Main.configPropertyValues.stopAtEnd){
-			Main.totalDocuments = CollUtilities.getTotalDocumentCountWithStopAtEnd(coll);
+			new Thread(new CountRunnable()).start();
 		}
 		
 		Database outputDatabase = new Database(Main.configPropertyValues.outputHost, Main.configPropertyValues.outputPort);

@@ -19,9 +19,11 @@ public class Progress extends ServerResource{
     }
     private String getResonseString(){
     	String response = "";
-		long totalDocumentCount = -1;
+		long totalDocumentCount = 0;
 		if(Main.configPropertyValues.stopAtEnd){
-			totalDocumentCount = Main.totalDocuments;
+			if(Main.totalDocuments > 0){
+				totalDocumentCount = Main.totalDocuments;
+			}
 		}
 		else{
 			totalDocumentCount = CollUtilities.getTotalDocumentCount(Main.mainColl);
