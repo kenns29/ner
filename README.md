@@ -20,11 +20,11 @@ To run the code, make sure to put the config.properties file in the same directo
 ## Keep track of the progress
 
 * While the program is running, the current progress can be shown in a http server, with host and port defined in the config.properties file.
-* **[host]:[port]/status - shows the current status of the program
-* **[host]:[port]/progress - shows the current status of the program
-* **[host]:[port]/time - shows the detailed run time cost of each component in the program.
-* **[host]:[port]/jsonsafestid - shows the current safest id in the json format
-* **[host]:[port]/jsonstatus - shows the current status in json format
+* **[host]:[port]/status** - shows the current status of the program
+* **[host]:[port]/progress** - shows the current status of the program
+* **[host]:[port]/time** - shows the detailed run time cost of each component in the program.
+* **[host]:[port]/jsonsafestid** - shows the current safest id in the json format
+* **[host]:[port]/jsonstatus** - shows the current status in json format
 
 * check the log files in the /log folder
 
