@@ -27,3 +27,5 @@ To run the code, make sure to put the config.properties file in the same directo
 [host]:[port]/jsonstatus - shows the current status in json format
 
 ##check the log files in the /log folder
+
+#for furthur information please check the doc/ directory.
