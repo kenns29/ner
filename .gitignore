@@ -5,3 +5,4 @@
 .project
 /.gradle/
 /build/
+config_ignore.properties

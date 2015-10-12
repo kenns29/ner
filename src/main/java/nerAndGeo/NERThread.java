@@ -357,7 +357,9 @@ public class NERThread implements Runnable{
 			this.threadStatus.currentMongoObj = mongoObj;
 			this.threadStatus.currentObjectId = mongoObj.getObjectId("_id");
 			this.threadStatus.currentInsertionTime = TimeUtilities.getTimestampFromObjectId(this.threadStatus.currentObjectId);
-			this.threadStatus.currentTweetId = mongoObj.getLong("id");
+			if (mongoObj.containsField("id")) {
+				this.threadStatus.currentTweetId = mongoObj.getLong("id");
+			}
 		}
 		CollUtilities.unsetLocationCollection(coll, mongoObj);
 		int documentCount = Main.documentCount.incrementAndGet();
