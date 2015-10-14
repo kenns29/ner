@@ -27,7 +27,7 @@ import timer.DocumentProcessTimeHandler;
 public class Main {
 	public static final int VERSION_MAJOR = 1;
 	public static final int VERSION_MINOR = 2;
-	public static final int BUILD_ID = 1;
+	public static final int BUILD_ID = 2;
 
 	private static final Logger LOGGER = Logger.getLogger("reportsLog");
 	private static Logger HIGH_PRIORITY_LOGGER = Logger.getLogger("highPriorityLog");
@@ -35,7 +35,7 @@ public class Main {
 	
 	public static VersionControl versionControl =
 		new VersionControl(VERSION_MAJOR + "." + VERSION_MINOR + "." + BUILD_ID,
-			"07-08-2015");
+			"2015-10-12");
 	public static ConfigPropertyValues configPropertyValues = null;
 	
 	public static long totalDocuments = -1;
